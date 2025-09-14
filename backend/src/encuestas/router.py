@@ -26,12 +26,12 @@ def read_encuesta(encuesta_id: int, db:Session = Depends(get_db)):
 
 #modificar encuesta
 
-#@router.put("/{encuesta_id}", response_model=schemas.Encuesta)
-#def update_persona(
-#    encuesta_id: int, encuesta: schemas.EncuestaUpdate, db: Session = Depends(get_db)):
-#    return services.modificar_encuesta(db, encuesta_id, encuesta)
+@router.put("/{encuesta_id}", response_model=schemas.Encuesta)
+def update_persona(
+    encuesta_id: int, encuesta: schemas.EncuestaUpdate, db: Session = Depends(get_db)):
+    return services.modificar_encuesta(db, encuesta_id, encuesta)
 
 #eliminar encuesta
-#@router.delete("/{encuesta_id}", response_model=schemas.Encuesta)
-#def delete_encuesta(encuesta_id: int, db: Session = Depends(get_db)):
-#    return services.eliminar_encuesta(db, encuesta_id)
+@router.delete("/{encuesta_id}", response_model=dict)
+def delete_encuesta(encuesta_id: int, db: Session = Depends(get_db)):
+    return services.eliminar_encuesta(db, encuesta_id)

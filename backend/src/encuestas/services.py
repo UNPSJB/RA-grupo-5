@@ -23,3 +23,19 @@ def leer_encuesta(db: Session, encuesta_id: int)-> schemas.Encuesta:
         raise exceptions.EncuestaNoEncontrada()
     return db_encuesta
 
+
+def modificar_encuesta(
+    db: Session, encuesta_id: int, encuesta: schemas.EncuestaUpdate) -> Encuesta:
+    db_encuesta = leer_encuesta(db, encuesta_id)
+    db.execute(update(Encuesta).where(Encuesta.id == encuesta_id).values(**encuesta.model_dump()))
+    db.commit()
+    db.refresh(db_encuesta)
+    return db_encuesta
+
+
+def eliminar_encuesta(db: Session, encuesta_id: int) -> dict:
+    db_encuesta = leer_encuesta(db, encuesta_id)
+    nombre_encuesta = db_encuesta.nombre
+    db.delete(db_encuesta)
+    db.commit()
+    return {"message": f"Encuesta {nombre_encuesta} eliminada"}
