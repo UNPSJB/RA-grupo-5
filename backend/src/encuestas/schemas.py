@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from typing import List
 from enum import Enum
-from src.encuestas.models import EstadoEncuesta
+from src.encuestas.models import EstadoEncuesta, Cursado
 
 # Los siguientes schemas contienen atributos sin muchas restricciones de tipo.
 # Podemos crear atributos con ciertas reglas mediante el uso de un "Field" adecuado.
@@ -9,13 +9,17 @@ from src.encuestas.models import EstadoEncuesta
 
 
 class EncuestaBase(BaseModel):
-    nombre: str
-    carrera: str
-    sede: str
+    asignatura: str
+    año: int
+    estado: EstadoEncuesta
+    cursado: Cursado
     fecha_inicio: str
     fecha_fin: str
-    estado: EstadoEncuesta
-    actividad_curricular: str
+    carrera: str
+    sede: str
+    
+    
+    
     
 
 
