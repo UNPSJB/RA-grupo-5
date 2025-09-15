@@ -29,6 +29,6 @@ def update_persona(
     return services.modificar_persona(db, persona_id, persona)
 
 
-@router.delete("/{persona_id}", response_model=schemas.Persona)
+@router.delete("/{persona_id}", response_model=dict)
 def delete_persona(persona_id: int, db: Session = Depends(get_db)):
     return services.eliminar_persona(db, persona_id)
