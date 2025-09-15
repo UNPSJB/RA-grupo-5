@@ -26,21 +26,17 @@ def leer_persona(db: Session, persona_id: int) -> schemas.Persona:
 
 
 def modificar_persona(
-    db: Session, persona_id: int, persona: schemas.PersonaUpdate
-) -> Persona:
+    db: Session, persona_id: int, persona: schemas.PersonaUpdate) -> Persona:
     db_persona = leer_persona(db, persona_id)
-    db.execute(
-        update(Persona).where(Persona.id == persona_id).values(**persona.model_dump())
-    )
+    db.execute(update(Persona).where(Persona.id == persona_id).values(**persona.model_dump()))
     db.commit()
     db.refresh(db_persona)
     return db_persona
 
 
-def eliminar_persona(db: Session, persona_id: int) -> schemas.Persona:
+def eliminar_persona(db: Session, persona_id: int) -> dict:
     db_persona = leer_persona(db, persona_id)
-    if len(db_persona.mascotas) > 0:
-        raise exceptions.PersonaTieneMascotas()
-    db.execute(delete(Persona).where(Persona.id == persona_id))
+    nombre_persona = db_persona.nombre
+    db.delete(db_persona)
     db.commit()
-    return db_persona
+    return {"message": f"Persona {nombre_persona} eliminada"}
