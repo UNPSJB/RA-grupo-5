@@ -1,16 +1,16 @@
-import { useState } from 'react'
-import AgregarPersona from './componentes/AgregarPersona'
+import { Routes, Route } from "react-router-dom";
+import Layout from "./componentes/Layout.tsx";
+import EncuestasPendientes from "./paginas/EcuestasPendientes.tsx";
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-
-      <h1>Personas</h1>
-      <p>Gestión de personas</p>
-      <AgregarPersona />
-    </>
-  )
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        <Route index element={<EncuestasPendientes />} />
+        {/* Podés agregar más rutas aquí */}
+      </Route>
+    </Routes>
+  );
 }
 
-export default App
+export default App;
+
