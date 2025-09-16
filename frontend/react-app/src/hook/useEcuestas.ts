@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 
 enum EstadoEncuesta {
-    ABIERTA = "abierta",
-    CERRADA = "cerrada",
+  ABIERTA = "abierta",
+  CERRADA = "cerrada",
 }
 
 enum Cursado {
@@ -24,7 +24,7 @@ export function useEncuestas(){
     const[encuestas, setEncuestas] = useState<Encuesta[]>([]);
     const[loading, setLoading] = useState<boolean>(true);
     const[error, setError] = useState<string | null>(null);
-    
+ 
     const API_URL = "http://localhost:8000/encuestas"; // Cambiá esto por la URL real de tu API
 
     const fetchEncuestas = async () => {
