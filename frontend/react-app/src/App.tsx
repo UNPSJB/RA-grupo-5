@@ -1,12 +1,14 @@
 import { Routes, Route } from "react-router-dom";
 import Layout from "./componentes/Layout.tsx";
 import EncuestasPendientes from "./paginas/EcuestasPendientes.tsx";
+import './App.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
-        <Route index element={<EncuestasPendientes />} />
-        {/* Podés agregar más rutas aquí */}
+        <Route index element={<EncuestasPendientes />} />        {/* Podés agregar más rutas aca */}
       </Route>
     </Routes>
   );

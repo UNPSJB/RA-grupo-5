@@ -5,13 +5,13 @@ export default function Layout() {
   return (
     <>
       <Navbar bg="dark" variant="dark" expand="lg">
-        <Container>
-          <Navbar.Brand href="/">Mi App de Encuestas</Navbar.Brand>
+        
+          <Navbar.Brand className=" p-4 text-white border-end"  href="/">Encuestas</Navbar.Brand>
           <Nav className="me-auto">
             <Nav.Link as={Link} to="/">Encuestas Pendientes</Nav.Link>
             <Nav.Link as={Link} to="/otra-pagina">Otra Página</Nav.Link>
           </Nav>
-        </Container>
+        
       </Navbar>
 
       <Container className="mt-4">
