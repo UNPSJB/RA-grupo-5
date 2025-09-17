@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import Layout from "./componentes/Layout.tsx";
 import EncuestasPendientes from "./paginas/EcuestasPendientes.tsx";
-import './App.css';
+
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
