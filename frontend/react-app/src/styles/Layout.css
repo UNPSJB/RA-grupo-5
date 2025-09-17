@@ -1,0 +1,23 @@
+
+/* Hace que el layout ocupe toda la pantalla y acomoda footer al final */
+.layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /*Hace que la altura minima sea el 100%*/
+}
+
+/* Contenedor principal */
+.layout .container {
+  flex: 1; /* ocupa todo el espacio disponible entre navbar y footer */
+}
+
+
+/* Footer */
+.footer {
+    background-color: #222;
+    color: #ccc;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 1rem;
+    margin-top: auto; /* hace que quede pegado abajo */
+}
