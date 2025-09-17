@@ -10,8 +10,10 @@ __pycache__/
 # C extensions
 *.so
 
-# dependencias
+# Ignorar node_modules
+backend/node_modules/
 node_modules/
+frontend/node_modules/
 
 # Distribution / packaging
 .Python
