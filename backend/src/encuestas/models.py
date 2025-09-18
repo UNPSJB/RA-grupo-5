@@ -1,6 +1,6 @@
 from typing import Optional, List
 from sqlalchemy import Integer, String, Date, Enum as SQLEnum
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.models import ModeloBase
 from datetime import date
 from enum import Enum
@@ -28,4 +28,4 @@ class Encuesta(ModeloBase):
     fecha_fin: Mapped[date] = mapped_column(Date, index=True) 
     estado: Mapped[EstadoEncuesta] = mapped_column(SQLEnum(EstadoEncuesta), nullable=False, default=EstadoEncuesta.abierta)
     
-    
+    variables = relationship("Variable", back_populates="encuesta")
