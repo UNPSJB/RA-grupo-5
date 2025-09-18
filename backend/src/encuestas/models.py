@@ -1,7 +1,8 @@
 from typing import Optional, List
-from sqlalchemy import Integer, String, Enum as SQLEnum
+from sqlalchemy import Integer, String, Date, Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column
 from src.models import ModeloBase
+from datetime import date
 from enum import Enum
 
 class Cursado(str, Enum):
@@ -23,8 +24,8 @@ class Encuesta(ModeloBase):
     cursado: Mapped[Cursado] = mapped_column(SQLEnum(Cursado), nullable=False)
     año: Mapped[int] = mapped_column(Integer, index=True)
     sede: Mapped[str] = mapped_column(String, index=True)    
-    fecha_inicio: Mapped[str] = mapped_column(String, index=True)
-    fecha_fin: Mapped[str] = mapped_column(String, index=True) 
+    fecha_inicio: Mapped[date] = mapped_column(Date, index=True)
+    fecha_fin: Mapped[date] = mapped_column(Date, index=True) 
     estado: Mapped[EstadoEncuesta] = mapped_column(SQLEnum(EstadoEncuesta), nullable=False, default=EstadoEncuesta.abierta)
     
     
