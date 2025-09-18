@@ -1,12 +1,11 @@
 from typing import List
-from sqlalchemy import delete, select, update
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from src.variables.models import Variable
 from src.variables import schemas, exceptions
 
-# operaciones CRUD para Variables
 
-def crear_variable(db: Session, variable: schemas.VariableCreate) -> schemas.Variable:
+def crear_variable(db: Session, variable: schemas.VariableCreate) -> Variable:
     _variable = Variable(**variable.model_dump())
     db.add(_variable)
     db.commit()
@@ -14,33 +13,33 @@ def crear_variable(db: Session, variable: schemas.VariableCreate) -> schemas.Var
     return _variable
 
 
-def listar_variables(db: Session) -> List[schemas.Variable]:
+def listar_variables(db: Session) -> List[Variable]:
     return db.scalars(select(Variable)).all()
 
 
-def leer_variable(db: Session, variable_id: int) -> schemas.Variable:
+def leer_variable(db: Session, variable_id: int) -> Variable:
     db_variable = db.scalar(select(Variable).where(Variable.id == variable_id))
     if db_variable is None:
         raise exceptions.VariableNoEncontrada()
     return db_variable
 
 
-def modificar_variable(
-    db: Session, variable_id: int, variable: schemas.VariableUpdate
-) -> Variable:
+def modificar_variable(db: Session, variable_id: int, variable: schemas.VariableUpdate) -> Variable:
     db_variable = leer_variable(db, variable_id)
-    db.execute(
-        update(Variable).where(Variable.id == variable_id).values(**variable.model_dump())
-    )
+    for key, value in variable.model_dump(exclude_unset=True).items():
+        setattr(db_variable, key, value)
     db.commit()
     db.refresh(db_variable)
     return db_variable
 
 
-def eliminar_variable(db: Session, variable_id: int) -> schemas.Variable:
+def eliminar_variable(db: Session, variable_id: int) -> Variable:
     db_variable = leer_variable(db, variable_id)
-    if len(db_variable.variable) > 0:
-        raise exceptions.VariableAsociadaAEncuesta()
-    db.execute(delete(Variable).where(Variable.id == variable_id))
+
+    # Evitar borrar variable si tiene preguntas asociadas
+    if db_variable.preguntas and len(db_variable.preguntas) > 0:
+        raise exceptions.VariableConPreguntasAsociadas()
+
+    db.delete(db_variable)
     db.commit()
     return db_variable
