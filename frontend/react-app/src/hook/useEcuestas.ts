@@ -46,21 +46,21 @@ export function useEncuestas(){
 
     const fetchEncuestaById = async (id:number) => { // Función para obtener una encuesta por ID
     try {
-      setLoading(true);
-      const response = await fetch(`${API_URL}/${id}`);
-      if (!response.ok) {
+        setLoading(true);
+        const response = await fetch(`${API_URL}/${id}`);
+        if (!response.ok) {
         throw new Error("Error al obtener la encuesta");
-      }
-      const data = await response.json();
-      setError(null);
+        }
+        const data = await response.json();
+        setError(null);
       return data; // devuelve la encuesta
     } catch (err: any) {
-      setError(err.message);
-      return null;
+        setError(err.message);
+        return null;
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+    };
 
 
 useEffect(() => {
