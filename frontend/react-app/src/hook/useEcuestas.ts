@@ -9,11 +9,12 @@ enum Cursado {
     PrimerCuatrimestre = "cuatrimestre 1",
     SegundoCuatrimestre = "cuatrimestre 2",
     Anual = "Anual"
-}
+}   
 
 interface Encuesta {
     id: number;
     asignatura: string;
+    año: number;
     cursado: Cursado;
     estado: EstadoEncuesta;  
     fecha_fin: number;
@@ -26,7 +27,7 @@ export function useEncuestas(){
     const[error, setError] = useState<string | null>(null);
     const API_URL = "http://localhost:8000/encuestas"; // Cambiá esto por la URL real de tu API
 
-    const fetchEncuestas = async () => {
+    const fetchEncuestas = async () => {  // Función para obtener las encuestas
         try {
             setLoading(true);
             const response = await fetch(API_URL);
@@ -43,6 +44,24 @@ export function useEncuestas(){
         }
     }    
 
+    const fetchEncuestaById = async (id:number) => { // Función para obtener una encuesta por ID
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_URL}/${id}`);
+      if (!response.ok) {
+        throw new Error("Error al obtener la encuesta");
+      }
+      const data = await response.json();
+      setError(null);
+      return data; // devuelve la encuesta
+    } catch (err: any) {
+      setError(err.message);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
 useEffect(() => {
     fetchEncuestas();
@@ -52,6 +71,7 @@ return {
     encuestas,
     loading,
     error,
-    refetch: fetchEncuestas 
+    refetch: fetchEncuestas,
+    fetchEncuestaById,
     };
 }
