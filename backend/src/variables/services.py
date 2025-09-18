@@ -35,11 +35,6 @@ def modificar_variable(db: Session, variable_id: int, variable: schemas.Variable
 
 def eliminar_variable(db: Session, variable_id: int) -> Variable:
     db_variable = leer_variable(db, variable_id)
-
-    # Evitar borrar variable si tiene preguntas asociadas
-    if db_variable.preguntas and len(db_variable.preguntas) > 0:
-        raise exceptions.VariableConPreguntasAsociadas()
-
     db.delete(db_variable)
     db.commit()
     return db_variable
