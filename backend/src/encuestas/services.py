@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from src.encuestas.models import Encuesta
 from src.encuestas import schemas, exceptions
 
+
 # CRUD:
 
 def listar_encuestas(db:Session) -> List[schemas.Encuesta]:
@@ -35,7 +36,9 @@ def modificar_encuesta(
 
 def eliminar_encuesta(db: Session, encuesta_id: int) -> dict:
     db_encuesta = leer_encuesta(db, encuesta_id)
-    nombre_encuesta = db_encuesta.nombre
+    nombre_encuesta = db_encuesta.asignatura
     db.delete(db_encuesta)
     db.commit()
     return {"message": f"Encuesta {nombre_encuesta} eliminada"}
+
+

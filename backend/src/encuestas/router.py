@@ -21,8 +21,8 @@ def create_encuesta(encuesta: schemas.EncuestaCreate,  db: Session = Depends(get
 #ver encuesta por id
 @router.get("/{encuesta_id}", response_model=schemas.Encuesta)
 def read_encuesta(encuesta_id: int, db:Session = Depends(get_db)):
-     return services.leer_encuesta(db, encuesta_id)
- 
+    return services.leer_encuesta(db, encuesta_id)
+
 
 #modificar encuesta
 
@@ -35,3 +35,11 @@ def update_persona(
 @router.delete("/{encuesta_id}", response_model=dict)
 def delete_encuesta(encuesta_id: int, db: Session = Depends(get_db)):
     return services.eliminar_encuesta(db, encuesta_id)
+
+
+
+@router.post("/{encuesta_id}/confirmar")
+def confirmar_encuesta(encuesta_id: int):
+    # lógica para confirmar la encuesta
+    # Simula que se guardo correctamente
+    return {"status": "ok", "mensaje": f"Encuesta {encuesta_id} confirmada"}

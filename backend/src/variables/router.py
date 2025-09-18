@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from typing import List
 from src.database import get_db
 from src.variables import schemas, services
 
@@ -13,13 +14,13 @@ def create_variable(variable: schemas.VariableCreate, db: Session = Depends(get_
     return services.crear_variable(db, variable)
 
 
-@router.get("/", response_model=list[schemas.Variable])
-def read_variables(db: Session = Depends(get_db)):
+@router.get("/", response_model=List[schemas.Variable])
+def get_variables(db: Session = Depends(get_db)):
     return services.listar_variables(db)
 
 
 @router.get("/{variable_id}", response_model=schemas.Variable)
-def read_variable(variable_id: int, db: Session = Depends(get_db)):
+def get_variable(variable_id: int, db: Session = Depends(get_db)):
     return services.leer_variable(db, variable_id)
 
 
