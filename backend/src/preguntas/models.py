@@ -20,4 +20,3 @@ class Pregunta(ModeloBase):
     condicion: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     id_variable: Mapped[int] = mapped_column(ForeignKey("variables.id"), nullable=False)
     variable = relationship("Variable", back_populates="preguntas")
-    )
