@@ -19,6 +19,19 @@ export default function Encuesta() {
     <div>
       <h1>{encuesta.asignatura}</h1>
       <p>Estado: {encuesta.estado}</p>
+      <p><strong>Carrera:</strong> {encuesta.carrera}</p>
+      <p><strong>Sede:</strong> {encuesta.sede}</p>
+
+      <h2>Variables asociadas</h2>
+      {encuesta.variables && encuesta.variables.length > 0 ? (
+        <ul>
+          {encuesta.variables.map((v: any) => (
+            <li key={v.id}>{v.nombre}</li>
+          ))}
+        </ul>
+      ) : (
+        <p>No hay variables asociadas.</p>
+      )}
     </div>
   );
 }

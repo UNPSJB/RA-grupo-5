@@ -11,6 +11,11 @@ enum Cursado {
     Anual = "Anual"
 }   
 
+interface Variable {
+    id: number;
+    nombre: string;
+}
+
 interface Encuesta {
     id: number;
     asignatura: string;
@@ -18,6 +23,7 @@ interface Encuesta {
     cursado: Cursado;
     estado: EstadoEncuesta;  
     fecha_fin: number;
+    variables?: Variable[];
 }
 
 export function useEncuestas(){
