@@ -1,5 +1,8 @@
 import { Routes, Route } from "react-router-dom";
-import Layout from "./componentes/Layout.tsx";
+import LayoutHome from "./componentes/LayoutHome.tsx";
+import LayoutAlumno from "./componentes/LayoutAlumno.tsx";
+import LayoutDocente from "./componentes/LayoutDocente.tsx";
+import LayoutDepartamento from "./componentes/LayoutDepartamento.tsx";
 import EncuestasPendientes from "./paginas/EncuestasPendientes.tsx";
 import Encuesta from "./paginas/Encuesta.tsx";
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -7,17 +10,28 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Layout />}>
 
-        
+      <Route path="/" element={<LayoutHome/>}>
       </Route>
 
-      <Route path="/encuestas" element={<Layout />}>
-        <Route index element={<EncuestasPendientes />} />
-        <Route path=":id" element={<Encuesta />} /> {/*  ruta dinámica */}
-        <Route index element={<EncuestasPendientes />} />        {/* Podés agregar más rutas aca */}
+      <Route path="/login" element={<h1>Login</h1>}>
+      </Route>
+
+      <Route path="/alumno" element={<LayoutAlumno/>}>
+        <Route path="encuestas" >
+          <Route index element={<EncuestasPendientes />} />
+          <Route path=":id" element={<Encuesta />} /> {/*  ruta dinámica */}
+        </Route>
+      </Route>
+      
+      <Route path="/docente" element={<LayoutDocente />}>
 
       </Route>
+
+      <Route path="/departamento" element={<LayoutDepartamento />}>
+
+      </Route>
+
 
     </Routes>
   );

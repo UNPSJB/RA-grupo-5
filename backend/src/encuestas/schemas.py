@@ -3,10 +3,7 @@ from typing import List
 from enum import Enum
 from src.encuestas.models import EstadoEncuesta, Cursado
 from datetime import date
-
-# Los siguientes schemas contienen atributos sin muchas restricciones de tipo.
-# Podemos crear atributos con ciertas reglas mediante el uso de un "Field" adecuado.
-# https://docs.pydantic.dev/latest/concepts/fields/
+from src.variables.schemas import VariableBase
 
 
 class EncuestaBase(BaseModel):
@@ -18,10 +15,7 @@ class EncuestaBase(BaseModel):
     fecha_fin: date
     carrera: str
     sede: str
-    
-    
-    
-    
+    variables: List[VariableBase]
 
 
 class EncuestaCreate(EncuestaBase):
@@ -34,7 +28,4 @@ class EncuestaUpdate(EncuestaBase):
 
 class Encuesta(EncuestaBase):
     id: int
-
-    # from_atributes=True permite que Pydantic trabaje con modelos SQLAlchemy
-    # más info.: https://docs.pydantic.dev/latest/api/config/#pydantic.config.ConfigDict.from_attributes
     model_config = {"from_attributes": True}

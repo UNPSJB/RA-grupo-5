@@ -1,4 +1,4 @@
-import { useEncuestas } from "../hook/useEcuestas";
+import { useEncuestas } from "../hook/useEncuestas";
 import Table from "react-bootstrap/Table";
 import { Link } from "react-router-dom";
 
@@ -39,7 +39,7 @@ export default function EncuestasPendientes() {
                 <td>{encuesta.fecha_fin}</td>
                 <td>
                     <Link
-                    to={`/encuestas/${encuesta.id}`}
+                    to={`/alumno/encuestas/${encuesta.id}`}
                     className="btn btn-primary m-2"
                     >
                     Ir a encuesta
