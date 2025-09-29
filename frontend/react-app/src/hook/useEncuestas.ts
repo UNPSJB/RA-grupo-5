@@ -11,6 +11,11 @@ enum Cursado {
     Anual = "Anual"
 }   
 
+interface Variable {
+    id: number;
+    nombre: string;
+}
+
 interface Encuesta {
     id: number;
     asignatura: string;
@@ -18,6 +23,7 @@ interface Encuesta {
     cursado: Cursado;
     estado: EstadoEncuesta;  
     fecha_fin: number;
+    variables?: Variable[];
 }
 
 export function useEncuestas(){
@@ -25,7 +31,7 @@ export function useEncuestas(){
     const[encuestas, setEncuestas] = useState<Encuesta[]>([]);
     const[loading, setLoading] = useState<boolean>(true);
     const[error, setError] = useState<string | null>(null);
-    const API_URL = "http://localhost:8000/encuestas"; // Cambiá esto por la URL real de tu API
+    const API_URL = "http://localhost:8000/encuestas"; //definimos la URL como una const
 
     const fetchEncuestas = async () => {  // Función para obtener las encuestas
         try {

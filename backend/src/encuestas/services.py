@@ -1,6 +1,6 @@
 from typing import List
 from sqlalchemy import delete, select, update
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from src.encuestas.models import Encuesta
 from src.encuestas import schemas, exceptions
 
@@ -23,6 +23,17 @@ def leer_encuesta(db: Session, encuesta_id: int)-> schemas.Encuesta:
     if db_encuesta is None:
         raise exceptions.EncuestaNoEncontrada()
     return db_encuesta
+
+def get_encuesta_completa(db: Session, encuesta_id: int):
+    return (
+        db.query(Encuesta)
+        .options(
+            joinedload(Encuesta.variables)
+            .joinedload(Encuesta.Variable.preguntas)
+        )
+        .filter(Encuesta.id == encuesta_id)
+        .first()
+    )
 
 
 def modificar_encuesta(
