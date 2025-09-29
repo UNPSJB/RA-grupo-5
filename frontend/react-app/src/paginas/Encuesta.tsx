@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useEncuestas } from "../hook/useEcuestas";
+//import Variable from "../componentes/Variable";
 
 export default function Encuesta() {
   const { id } = useParams<{ id: string }>();
