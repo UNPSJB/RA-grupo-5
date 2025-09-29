@@ -4,13 +4,13 @@ import { Button } from "react-bootstrap";
 
 export default function BotonConfimarEncuetas({encuestaId}: {encuestaId: number}) {
     const[loading, setLoading] = useState(false);
-    const[error, setError] = useState("");
-    const[success, setSuccess] = useState(false);
+    //const[error, setError] = useState("");
+    //const[success, setSuccess] = useState(false);
 
     const confirmarEncuestas = async () => {
         setLoading(true);
-        setError(""); // este hook linea limpia los errores anteriores
-        setSuccess(false); //este hook resetea el estado de exito
+        //setError(""); // este hook linea limpia los errores anteriores
+        //setSuccess(false); //este hook resetea el estado de exito
         try {
 
                 const respuesta = await fetch(`http://localhost:8000/encuestas/${encuestaId}/confirmar`, {
@@ -21,10 +21,10 @@ export default function BotonConfimarEncuetas({encuestaId}: {encuestaId: number}
 
         
         if (!respuesta.ok) throw new Error("Error al confirmar las encuestas");
-
-        setSuccess(true); // confirma el estado de exito
+        
+        /*setSuccess(true); // confirma el estado de exito*/
         } catch (err: any) {
-            setError(err.message);                    
+            console.log(err.message);                    
         } finally {
             setLoading(false);
         }
