@@ -24,6 +24,8 @@ function App() {
         </Route>
       </Route>
       
+      <Route path="/informe" element={<h1>Informe</h1>}></Route>
+
       <Route path="/docente" element={<LayoutDocente />}>
 
       </Route>
