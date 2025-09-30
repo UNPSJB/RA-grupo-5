@@ -1,5 +1,5 @@
-import sqlalchemy import Integer, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import Integer, String
+from sqlalchemy.orm import Mapped, mapped_column#, relationship
 from src.models import ModeloBase
 
 class Informe(ModeloBase):
@@ -13,7 +13,5 @@ class Informe(ModeloBase):
     cant_alu_inscriptos: Mapped[int] = mapped_column(Integer)
     cant_com_teoricas: Mapped[int] = mapped_column(Integer)
     cant_com_practicas: Mapped[int] = mapped_column(Integer)
-
-    # Aca van las foreign keys a las variables que se usen en el informe
-
     
+    # Aca van las foreign keys a las variables que se usen en el informe

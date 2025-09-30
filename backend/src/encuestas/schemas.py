@@ -1,6 +1,5 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from typing import List
-from enum import Enum
 from src.encuestas.models import EstadoEncuesta, Cursado
 from datetime import date
 from src.variables.schemas import VariableBase
