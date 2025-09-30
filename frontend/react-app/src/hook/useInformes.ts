@@ -42,6 +42,10 @@ export function useInformes() {
     }
   };
 
+  useEffect(() => {
+    fetchInformes();
+  }, []);
+
   return {
     informes,
     loading,
