@@ -1,5 +1,11 @@
+enum EstadoInforme {
+  abierto = "abierto",
+  cerrado = "cerrado",
+}
+
 export interface Informe {
   id: number;
+  estado: EstadoInforme;
   sede: string;
   ciclo_lectivo: string;
   cod_act_curricular: string;
