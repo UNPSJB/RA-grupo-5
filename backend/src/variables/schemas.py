@@ -1,10 +1,12 @@
+from src.preguntas.schemas import PreguntaBase
 from pydantic import BaseModel
-from typing import Optional
+from typing import List, Optional
 
 
 class VariableBase(BaseModel):
     nombre: str
     codigo: str
+    preguntas: List[PreguntaBase]
 
 
 class VariableCreate(VariableBase):
