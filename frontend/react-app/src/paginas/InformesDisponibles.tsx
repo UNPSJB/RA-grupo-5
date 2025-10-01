@@ -1,5 +1,6 @@
 import { useInformes } from "../hook/useInformes";
 import Table from "react-bootstrap/Table";
+import { Link } from "react-router-dom";
 
 export default function InformesDisponibles() {
   const { informes, loading, error } = useInformes();
@@ -17,6 +18,7 @@ export default function InformesDisponibles() {
           <tr>
             <th>Cod. Asignatura</th>
             <th>Docente</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -29,6 +31,14 @@ export default function InformesDisponibles() {
               <tr key={informe.id}>
                 <td>{informe.cod_act_curricular}</td>
                 <td>{informe.doc_responsable}</td>
+                <td>
+                  <Link
+                    to={`/departamento/informes/${informe.id}`}
+                    className="btn btn-primary m-2"
+                  >
+                  Ir a informe
+                  </Link>
+                </td>
               </tr>
             ))
           )}

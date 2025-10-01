@@ -34,6 +34,7 @@ export function useInformes() {
         const data = await response.json();
         setInformes((prev) => [...prev, data]);
         setError(null);
+        return data;
         } catch (err: any) {
         setError(err.message);
         return null;

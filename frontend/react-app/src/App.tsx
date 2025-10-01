@@ -7,6 +7,7 @@ import EncuestasPendientes from "./paginas/EncuestasPendientes.tsx";
 import Encuesta from "./paginas/Encuesta.tsx";
 import "bootstrap/dist/css/bootstrap.min.css";
 import InformesDisponibles from "./paginas/InformesDisponibles.tsx";
+import Informe from "./paginas/Informe.tsx";
 
 function App() {
   return (
@@ -29,9 +30,11 @@ function App() {
       <Route path="/departamento" element={<LayoutDepartamento />}>
         <Route path="informes">
           <Route index element={<InformesDisponibles />} />
-          <Route path=":id" element={<h1>Detalle Informes</h1>} />
+          <Route path=":id" element={<Informe />} />
         </Route>
       </Route>
+
+      
     </Routes>
   );
 }
