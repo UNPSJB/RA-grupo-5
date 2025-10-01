@@ -22,7 +22,7 @@ export default function InformesDisponibles() {
         <tbody>
           {Cerrados.length === 0 ? (
             <tr>
-              <td colSpan={3}>No hay informes cerrados disponibles.</td>
+              <td colSpan={2}>No hay informes cerrados disponibles.</td>
             </tr>
           ) : (
             Cerrados.map((informe) => (
