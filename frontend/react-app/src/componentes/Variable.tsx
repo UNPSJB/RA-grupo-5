@@ -18,7 +18,7 @@ export default function Variable({ variable }: VariableProps) {
         <tbody>
           {variable.preguntas?.map((pregunta: any) => (
             <tr key={pregunta.id}>
-              <td>{pregunta.texto}</td>
+              <td>{pregunta.texto_pregunta}</td>
               <td>
                 {/* Franco: acá iría el input correspondiente para la rta (checkbox con opciones, etc) */}
                 <input type="text" name={`pregunta-${pregunta.id}`} />
