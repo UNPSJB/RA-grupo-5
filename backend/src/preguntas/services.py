@@ -6,7 +6,7 @@ from src.preguntas import schemas, exceptions
 
 # operaciones CRUD para Preguntas
 
-def crear_pregunta(db: Session, pregunta: schemas.PreguntaCreate) -> schemas.Pregunta:
+def crear_pregunta(db: Session, pregunta: schemas.PreguntaCreate) -> schemas.PreguntaRead:
     _pregunta = Pregunta(**pregunta.model_dump())
     db.add(_pregunta)
     db.commit()
@@ -14,11 +14,11 @@ def crear_pregunta(db: Session, pregunta: schemas.PreguntaCreate) -> schemas.Pre
     return _pregunta
 
 
-def listar_preguntas(db: Session) -> List[schemas.Pregunta]:
+def listar_preguntas(db: Session) -> List[schemas.PreguntaRead]:
     return db.scalars(select(Pregunta)).all()
 
 
-def leer_pregunta(db: Session, pregunta_id: int) -> schemas.Pregunta:
+def leer_pregunta(db: Session, pregunta_id: int) -> schemas.PreguntaRead:
     db_pregunta = db.scalar(select(Pregunta).where(Pregunta.id == pregunta_id))
     if db_pregunta is None:
         raise exceptions.PreguntaNoEncontrada()
@@ -34,7 +34,7 @@ def modificar_pregunta(db: Session, pregunta_id: int, pregunta: schemas.Pregunta
     return db_pregunta
 
 
-def eliminar_pregunta(db: Session, pregunta_id: int) -> schemas.Pregunta:
+def eliminar_pregunta(db: Session, pregunta_id: int) -> schemas.PreguntaRead:
     db_pregunta = leer_pregunta(db, pregunta_id)
     db.execute(delete(Pregunta).where(Pregunta.id == pregunta_id))
     db.commit()

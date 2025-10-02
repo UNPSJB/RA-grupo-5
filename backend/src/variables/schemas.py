@@ -1,4 +1,4 @@
-from src.preguntas.schemas import PreguntaBase
+from src.preguntas.schemas import PreguntaRead
 from pydantic import BaseModel
 from typing import List, Optional
 
@@ -6,7 +6,6 @@ from typing import List, Optional
 class VariableBase(BaseModel):
     nombre: str
     codigo: str
-    preguntas: List[PreguntaBase]
 
 
 class VariableCreate(VariableBase):
@@ -19,8 +18,8 @@ class VariableUpdate(BaseModel):
     id_encuesta: Optional[int] = None
 
 
-class Variable(VariableBase):
+class VariableRead(VariableBase):
     id: int
     id_encuesta: int
-
+    preguntas: List[PreguntaRead]  = []  #incluimos las preguntas
     model_config = {"from_attributes": True}
