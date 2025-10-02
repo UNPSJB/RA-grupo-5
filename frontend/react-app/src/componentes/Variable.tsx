@@ -20,12 +20,12 @@ export default function Variable({ variable }: VariableProps) {
             <tr key={pregunta.id}>
             <td>{pregunta.texto_pregunta}</td>
             <td>
-                {pregunta.tipo === "single_choise" || pregunta.tipo === "multiple_choise" ? (
+                {pregunta.tipo === "single_choice" || pregunta.tipo === "multiple_choice" ? (
                     pregunta.opcionesRespuestas?.map((opcion: any) => (
                     <div key={opcion.id}>
                         <label>
                         <input
-                            type={pregunta.tipo === "single_choise" ? "radio" : "checkbox"}
+                            type={pregunta.tipo === "single_choice" ? "radio" : "checkbox"}
                             name={`pregunta-${pregunta.id}`}
                             value={opcion.texto_opcion}
                         />{" "}
