@@ -18,11 +18,29 @@ export default function Variable({ variable }: VariableProps) {
         <tbody>
           {variable.preguntas?.map((pregunta: any) => (
             <tr key={pregunta.id}>
-              <td>{pregunta.texto_pregunta}</td>
-              <td>
-                {/* Franco: acá iría el input correspondiente para la rta (checkbox con opciones, etc) */}
-                <input type="text" name={`pregunta-${pregunta.id}`} />
-              </td>
+            <td>{pregunta.texto_pregunta}</td>
+            <td>
+                {pregunta.tipo === "single_choice" || pregunta.tipo === "multiple_choice" ? (
+                    pregunta.opcionesRespuestas?.map((opcion: any) => (
+                    <div key={opcion.id}>
+                        <label>
+                        <input
+                            type={pregunta.tipo === "single_choice" ? "radio" : "checkbox"}
+                            name={`pregunta-${pregunta.id}`}
+                            value={opcion.texto_opcion}
+                        />{" "}
+                        {opcion.texto_opcion}
+                        </label>
+                    </div>
+                    ))
+                ) : pregunta.tipo === "open" ? (
+                    <input
+                    type="text"
+                    name={`pregunta-${pregunta.id}`}
+                    placeholder="Ingrese su respuesta"
+                    />
+                ) : null}
+            </td>
             </tr>
           ))}
         </tbody>
