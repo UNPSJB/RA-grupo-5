@@ -1,5 +1,6 @@
 import Table from "react-bootstrap/Table";
 import type { VariableProps } from "../types/Variable";
+import Pregunta from "./Pregunta";
 
 export default function Variable({ variable }: VariableProps) {
   return (
@@ -17,31 +18,7 @@ export default function Variable({ variable }: VariableProps) {
         </thead>
         <tbody>
           {variable.preguntas?.map((pregunta: any) => (
-            <tr key={pregunta.id}>
-            <td>{pregunta.texto_pregunta}</td>
-            <td>
-                {pregunta.tipo === "single_choice" || pregunta.tipo === "multiple_choice" ? (
-                    pregunta.opcionesRespuestas?.map((opcion: any) => (
-                    <div key={opcion.id}>
-                        <label>
-                        <input
-                            type={pregunta.tipo === "single_choice" ? "radio" : "checkbox"}
-                            name={`pregunta-${pregunta.id}`}
-                            value={opcion.texto_opcion}
-                        />{" "}
-                        {opcion.texto_opcion}
-                        </label>
-                    </div>
-                    ))
-                ) : pregunta.tipo === "open" ? (
-                    <input
-                    type="text"
-                    name={`pregunta-${pregunta.id}`}
-                    placeholder="Ingrese su respuesta"
-                    />
-                ) : null}
-            </td>
-            </tr>
+            <Pregunta key={pregunta.id} pregunta={pregunta} />
           ))}
         </tbody>
       </Table>
