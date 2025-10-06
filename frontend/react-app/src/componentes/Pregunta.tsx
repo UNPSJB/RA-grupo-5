@@ -1,30 +1,17 @@
+import Table from "react-bootstrap/Table";
 import type { PreguntaProps } from "../types/Preguntas";
+import OpcionRespuesta from "./OpcionRespuesta";
 
 export default function Pregunta({ pregunta }: PreguntaProps) {
   return (
-    <tr key={pregunta.id}>
-      <td>{pregunta.texto_pregunta}</td>
-      <td>
-        {pregunta.tipo === "single_choice" ||
-        pregunta.tipo === "multiple_choice" ? (
-          pregunta.opcionesRespuestas?.map((opcion: any) => (
-            <div key={opcion.id}>
-              <label>
-                <input
-                  type={
-                    pregunta.tipo === "single_choice" ? "radio" : "checkbox"
-                  }
-                  name={`pregunta-${pregunta.id}`}
-                  value={opcion.texto_opcion}
-                />{" "}
-                {opcion.texto_opcion}
-              </label>
-            </div>
-          ))
-        ) : pregunta.tipo === "open" ? (
-          <input type="text" name={`pregunta-${pregunta.id}`} />
-        ) : null}
-      </td>
-    </tr>
+    <Table striped bordered>
+      <thead></thead>
+      <tbody>
+        <td>{pregunta.texto_pregunta}</td>
+        {pregunta.opcionesRespuestas?.map((opciones: any) => (
+          <OpcionRespuesta key={opciones.id} opcionRespuesta={opciones} />
+        ))}
+      </tbody>
+    </Table>
   );
 }
