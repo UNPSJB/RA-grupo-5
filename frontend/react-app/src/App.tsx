@@ -5,9 +5,10 @@ import LayoutDocente from "./componentes/LayoutDocente.tsx";
 import LayoutDepartamento from "./componentes/LayoutDepartamento.tsx";
 import EncuestasPendientes from "./paginas/EncuestasPendientes.tsx";
 import Encuesta from "./paginas/Encuesta.tsx";
-import "bootstrap/dist/css/bootstrap.min.css";
 import InformesDisponibles from "./paginas/InformesDisponibles.tsx";
 import Informe from "./paginas/Informe.tsx";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import ReportesDisponibles from "./paginas/ReportesDisponibles.tsx";
 
 function App() {
   return (
@@ -20,6 +21,13 @@ function App() {
         <Route path="encuestas">
           <Route index element={<EncuestasPendientes />} />
           <Route path=":id" element={<Encuesta />} /> {/*  ruta dinámica */}
+        </Route>
+      </Route>
+      
+      <Route path="/docente" element={<LayoutDocente />}>
+        <Route path="reportes" >
+          <Route index element={<ReportesDisponibles />} />
+          <Route path=":id" element={<h1>Detalle Reporte</h1>} /> {/*  ruta dinámica */}
         </Route>
       </Route>
 
