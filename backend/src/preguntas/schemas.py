@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional, List
 from src.preguntas.models import TipoPreguntaEnum
-from src.opcionesRespuestas.schemas import OpcionRespuestaRead
+from src.opciones_respuestas.schemas import OpcionRespuestaRead
 
 
 class PreguntaBase(BaseModel):
