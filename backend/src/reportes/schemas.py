@@ -7,7 +7,6 @@ from src.reportes.models import Reporte
 
 
 class ReporteBase(BaseModel):
-    id: int
     asignatura: str
     año: int
     cursado: Cursado
