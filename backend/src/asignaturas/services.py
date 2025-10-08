@@ -21,7 +21,7 @@ def crear_asignatura(db: Session, asignatura: schemas.AsignaturaCreate) -> schem
 def leer_asignatura(db: Session, asignatura_id: int)-> schemas.AsignaturaRead:
     db_asignatura = db.scalar(select(Asignatura).where(Asignatura.id == asignatura_id))
     if db_asignatura is None:
-         return {"message": f"Asignatura {asignatura_id} no enctrada"}
+         return {"message": f"Asignatura {asignatura_id} no encontrada"}
     return db_asignatura
 
 
