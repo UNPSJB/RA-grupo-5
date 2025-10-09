@@ -36,15 +36,34 @@ const fetchReportes = async () => {
         } finally {
             setLoading(false);
         }
-    }    
-useEffect(() => {
-    fetchReportes();
-}, []);
+    };
+    const fetchReporteById = async (id: number) => {
+        try {
+            setLoading(true);
+            const response = await fetch(`${API_URL}/${id}`);
+            if (!response.ok) {
+                throw new Error("Error al obtener el reporte");
+            }
+            const data = await response.json();
+            setReportes((prev) => [...prev, data]);
+            setError(null);
+            return data;
+        } catch (err: any) {
+            setError(err.message);
+            return null;
+        } finally {
+            setLoading(false);
+        }
+};
+    useEffect(() => {
+        fetchReportes();
+    }, []);
 
 return {
     reportes,
     loading,
     error,
     refetch: fetchReportes,
+    fetchReporteById,
     };
 }
