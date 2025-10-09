@@ -1,8 +1,7 @@
 import {useState, useEffect} from "react";
 import {useInformes} from "../hook/useInformes";
 import {useParams} from "react-router-dom";
-import Table from "react-bootstrap/Table";
-
+import { Container, Row, Col, Card, Form } from "react-bootstrap";
 
 export default function Informe() {
     const {id} = useParams<{id: string}>();
@@ -11,8 +10,7 @@ export default function Informe() {
 
 
 useEffect(() => {
-    console.log("ID recibido:", id); // <-- Agrega este log
-    if (id) {
+        if (id) {
         fetchInformeById(Number(id)).then((data) => {
             console.log("Datos recibidos:", data); // <-- Y este log
             setInforme(data);
@@ -20,43 +18,53 @@ useEffect(() => {
     }
 }, [id]);
 
+const preguntas_informe = [
+    "¿El contenido del curso fue relevante para la materia?",
+    "¿El docente explicó los conceptos de manera clara?",
+    "¿El material de estudio fue adecuado?",
+    "¿El ritmo del curso fue apropiado?",
+    "¿Recomendarías este curso a otros estudiantes?"
+];
 
 if (!informe) return <p>Cargando informe...</p>;
 
-
 return (
-    <div>
-        <h1>Informe de {informe.cod_act_curricular}</h1>
-            <div className="container mt-4 ">
-                <p className="">Estado: {informe.estado}</p>
-                <p>
-                    <strong>Sede:</strong> {informe.sede}
-                </p>
-                <p>
-                    <strong>Ciclo Lectivo:</strong> {informe.ciclo_lectivo}
-                </p>
-            </div>
-        <Table striped bordered hover size="sm">
-            <thead>
-                <tr>
-                    <th>Necesidades de equipamiento</th>
+    <Container className=" justify-content-center mt-4">
+        <Row>
+            <Col>
+                <Card>
+                    <Card.Header as="h5">Informe: {informe.cod_act_curricular}</Card.Header>
+                    <Card.Body className="d-flex justify-content-between">
+                        <Card.Text >
+                            <strong>Estado:</strong> {informe.estado}
+                        </Card.Text >
+                        <Card.Text >
+                            <strong>Sede:</strong> {informe.sede}
+                        </Card.Text>
+                        <Card.Text >
+                            <strong>Ciclo Lectivo:</strong> {informe.ciclo_lectivo}
+                        </Card.Text>
+                        
+                    </Card.Body>
+                </Card>
+          </Col>
+                    {preguntas_informe.map((pregunta, i) => (
+            <Row key={i} className="mt-3">
+                <Card>
+                    <Form>
+                        <Form.Group as={Row} className="mb-3" controlId={`pregunta-${i}`}>
+                            <Form.Label column sm="8">{pregunta}</Form.Label>
+                            <Col sm="4">
+                                <Form.Control type="text" placeholder="Ingrese su respuesta"/>
+                            </Col>
+                        </Form.Group>
 
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    
-                    <p>1: Indique en el caso que corresponda, las necesidades de equipamiento y actualización de bibliografía que considere prioritarias para su actuación docente. Asimismo, en caso de corresponder, indique los insumos básicos necesarios para el desarrollo de actividades prácticas, renovación o incorporación de equipamientos informáticos requeridos para el desarrollo de clases. (Por favor, verifique si lo solicitado en años anteriores  ya  se encuentra  disponible)</p>
-                    
-                </tr>
-                <tr>
-                    <textarea name="campo-1" id="campo-1"></textarea>
-                </tr>
-            </tbody>
-        </Table>
-    
-    </div>
-    
-
+                    </Form>
+                </Card>
+            </Row>
+          ))    
+        }
+        </Row>
+    </Container>
 );
 }
