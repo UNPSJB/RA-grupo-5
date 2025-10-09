@@ -8,11 +8,24 @@ export default function Encuesta() {
   const { fetchEncuestaById } = useEncuestas();
   const [encuesta, setEncuesta] = useState<any>(null);
 
+  // Mapa: preguntaId -> opcionId
+  const [respuestas, setRespuestas] = useState<
+    Record<string | number, string | number>
+  >({});
+
   useEffect(() => {
     if (id) {
       fetchEncuestaById(Number(id)).then((data) => setEncuesta(data));
     }
   }, [id]);
+
+  const handleSeleccionar = (
+    idPregunta: number | string,
+    idOpcion: number | string
+  ) => {
+    setRespuestas((prev) => ({ ...prev, [idPregunta]: idOpcion }));
+    //acá podríamos llamar al backend u otro hook para guardar la respuesta
+  };
 
   if (!encuesta) return <p>Cargando encuesta...</p>;
 
@@ -27,7 +40,14 @@ export default function Encuesta() {
         <strong>Sede:</strong> {encuesta.sede}
       </p>
       {encuesta.variables?.map((variable: any) => (
-        <Variable key={variable.id} variable={variable} />
+        <Variable
+          key={variable.id}
+          variable={variable}
+          getSeleccion={(idPregunta: number | string) =>
+            respuestas[idPregunta] ?? null
+          }
+          onSeleccionar={handleSeleccionar}
+        />
       ))}
     </div>
   );

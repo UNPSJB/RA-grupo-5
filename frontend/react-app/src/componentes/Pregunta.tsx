@@ -1,17 +1,35 @@
-import Table from "react-bootstrap/Table";
 import type { PreguntaProps } from "../types/Preguntas";
 import OpcionRespuesta from "./OpcionRespuesta";
+import type { Extras } from "../types/OpcionRespuesta";
 
-export default function Pregunta({ pregunta }: PreguntaProps) {
+export default function Pregunta({
+  pregunta,
+  seleccionActual,
+  onSeleccionar,
+}: PreguntaProps & Extras) {
   return (
-    <Table striped bordered>
-      <thead></thead>
-      <tbody>
-        <td>{pregunta.texto_pregunta}</td>
-        {pregunta.opcionesRespuestas?.map((opciones: any) => (
-          <OpcionRespuesta key={opciones.id} opcionRespuesta={opciones} />
-        ))}
-      </tbody>
-    </Table>
+    <tr>
+      <td style={{ width: "40%", fontWeight: "bold" }}>
+        {pregunta.texto_pregunta}
+      </td>
+
+      {pregunta.opcionesRespuestas?.map((opcion: any) => {
+        const idOpcion =
+          opcion?.id ??
+          opcion?.opcionRespuesta?.id ??
+          opcion?.opcionRespuesta?.id_opcion ??
+          opcion?.valor;
+
+        return (
+          <td key={idOpcion} style={{ textAlign: "center", minWidth: 90 }}>
+            <OpcionRespuesta
+              opcionRespuesta={opcion}
+              seleccionada={seleccionActual === idOpcion}
+              onSeleccionar={(id) => onSeleccionar(pregunta.id, id)}
+            />
+          </td>
+        );
+      })}
+    </tr>
   );
 }

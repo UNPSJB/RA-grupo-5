@@ -1,8 +1,12 @@
 import Table from "react-bootstrap/Table";
-import type { VariableProps } from "../types/Variable";
 import Pregunta from "./Pregunta";
+import type { Props } from "../types/Variable";
 
-export default function Variable({ variable }: VariableProps) {
+export default function Variable({
+  variable,
+  getSeleccion,
+  onSeleccionar,
+}: Props) {
   return (
     <div className="container mt-4">
       <h3>
@@ -12,13 +16,18 @@ export default function Variable({ variable }: VariableProps) {
       <Table striped bordered>
         <thead>
           <tr>
-            <th>Pregunta</th>
-            <th>Respuesta</th>
+            <th style={{ width: "40%" }}>Pregunta</th>
+            <th colSpan={3}>Respuesta</th>
           </tr>
         </thead>
         <tbody>
           {variable.preguntas?.map((pregunta: any) => (
-            <Pregunta key={pregunta.id} pregunta={pregunta} />
+            <Pregunta
+              key={pregunta.id}
+              pregunta={pregunta}
+              seleccionActual={getSeleccion(pregunta.id)}
+              onSeleccionar={onSeleccionar}
+            />
           ))}
         </tbody>
       </Table>
