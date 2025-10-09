@@ -1,7 +1,12 @@
 import Table from "react-bootstrap/Table";
-import type { VariableProps } from "../types/Variable";
+import Pregunta from "./Pregunta";
+import type { Props } from "../types/Variable";
 
-export default function Variable({ variable }: VariableProps) {
+export default function Variable({
+  variable,
+  getSeleccion,
+  onSeleccionar,
+}: Props) {
   return (
     <div className="container mt-4">
       <h3>
@@ -11,37 +16,18 @@ export default function Variable({ variable }: VariableProps) {
       <Table striped bordered>
         <thead>
           <tr>
-            <th>Pregunta</th>
-            <th>Respuesta</th>
+            <th style={{ width: "40%" }}>Pregunta</th>
+            <th colSpan={3}>Respuesta</th>
           </tr>
         </thead>
         <tbody>
           {variable.preguntas?.map((pregunta: any) => (
-            <tr key={pregunta.id}>
-            <td>{pregunta.texto_pregunta}</td>
-            <td>
-                {pregunta.tipo === "single_choice" || pregunta.tipo === "multiple_choice" ? (
-                    pregunta.opcionesRespuestas?.map((opcion: any) => (
-                    <div key={opcion.id}>
-                        <label>
-                        <input
-                            type={pregunta.tipo === "single_choice" ? "radio" : "checkbox"}
-                            name={`pregunta-${pregunta.id}`}
-                            value={opcion.texto_opcion}
-                        />{" "}
-                        {opcion.texto_opcion}
-                        </label>
-                    </div>
-                    ))
-                ) : pregunta.tipo === "open" ? (
-                    <input
-                    type="text"
-                    name={`pregunta-${pregunta.id}`}
-                    placeholder="Ingrese su respuesta"
-                    />
-                ) : null}
-            </td>
-            </tr>
+            <Pregunta
+              key={pregunta.id}
+              pregunta={pregunta}
+              seleccionActual={getSeleccion(pregunta.id)}
+              onSeleccionar={onSeleccionar}
+            />
           ))}
         </tbody>
       </Table>

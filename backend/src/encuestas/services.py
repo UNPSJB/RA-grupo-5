@@ -1,5 +1,5 @@
 from typing import List
-from sqlalchemy import delete, select, update
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session, joinedload
 from src.encuestas.models import Encuesta
 from src.encuestas import schemas, exceptions
