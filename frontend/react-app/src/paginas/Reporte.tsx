@@ -38,13 +38,14 @@ export default function Reporte(){
                 </thead>
                 <tbody>
                     <tr>
-                        <h3>Contenido del campo del reporte:</h3>
-                        <p>
-                            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Itaque sunt dolorum fugit alias fugiat facilis incidunt totam accusamus esse recusandae. Aut necessitatibus ullam nulla maiores?
+                        <p>Contenido del campo del reporte:
+
+                            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quae, nesciunt cupiditate! Veniam quasi at enim aut eveniet recusandae, eligendi minima natus minus, voluptatem dignissimos omnis?
                         </p>
                     </tr>
                 </tbody>
             </Table>
+
         </div>
     );
 }
