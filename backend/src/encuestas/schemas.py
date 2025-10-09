@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import List
 from src.encuestas.models import EstadoEncuesta, Cursado
 from datetime import date
-from src.variables.schemas import VariableBase
+from src.variables.schemas import VariableRead
 
 
 class EncuestaBase(BaseModel):
@@ -14,7 +14,7 @@ class EncuestaBase(BaseModel):
     fecha_fin: date
     carrera: str
     sede: str
-    variables: List[VariableBase]
+    
 
 
 class EncuestaCreate(EncuestaBase):
@@ -25,6 +25,7 @@ class EncuestaUpdate(EncuestaBase):
     pass
 
 
-class Encuesta(EncuestaBase):
+class EncuestaRead(EncuestaBase):
     id: int
+    variables: List[VariableRead]  = []  #incluimos las variables
     model_config = {"from_attributes": True}

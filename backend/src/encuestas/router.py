@@ -9,28 +9,28 @@ router = APIRouter(prefix="/encuestas", tags=["encuestas"])
 
 
 #listar encuestas
-@router.get("/", response_model=list[schemas.Encuesta])
+@router.get("/", response_model=list[schemas.EncuestaRead])
 def read_encuestas(db: Session = Depends(get_db)):
     return services.listar_encuestas(db)
 
 #crear encuesta
-@router.post("/",response_model=schemas.Encuesta)
+@router.post("/",response_model=schemas.EncuestaRead)
 def create_encuesta(encuesta: schemas.EncuestaCreate,  db: Session = Depends(get_db)):
     return services.crear_encuesta(db,encuesta)
 
 #ver encuesta por id
-@router.get("/{encuesta_id}", response_model=schemas.Encuesta)
+@router.get("/{encuesta_id}", response_model=schemas.EncuestaRead)
 def read_encuesta(encuesta_id: int, db:Session = Depends(get_db)):
     return services.leer_encuesta(db, encuesta_id)
 
 #ver encuesta por id con sus variables
-@router.get("/{encuesta_id}", response_model=schemas.Encuesta)
+@router.get("/{encuesta_id}", response_model=schemas.EncuestaRead)
 def read_encuesta(encuesta_id: int, db: Session = Depends(get_db)):
     return services.get_encuesta_completa(db, encuesta_id)
 
 #modificar encuesta
 
-@router.put("/{encuesta_id}", response_model=schemas.Encuesta)
+@router.put("/{encuesta_id}", response_model=schemas.EncuestaRead)
 def update_encuesta(
     encuesta_id: int, encuesta: schemas.EncuestaUpdate, db: Session = Depends(get_db)):
     return services.modificar_encuesta(db, encuesta_id, encuesta)

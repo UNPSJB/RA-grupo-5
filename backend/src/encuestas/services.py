@@ -7,18 +7,18 @@ from src.encuestas import schemas, exceptions
 
 # CRUD:
 
-def listar_encuestas(db:Session) -> List[schemas.Encuesta]:
+def listar_encuestas(db:Session) -> List[schemas.EncuestaRead]:
     return db.scalars(select(Encuesta)).all()
 
 
-def crear_encuesta(db: Session, encuesta: schemas.EncuestaCreate) -> schemas.Encuesta:
+def crear_encuesta(db: Session, encuesta: schemas.EncuestaCreate) -> schemas.EncuestaRead:
     _encuesta = Encuesta(**encuesta.model_dump())
     db.add(_encuesta)
     db.commit()
     db.refresh(_encuesta)
     return _encuesta
 
-def leer_encuesta(db: Session, encuesta_id: int)-> schemas.Encuesta:
+def leer_encuesta(db: Session, encuesta_id: int)-> schemas.EncuestaRead:
     db_encuesta = db.scalar(select(Encuesta).where(Encuesta.id == encuesta_id))
     if db_encuesta is None:
         raise exceptions.EncuestaNoEncontrada()
