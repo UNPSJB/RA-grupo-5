@@ -34,8 +34,6 @@ function App() {
 
       <Route path="/informe" element={<h1>Informe</h1>}></Route>
 
-      <Route path="/docente" element={<LayoutDocente />}></Route>
-
       <Route path="/departamento" element={<LayoutDepartamento />}>
         <Route path="informes">
           <Route index element={<InformesDisponibles />} />
