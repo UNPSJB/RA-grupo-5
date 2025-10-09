@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from typing import List
 from enum import Enum
-from src.encuestas.models import Cursado
+from src.asignaturas.models import Cursado
 from datetime import date
 from src.reportes.models import Reporte
 
