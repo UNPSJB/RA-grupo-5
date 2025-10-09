@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from src.database import get_db
-from src.opcionesRespuestas import schemas, services
+from src.opciones_respuestas import schemas, services
 
 router = APIRouter(prefix="/opcionesRespuestas", tags=["opcionesRespuestas"])
 

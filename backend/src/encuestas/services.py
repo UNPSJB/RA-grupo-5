@@ -24,17 +24,6 @@ def leer_encuesta(db: Session, encuesta_id: int)-> schemas.EncuestaRead:
         raise exceptions.EncuestaNoEncontrada()
     return db_encuesta
 
-def get_encuesta_completa(db: Session, encuesta_id: int):
-    return (
-        db.query(Encuesta)
-        .options(
-            joinedload(Encuesta.variables)
-            .joinedload(Encuesta.Variable.preguntas)
-        )
-        .filter(Encuesta.id == encuesta_id)
-        .first()
-    )
-
 
 def modificar_encuesta(
     db: Session, encuesta_id: int, encuesta: schemas.EncuestaUpdate) -> Encuesta:
@@ -47,9 +36,8 @@ def modificar_encuesta(
 
 def eliminar_encuesta(db: Session, encuesta_id: int) -> dict:
     db_encuesta = leer_encuesta(db, encuesta_id)
-    nombre_encuesta = db_encuesta.asignatura
     db.delete(db_encuesta)
     db.commit()
-    return {"message": f"Encuesta {nombre_encuesta} eliminada"}
+    return {"message": f"Encuesta  eliminada"}
 
 

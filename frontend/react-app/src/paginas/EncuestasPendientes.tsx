@@ -33,9 +33,9 @@ export default function EncuestasPendientes() {
             ) : (
             Pendientes.map((encuesta) => (
                 <tr key={encuesta.id}>
-                <td>{encuesta.asignatura}</td>
-                <td>{encuesta.año}</td>
-                <td>{encuesta.cursado}</td>
+                <td>{encuesta.asignatura?.nombre}</td>  
+                <td>{encuesta.asignatura?.año}</td>
+                <td>{encuesta.asignatura?.cursado}</td>
                 <td>{encuesta.fecha_fin}</td>
                 <td>
                     <Link

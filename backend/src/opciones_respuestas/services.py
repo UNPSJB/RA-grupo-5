@@ -1,8 +1,8 @@
 from typing import List
 from sqlalchemy import select 
 from sqlalchemy.orm import Session
-from src.opcionesRespuestas.models import OpcionRespuesta
-from src.opcionesRespuestas import schemas
+from src.opciones_respuestas.models import OpcionRespuesta
+from src.opciones_respuestas import schemas
 
 # operaciones CRUD para opcionesRespuestas
 

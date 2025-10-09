@@ -31,13 +31,13 @@ export default function Encuesta() {
 
   return (
     <div>
-      <h1>{encuesta.asignatura}</h1>
+      <h1>{encuesta.asignatura.nombre}</h1>
       <p>Estado: {encuesta.estado}</p>
       <p>
-        <strong>Carrera:</strong> {encuesta.carrera}
+        <strong>Carrera:</strong> {encuesta.asignatura.carrera}
       </p>
       <p>
-        <strong>Sede:</strong> {encuesta.sede}
+        <strong>Sede:</strong> {encuesta.asignatura.sede}
       </p>
       {encuesta.variables?.map((variable: any) => (
         <Variable

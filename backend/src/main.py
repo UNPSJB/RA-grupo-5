@@ -10,10 +10,14 @@ from src.personas.router import router as personas_router
 from src.encuestas.router import router as encuestas_router
 from src.variables.router import router as variables_router
 from src.preguntas.router import router as preguntas_router
+from src.opciones_respuestas.router import router as opcionesRespuestas_router
+from src.asignaturas.router import router as asignaturas_router
+from src.encuestas_asignaturas.router import router as encuestasAsignaturas_router
 from src.informes.router import router as informes_router
 from src.reportes.router import router as reportes_router
-from src.opcionesRespuestas.router import router as opcionesRespuestas_router
+
 from fastapi.middleware.cors import CORSMiddleware
+
 
 load_dotenv()
 
@@ -48,6 +52,9 @@ app.include_router(personas_router)
 app.include_router(encuestas_router)
 app.include_router(variables_router)
 app.include_router(preguntas_router)
+app.include_router(opcionesRespuestas_router)
+app.include_router(asignaturas_router)
+app.include_router(encuestasAsignaturas_router)
 app.include_router(informes_router)
 app.include_router(reportes_router)
-app.include_router(opcionesRespuestas_router)
+
