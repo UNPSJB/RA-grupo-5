@@ -39,11 +39,9 @@ export default function Encuesta() {
       <p>
         <strong>Sede:</strong> {encuesta.asignatura.sede}
       </p>
-      {encuesta.variables?.map((variable: any) => (
-        <Variable
-          key={variable.id}
-          variable={variable}
-          getSeleccion={(idPregunta: number | string) =>
+      {encuesta.encuestabase?.variables.map((variable: any) => (
+        <Variable key={variable.id} variable={variable} 
+        getSeleccion={(idPregunta: number | string) =>
             respuestas[idPregunta] ?? null
           }
           onSeleccionar={handleSeleccionar}
