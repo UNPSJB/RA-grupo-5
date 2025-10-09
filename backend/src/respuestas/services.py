@@ -2,7 +2,7 @@ from typing import List
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from src.respuestas.models import Respuesta
-from src.respuestas import schemas, exceptions
+from src.respuestas import schemas, exception
 
 def crear_respuesta(db: Session, respuesta: schemas.RespuestaCreate) -> Respuesta:
     _respuesta = Respuesta(**respuesta.model_dump())
@@ -17,7 +17,7 @@ def listar_respuestas(db: Session) -> List[Respuesta]:
 def leer_respuesta(db: Session, respuesta_id: int) -> Respuesta:
     db_respuesta = db.scalar(select(Respuesta).where(Respuesta.id == respuesta_id))
     if db_respuesta is None:
-        raise exceptions.RespuestaNoEncontrada()
+        raise exception.RespuestaNoEncontrada()
     return db_respuesta
 
 def eliminar_respuesta(db: Session, respuesta_id: int) -> Respuesta:
