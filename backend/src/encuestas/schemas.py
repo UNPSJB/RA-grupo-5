@@ -4,7 +4,7 @@ from enum import Enum
 from src.encuestas.models import Ciclo
 from datetime import date
 from src.variables.schemas import VariableRead
-from src.encuestas_asignaturas.schemas import EncuestaAsignaturaRead
+#from src.encuestas_asignaturas.schemas import EncuestaAsignaturaRead
 
 
 class EncuestaBase(BaseModel):
@@ -21,5 +21,5 @@ class EncuestaUpdate(EncuestaBase):
 class EncuestaRead(EncuestaBase):
     id: int
     variables: List[VariableRead]  = []  #incluimos las variables
-    encuestas_asignaturas: List[EncuestaAsignaturaRead] = []  #incluimos las encuestas de asignaturas
+    #encuestas_asignaturas: List[EncuestaAsignaturaRead] = []
     model_config = {"from_attributes": True}

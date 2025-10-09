@@ -7,8 +7,15 @@ from src.encuestas_asignaturas import schemas
 
 # CRUD:
  
-def listar_encuestas_asignaturas(db:Session) -> List[schemas.EncuestaAsignaturaRead]:
-    return db.scalars(select(EncuestaAsignatura)).all()
+def listar_encuestas_asignaturas(db:Session):
+     return (
+        db.query(EncuestaAsignatura)
+        .options(
+            joinedload(EncuestaAsignatura.asignatura),
+            joinedload(EncuestaAsignatura.encuesta)
+        )
+        .all()
+    )
 
 
 def crear_encuesta_asignatura(db: Session, encuesta: schemas.EncuestaAsignaturaCreate) -> schemas.EncuestaAsignaturaRead:
@@ -24,17 +31,6 @@ def leer_encuesta_asignatura(db: Session, encuesta_id: int)-> schemas.EncuestaAs
         return {"message": "Encuesta no encontrada"}
     return db_encuesta
 
-
-# def get_encuesta_completa(db: Session, encuesta_id: int):
-#     return (
-#         db.query(EncuestaAsignatura)
-#         .options(
-#             joinedload(EncuestaAsignatura.variables)
-#             .joinedload(EncuestaAsignatura.Variable.preguntas)
-#         )
-#         .filter(EncuestaAsignatura.id == encuesta_id)
-#         .first()
-#     )
 
 
 def modificar_encuesta_asignatura(

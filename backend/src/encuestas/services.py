@@ -24,17 +24,6 @@ def leer_encuesta(db: Session, encuesta_id: int)-> schemas.EncuestaRead:
         raise exceptions.EncuestaNoEncontrada()
     return db_encuesta
 
-def get_encuesta_completa(db: Session, encuesta_id: int):
-    return (
-        db.query(Encuesta)
-        .options(
-            joinedload(Encuesta.variables)
-            .joinedload(Encuesta.Variable.preguntas)
-        )
-        .filter(Encuesta.id == encuesta_id)
-        .first()
-    )
-
 
 def modificar_encuesta(
     db: Session, encuesta_id: int, encuesta: schemas.EncuestaUpdate) -> Encuesta:

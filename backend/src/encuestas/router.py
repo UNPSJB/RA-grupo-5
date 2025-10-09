@@ -23,11 +23,6 @@ def create_encuesta(encuesta: schemas.EncuestaCreate,  db: Session = Depends(get
 def read_encuesta(encuesta_id: int, db:Session = Depends(get_db)):
     return services.leer_encuesta(db, encuesta_id)
 
-#ver encuesta por id con sus variables
-@router.get("/{encuesta_id}", response_model=schemas.EncuestaRead)
-def read_encuesta(encuesta_id: int, db: Session = Depends(get_db)):
-    return services.get_encuesta_completa(db, encuesta_id)
-
 #modificar encuesta
 
 @router.put("/{encuesta_id}", response_model=schemas.EncuestaRead)

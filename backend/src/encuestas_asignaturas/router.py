@@ -22,13 +22,6 @@ def read_encuesta_asignatura(encuesta_id: int, db:Session = Depends(get_db)):
     return services.leer_encuesta_asignatura(db, encuesta_id)
 
 
-
-# #ver encuesta por id con sus variables
-# @router.get("/{encuesta_id}", response_model=schemas.EncuestaRead)
-# def read_encuesta(encuesta_id: int, db: Session = Depends(get_db)):
-#     return services.get_encuesta_completa(db, encuesta_id)
-
-
 @router.put("/{encuesta_id}", response_model=schemas.EncuestaAsignaturaRead)
 def update_encuesta_asignatura(
     encuesta_id: int, encuesta: schemas.EncuestaAsignaturaUpdate, db: Session = Depends(get_db)):

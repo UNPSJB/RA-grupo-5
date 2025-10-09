@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import List
 from src.asignaturas.models import Cursado
-from src.encuestas_asignaturas.schemas import EncuestaAsignaturaRead
+#from src.encuestas_asignaturas.schemas import EncuestaAsignaturaRead
 
 class AsignaturaBase(BaseModel):
     nombre: str
@@ -22,5 +22,5 @@ class AsignaturaUpdate(AsignaturaBase):
 
 class AsignaturaRead(AsignaturaBase):
     id: int
-    encuestas_asignaturas: List[EncuestaAsignaturaRead] = []
+    #encuestas_asignaturas: List[EncuestaAsignaturaRead] = []
     model_config = {"from_attributes": True}
