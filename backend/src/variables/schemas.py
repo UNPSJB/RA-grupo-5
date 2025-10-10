@@ -9,17 +9,17 @@ class VariableBase(BaseModel):
 
 
 class VariableCreate(VariableBase):
-    id_encuesta: int
+    id_encuesta_base: int
 
 
 class VariableUpdate(BaseModel):
     nombre: Optional[str] = None
     codigo: Optional[str] = None
-    id_encuesta: Optional[int] = None
+    id_encuesta_base: Optional[int] = None
 
 
 class VariableRead(VariableBase):
     id: int
-    id_encuesta: int
+    id_encuesta_base: int
     preguntas: List[PreguntaRead]  = []  #incluimos las preguntas
     model_config = {"from_attributes": True}

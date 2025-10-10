@@ -1,24 +1,24 @@
 from pydantic import BaseModel
 from typing import List
 from enum import Enum
-from src.encuestas.models import Ciclo
+from src.encuestas_base.models import Ciclo
 from datetime import date
 from src.variables.schemas import VariableRead
 #from src.encuestas_asignaturas.schemas import EncuestaAsignaturaRead
 
 
-class EncuestaBase(BaseModel):
+class EncuestaBaseBase(BaseModel):
     nombre: str
     ciclo: Ciclo
     
-class EncuestaCreate(EncuestaBase):
+class EncuestaBaseCreate(EncuestaBaseBase):
     pass
 
-class EncuestaUpdate(EncuestaBase):
+class EncuestaBaseUpdate(EncuestaBaseBase):
     pass
 
 
-class EncuestaRead(EncuestaBase):
+class EncuestaBaseRead(EncuestaBaseBase):
     id: int
     variables: List[VariableRead]  = []  #incluimos las variables
     #encuestas_asignaturas: List[EncuestaAsignaturaRead] = []

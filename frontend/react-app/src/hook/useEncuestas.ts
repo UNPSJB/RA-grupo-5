@@ -34,12 +34,12 @@ interface EncuestaBase {
 interface Encuesta{
     id: number;
     id_asignatura: number;
-    id_encuesta: number;
+    id_encuesta_base: number;
     estado: EstadoEncuesta;  
     fecha_inicio: string;
     fecha_fin: string;
     asignatura?: Asignatura;
-    encuesta?: EncuestaBase;
+    encuesta_base?: EncuestaBase;
 }
 
 

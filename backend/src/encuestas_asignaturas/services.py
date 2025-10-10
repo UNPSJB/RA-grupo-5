@@ -12,7 +12,7 @@ def listar_encuestas_asignaturas(db:Session):
         db.query(EncuestaAsignatura)
         .options(
             joinedload(EncuestaAsignatura.asignatura),
-            joinedload(EncuestaAsignatura.encuesta)
+            joinedload(EncuestaAsignatura.encuesta_base)
         )
         .all()
     )

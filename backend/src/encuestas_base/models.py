@@ -10,10 +10,10 @@ class Ciclo(str, Enum):
     ciclo_superior = "ciclo superior"
 
 
-class Encuesta(ModeloBase):
-    __tablename__ = "encuestas"
+class EncuestaBase(ModeloBase):
+    __tablename__ = "encuestas_base"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     nombre: Mapped[str] = mapped_column(String, index=True)
     ciclo: Mapped[Ciclo] = mapped_column(SQLEnum(Ciclo), index=True)
-    variables = relationship("Variable", back_populates="encuesta")
-    encuestas_asignaturas = relationship("EncuestaAsignatura", back_populates="encuesta")
+    variables = relationship("Variable", back_populates="encuesta_base")
+    encuestas_asignaturas = relationship("EncuestaAsignatura", back_populates="encuesta_base")

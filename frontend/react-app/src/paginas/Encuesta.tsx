@@ -39,7 +39,7 @@ export default function Encuesta() {
       <p>
         <strong>Sede:</strong> {encuesta.asignatura.sede}
       </p>
-      {encuesta.encuestabase?.variables.map((variable: any) => (
+      {encuesta.encuesta_base?.variables.map((variable: any) => (
         <Variable key={variable.id} variable={variable} 
         getSeleccion={(idPregunta: number | string) =>
             respuestas[idPregunta] ?? null

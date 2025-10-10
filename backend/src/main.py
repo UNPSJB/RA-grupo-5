@@ -7,7 +7,7 @@ from src.models import ModeloBase
 
 # importamos los routers desde nuestros modulos
 from src.personas.router import router as personas_router
-from src.encuestas.router import router as encuestas_router
+from src.encuestas_base.router import router as encuestas_base_router
 from src.variables.router import router as variables_router
 from src.preguntas.router import router as preguntas_router
 from src.opciones_respuestas.router import router as opcionesRespuestas_router
@@ -49,7 +49,7 @@ app.add_middleware( #analiza la Request, se define una estructura para la Reques
 
 # asociamos los routers a nuestra app
 app.include_router(personas_router)
-app.include_router(encuestas_router)
+app.include_router(encuestas_base_router)
 app.include_router(variables_router)
 app.include_router(preguntas_router)
 app.include_router(opcionesRespuestas_router)

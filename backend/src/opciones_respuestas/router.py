@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from src.database import get_db
 from src.opciones_respuestas import schemas, services
 
-router = APIRouter(prefix="/opcionesRespuestas", tags=["opcionesRespuestas"])
+router = APIRouter(prefix="/opciones-respuestas", tags=["opciones-respuestas"])
 
 # Rutas para opcionesRespuestas
 
