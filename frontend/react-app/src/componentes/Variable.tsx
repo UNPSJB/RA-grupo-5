@@ -1,20 +1,36 @@
 import Table from "react-bootstrap/Table";
-import { useEncuestas } from "../hook/useEcuestas";
+import Pregunta from "./Pregunta";
+import type { Props } from "../types/Variable";
 
-function Variable () {
-    const {encuestas, loading, error} = useEncuestas();
-    
-    if (loading) return <p>Cargando encuesta...</p>;
-    if (error) return <p>Error: {error}</p>;
+export default function Variable({
+  variable,
+  getSeleccion,
+  onSeleccionar,
+}: Props) {
+  return (
+    <div className="container mt-4">
+      <h3>
+        {variable.codigo}: {variable.nombre}
+      </h3>
 
-    return (
-        <div className="container mt-4">
-            <Table className="table table-striped"></Table>
-                <tbody>
-                    
-                </tbody>
-        </div>
-        );
+      <Table striped bordered>
+        <thead>
+          <tr>
+            <th style={{ width: "40%" }}>Pregunta</th>
+            <th colSpan={3}>Respuesta</th>
+          </tr>
+        </thead>
+        <tbody>
+          {variable.preguntas?.map((pregunta: any) => (
+            <Pregunta
+              key={pregunta.id}
+              pregunta={pregunta}
+              seleccionActual={getSeleccion(pregunta.id)}
+              onSeleccionar={onSeleccionar}
+            />
+          ))}
+        </tbody>
+      </Table>
+    </div>
+  );
 }
-
-export default Variable;

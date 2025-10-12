@@ -11,27 +11,44 @@ enum Cursado {
     Anual = "Anual"
 }   
 
-interface Variable {
-    id: number;
-    nombre: string;
+enum Ciclo{
+    ciclo_basico = "ciclo basico",
+    ciclo_superior = "ciclo superior"
 }
 
-interface Encuesta {
+interface Asignatura {
     id: number;
-    asignatura: string;
+    nombre: string;
+    nombre_docente: string;
     año: number;
     cursado: Cursado;
-    estado: EstadoEncuesta;  
-    fecha_fin: number;
-    variables?: Variable[];
 }
+
+interface EncuestaBase {
+    id: number;
+    nombre: string;
+    ciclo: Ciclo
+    variables?: any[];
+}
+
+interface Encuesta{
+    id: number;
+    id_asignatura: number;
+    id_encuesta_base: number;
+    estado: EstadoEncuesta;  
+    fecha_inicio: string;
+    fecha_fin: string;
+    asignatura?: Asignatura;
+    encuesta_base?: EncuestaBase;
+}
+
 
 export function useEncuestas(){
 
     const[encuestas, setEncuestas] = useState<Encuesta[]>([]);
     const[loading, setLoading] = useState<boolean>(true);
     const[error, setError] = useState<string | null>(null);
-    const API_URL = "http://localhost:8000/encuestas"; //definimos la URL como una const
+    const API_URL = "http://localhost:8000/encuestas-asignaturas"; //definimos la URL como una const
 
     const fetchEncuestas = async () => {  // Función para obtener las encuestas
         try {
