@@ -7,7 +7,7 @@ import EncuestasPendientes from "./paginas/EncuestasPendientes.tsx";
 import Encuesta from "./paginas/Encuesta.tsx";
 import "bootstrap/dist/css/bootstrap.min.css";
 import InformesDisponibles from "./paginas/InformesDisponibles.tsx";
-import Informe from "./paginas/Informe.tsx";
+import InformeCurricular from "./paginas/InformeCurricular.tsx";
 
 function App() {
   return (
@@ -25,16 +25,17 @@ function App() {
 
       <Route path="/informe" element={<h1>Informe</h1>}></Route>
 
-      <Route path="/docente" element={<LayoutDocente />}></Route>
+      <Route path="/docente" element={<LayoutDocente />}>
 
-      <Route path="/departamento" element={<LayoutDepartamento />}>
-        <Route path="informes">
-          <Route index element={<InformesDisponibles />} />
-          <Route path=":id" element={<Informe />} />
-        </Route>
       </Route>
 
-      
+      <Route path="/departamento" element={<LayoutDepartamento />}>
+          <Route index element={<InformesDisponibles />} />
+          <Route path="informes">
+            <Route path=":id" element={<InformeCurricular />} />
+          </Route>
+      </Route>
+
     </Routes>
   );
 }

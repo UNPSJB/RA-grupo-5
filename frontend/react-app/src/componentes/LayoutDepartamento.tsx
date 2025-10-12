@@ -17,7 +17,7 @@ export default function LayoutDepartamento() {
             />
         </Navbar.Brand>
         <Nav className="me-auto">
-          <NavDropdown title= "listatdo de informes" id="navbarScrollingDropdown" menuVariant="dark">
+          <NavDropdown title= "Listado de informes" id="navbarScrollingDropdown" menuVariant="dark">
             <NavDropdown.Item as={Link} to="/departamento/informes">Informes curriculares</NavDropdown.Item>
             <NavDropdown.Item as={Link} to="/departamento/informes-sinteticos">Informes sinteticos</NavDropdown.Item>
           </NavDropdown>
