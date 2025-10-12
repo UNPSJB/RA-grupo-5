@@ -1,11 +1,11 @@
 import {useState, useEffect} from "react";
-import {useInformes} from "../hook/useInformes";
+import {useInformesCurriculares} from "../hook/useInformesCurriculares";
 import {useParams} from "react-router-dom";
-import { Container, Row, Col, Card, Form } from "react-bootstrap";
+import { Container, Row, Col, Card } from "react-bootstrap";
 import "../styles/informe.css"
-export default function CompletarInformeCurricular() {
+export default function InformeCurricular() {
     const {id} = useParams<{id: string}>();
-    const {fetchInformeById} = useInformes();
+    const {fetchInformeById} = useInformesCurriculares();
     const [informe, setInforme] = useState<any>(null);
 
 

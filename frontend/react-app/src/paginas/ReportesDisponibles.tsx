@@ -8,15 +8,15 @@ export default function ReportesDisponibles() {
     if (loading) return <p>Cargando reportes...</p>;
     if (error) return <p>Error: {error}</p>;
 return (
-    <div className="container mt-4">
-        <h1>Reportes Disponibles</h1>
-        <Table className="table table-striped">
+    <div className="container mt-3 p-4 border">
+        <h2 className="m-3">Reportes Disponibles</h2>
+        <Table className="table table-striped border mt-5">
         <thead>
-            <tr>
-            <th>Asignatura</th>
-            <th>Año</th>
-            <th>Cursado</th>
-            <th>Acciones</th>
+            <tr className="border">
+                <th>Asignatura</th>
+                <th>Año</th>
+                <th>Cursado</th>
+                <th>Acciones</th>
             </tr>
         </thead>
             <tbody>

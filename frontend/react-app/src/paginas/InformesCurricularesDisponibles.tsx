@@ -1,14 +1,14 @@
-import { useInformes } from "../hook/useInformes";
+import { useInformesCurriculares } from "../hook/useInformesCurriculares";
 import Table from "react-bootstrap/Table";
 import { Link } from "react-router-dom";
 
-export default function InformesDisponibles() {
-  const { informes, loading, error } = useInformes();
+export default function InformesCurricularesDisponibles() {
+  const { informesCurriculares, loading, error } = useInformesCurriculares();
 
   if (loading) return <p>Cargando informes...</p>;
   if (error) return <p>Error: {error}</p>;
 
-  const Cerrados = informes.filter((informe) => informe.estado === "cerrado");
+  const Cerrados = informesCurriculares.filter((informe) => informe.estado === "cerrado");
 
   return (
     <div className="container mt-3 p-4  border">

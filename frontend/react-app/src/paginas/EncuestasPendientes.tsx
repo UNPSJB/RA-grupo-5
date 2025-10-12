@@ -13,11 +13,11 @@ export default function EncuestasPendientes() {
     );
 
     return (
-    <div className="container mt-4">
-        <h1>Encuestas Pendientes</h1>
-        <Table className="table table-striped">
+    <div className="container mt-4 p-4 border">
+        <h1 className="m-3">Encuestas Pendientes</h1>
+        <Table className="table table-striped border mt-5">
         <thead>
-            <tr>
+            <tr className="border">
             <th>Asignatura</th>
             <th>Año</th>
             <th>Cursado</th>
