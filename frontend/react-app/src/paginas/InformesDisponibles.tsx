@@ -11,11 +11,11 @@ export default function InformesDisponibles() {
   const Cerrados = informes.filter((informe) => informe.estado === "cerrado");
 
   return (
-    <div className="container mt-4">
-      <h1>Informes Disponibles</h1>
-      <Table className="table table-striped">
+    <div className="container mt-3 p-4  border">
+      <h2 className="m-3">Informes Disponibles</h2>
+      <Table className="table table-striped border mt-5">
         <thead>
-          <tr>
+          <tr className="border">
             <th>Cod. Asignatura</th>
             <th>Docente</th>
             <th>Acciones</th>
@@ -34,7 +34,7 @@ export default function InformesDisponibles() {
                 <td>
                   <Link
                     to={`/departamento/informes/${informe.id}`}
-                    className="btn btn-primary m-2"
+                    className="btn btn-primary m-2 sm"
                   >
                   Ir a informe
                   </Link>

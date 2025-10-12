@@ -7,7 +7,7 @@ import EncuestasPendientes from "./paginas/EncuestasPendientes.tsx";
 import Encuesta from "./paginas/Encuesta.tsx";
 import Reporte from "./paginas/Reporte.tsx";
 import InformesDisponibles from "./paginas/InformesDisponibles.tsx";
-import Informe from "./paginas/Informe.tsx";
+import InformeCurricular from "./paginas/InformeCurricular.tsx";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import ReportesDisponibles from "./paginas/ReportesDisponibles.tsx";
 
@@ -35,13 +35,12 @@ function App() {
       <Route path="/informe" element={<h1>Informe</h1>}></Route>
 
       <Route path="/departamento" element={<LayoutDepartamento />}>
-        <Route path="informes">
           <Route index element={<InformesDisponibles />} />
-          <Route path=":id" element={<Informe />} />
-        </Route>
+          <Route path="informes">
+            <Route path=":id" element={<InformeCurricular />} />
+          </Route>
       </Route>
 
-      
     </Routes>
   );
 }

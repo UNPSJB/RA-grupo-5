@@ -1,13 +1,20 @@
 import { Link, Outlet } from "react-router-dom";
-import { Container, Navbar, Nav } from "react-bootstrap";
+import { Container, Card, Navbar,  } from "react-bootstrap";
 import "../styles/Layout.css";
+import logoUnpsjb from "../assets/unpsjb.png"
 
 export default function LayoutHome() {
   return (
     <div className="layout">
       <Navbar bg="dark" variant="dark" expand="lg">
-        <Navbar.Brand className="p-4 text-white border-end" href="/">
-          Encuestas UNPSJB
+        <Navbar.Brand className="ms-3" href="/">
+          <img 
+            src={logoUnpsjb}
+            width="80"
+            height="80" 
+            className="d-inline-block align-top ms-3"
+            alt="Logo UNPSJB" 
+            />
         </Navbar.Brand>
       </Navbar>
 
@@ -18,9 +25,10 @@ export default function LayoutHome() {
         >
           <Outlet />
           <div className="d-flex gap-3 mt-5">
+
             <Link to="/alumno" className="btn btn-dark  ">
-              Rol Alumno
-            </Link>
+            Rol Alumno</Link>
+        
             <Link to="/docente" className="btn btn-dark">
               Rol Docente
             </Link>
