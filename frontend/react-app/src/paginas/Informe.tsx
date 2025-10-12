@@ -1,8 +1,8 @@
 import {useState, useEffect} from "react";
 import {useInformes} from "../hook/useInformes";
 import {useParams} from "react-router-dom";
-import { Container, Row, Col, Card, Form } from "react-bootstrap";
-
+import { Container, Row, Col, Card, Form, CardBody, InputGroup } from "react-bootstrap";
+import "../styles/informe.css"
 export default function Informe() {
     const {id} = useParams<{id: string}>();
     const {fetchInformeById} = useInformes();
@@ -19,52 +19,99 @@ useEffect(() => {
 }, [id]);
 
 const preguntas_informe = [
-    "¿El contenido del curso fue relevante para la materia?",
-    "¿El docente explicó los conceptos de manera clara?",
-    "¿El material de estudio fue adecuado?",
-    "¿El ritmo del curso fue apropiado?",
-    "¿Recomendarías este curso a otros estudiantes?"
+    "¿Se logro desarrollar la totalidad de los contenidos planificados?",
+    "¿Cuales fueron los principales aspectos positivos y los obstaculos que se manifiestaron durante el desarrollo del espacio curricular?",
 ];
 
 if (!informe) return <p>Cargando informe...</p>;
 
 return (
-    <Container className=" justify-content-center mt-4">
-        <Row>
-            <Col>
-                <Card>
-                    <Card.Header as="h5">Informe: {informe.cod_act_curricular}</Card.Header>
-                    <Card.Body className="d-flex justify-content-between">
-                        <Card.Text >
-                            <strong>Estado:</strong> {informe.estado}
-                        </Card.Text >
-                        <Card.Text >
-                            <strong>Sede:</strong> {informe.sede}
-                        </Card.Text>
-                        <Card.Text >
-                            <strong>Ciclo Lectivo:</strong> {informe.ciclo_lectivo}
-                        </Card.Text>
-                        
-                    </Card.Body>
-                </Card>
-          </Col>
-                    {preguntas_informe.map((pregunta, i) => (
-            <Row key={i} className="mt-3">
-                <Card>
-                    <Form>
-                        <Form.Group as={Row} className="mb-3" controlId={`pregunta-${i}`}>
-                            <Form.Label column sm="8">{pregunta}</Form.Label>
-                            <Col sm="4">
-                                <Form.Control type="text" placeholder="Ingrese su respuesta"/>
-                            </Col>
-                        </Form.Group>
+    <Container className=" my-5">
+        <Col>
+            <Card style={{maxWidth: '800px'}} className="mi-card p-5 shadow-lg mx-auto">
+                <h2 className="text-center mb-4 text-primary">Informe currilcular</h2>
 
-                    </Form>
-                </Card>
-            </Row>
-          ))    
-        }
-        </Row>
+                <Form>
+                    <Row className="align-items-strat">
+                        <Col md={8} className="">
+                            <Form.Group className="">
+                                    <Form.Label className="m-3 bg-light fw-semibold">{preguntas_informe[0]}</Form.Label>
+                                    <Form.Control as="textarea" rows={4} placeholder="Escriba su respuesta"/>
+                            </Form.Group>
+                        </Col>
+                        <Col md={4} className="">
+                            <Card className="shadow-sm border-0 bg-light">
+                            <Card.Body className="text-center">
+                                <Card.Title className="text-primary fw-semibold mb-3">
+                                Horas dictadas / Horas establecidas
+                                </Card.Title>
+                                <div style={{ height: "150px" }}>
+                                <h3 className="text-success fw-bold">80%</h3>
+                                <p className="text-muted small">Cumplimiento total</p>
+                                </div>
+                            </Card.Body>
+                            </Card>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col>
+                            <Form.Group className="">       
+                                    <Form.Label className="m-3 bg-light fw-semibold">{preguntas_informe[1]}</Form.Label>
+                                    <Form.Control as="textarea" rows={4} placeholder="Escriba su respuesta"/>
+                            </Form.Group>
+                        </Col>
+                    </Row>
+                </Form> 
+
+                <div className="p-3 bg-light rounded-3 border mt-4">
+                    <p className="text-center mb-3 fw-semibold">
+                    Centrandoce específicamente en los procesos de enseñanza y aprendizaje
+                    </p>
+
+                    <Row>
+                        <h4 className="m-3">Aspectos positivos</h4>
+                        <Col md={6}>
+                            <Form.Group className="m-2">   
+                                <Form.Label>Proceso de Enseñansa</Form.Label>
+                                <Form.Control as="textarea" rows={4} placeholder="Describa los aspectos positivos..." />
+                            </Form.Group>
+                        </Col>
+
+                        <Col md={6}>
+                            <Form.Group className="m-2">
+                                <Form.Label>Proceso de aprendizaje</Form.Label>
+                                <Form.Control as="textarea" rows={4} placeholder="Describa los aspectos a mejorar..." />
+                            </Form.Group>
+                        </Col>
+                    </Row>
+
+                    <Row>
+                        <h4 className="m-3">Obstaculos</h4>
+
+                        <Col md={6}>
+                            <Form.Group>   
+                            <Form.Label>Proceso de Enseñansa</Form.Label>
+                            <Form.Control as="textarea" rows={4} placeholder="Describa los aspectos positivos..." />
+                            </Form.Group>
+                        </Col>
+
+                        <Col md={6}>
+                            <Form.Group className="m-2">
+                                <Form.Label>Proceso de aprendizaje</Form.Label>
+                                <Form.Control as="textarea" rows={4} placeholder="Describa los aspectos a mejorar..." />
+                            </Form.Group>
+                        </Col>
+                    </Row>
+
+                    <Row>
+                        <h4 className="m-3">Estrategias a implementar</h4>
+                            <Form.Group className="m-2">
+                                <Form.Control as="textarea" rows={4} placeholder="Describa las estrategias a implementar..." />
+                            </Form.Group>
+                    </Row>
+                </div>
+            </Card>
+        </Col>
     </Container>
 );
 }
