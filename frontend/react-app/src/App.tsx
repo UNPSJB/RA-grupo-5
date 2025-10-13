@@ -8,7 +8,7 @@ import Encuesta from "./paginas/Encuesta.tsx";
 import Reporte from "./paginas/Reporte.tsx";
 import InformesCurricularesDisponibles from "./paginas/InformesCurricularesDisponibles.tsx";
 import InformeCurricular from "./paginas/InformeCurricular.tsx";
-import 'bootstrap/dist/css/bootstrap.min.css';
+import "bootstrap/dist/css/bootstrap.min.css";
 import ReportesDisponibles from "./paginas/ReportesDisponibles.tsx";
 
 function App() {
@@ -16,31 +16,29 @@ function App() {
     <Routes>
       <Route path="/" element={<LayoutHome />}></Route>
 
-      <Route path="/login" element={<h1>Login</h1>}></Route>
-
       <Route path="/alumno" element={<LayoutAlumno />}>
+        <Route index element={<EncuestasPendientes />} />
+        <Route path="encuestas">
+          <Route path=":id" element={<Encuesta />} />
           <Route index element={<EncuestasPendientes />} />
-            <Route path="encuestas" >
-            <Route path=":id" element={<Encuesta />} /> {/*  ruta dinámica */}
         </Route>
       </Route>
-      
+
       <Route path="/docente" element={<LayoutDocente />}>
         <Route index element={<ReportesDisponibles />} />
-        <Route path="reportes" >
-          <Route path=":id" element={<Reporte/>} /> {/*  ruta dinámica */}
+        <Route path="reportes">
+          <Route path=":id" element={<Reporte />} />
+          <Route index element={<ReportesDisponibles />} />
         </Route>
       </Route>
 
-      <Route path="/informe" element={<h1>Informe</h1>}></Route>
-
       <Route path="/departamento" element={<LayoutDepartamento />}>
+        <Route index element={<InformesCurricularesDisponibles />} />
+        <Route path="informes">
+          <Route path=":id" element={<InformeCurricular />} />
           <Route index element={<InformesCurricularesDisponibles />} />
-          <Route path="informes">
-            <Route path=":id" element={<InformeCurricular />} />
-          </Route>
+        </Route>
       </Route>
-
     </Routes>
   );
 }
