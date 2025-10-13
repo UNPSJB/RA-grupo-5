@@ -20,7 +20,7 @@ function App() {
 
       <Route path="/alumno" element={<LayoutAlumno />}>
           <Route index element={<EncuestasPendientes />} />
-            <Route path="encuestas">
+            <Route path="encuestas" >
             <Route path=":id" element={<Encuesta />} /> {/*  ruta dinámica */}
         </Route>
       </Route>

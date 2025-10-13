@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import type { Informe } from "../types/Informe";
+import type { InformeCurricular } from "../types/InformeCurricular";
 
 export function useInformesCurriculares() {
-    const [informesCurriculares, setInformesCurriculares] = useState<Informe[]>([]);
+    const [informesCurriculares, setInformesCurriculares] = useState<InformeCurricular[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const API_URL = "http://localhost:8000/informes";
+    const API_URL = "http://localhost:8000/informes-curriculares";
 
     const fetchInformes = async () => {
     try {

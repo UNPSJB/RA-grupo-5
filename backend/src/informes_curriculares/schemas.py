@@ -1,7 +1,7 @@
 from pydantic import BaseModel
-from src.informes.models import EstadoInforme
+from src.informes_curriculares.models import EstadoInformeCurricular
 
-class InformeBase(BaseModel):
+class InformeCurricularBase(BaseModel):
     sede: str
     ciclo_lectivo: str
     cod_act_curricular: str
@@ -9,16 +9,16 @@ class InformeBase(BaseModel):
     cant_alu_inscriptos: int
     cant_com_teoricas: int
     cant_com_practicas: int
-    estado: EstadoInforme
+    estado: EstadoInformeCurricular
 
     #referencia a la foránea de la tabla con la que se relaciona
 
-class InformeCreate(InformeBase):
+class InformeCurricularCreate(InformeCurricularBase):
     pass
 
-class InformeUpdate(InformeBase):
+class InformeCurricularUpdate(InformeCurricularBase):
     pass
 
-class Informe(InformeBase):
+class InformeCurricular(InformeCurricularBase):
     id: int
     model_config = {"from_attributes": True}
