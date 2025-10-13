@@ -31,8 +31,10 @@ export default function Encuesta() {
 
   return (
     <div>
-      <h1>{encuesta.asignatura.nombre}</h1>
-      <p>Estado: {encuesta.estado}</p>
+      <h1>Encuesta de: {encuesta.asignatura.nombre}</h1>
+      <p>
+        <strong>Estado:</strong> {encuesta.estado}
+      </p>
       <p>
         <strong>Carrera:</strong> {encuesta.asignatura.carrera}
       </p>
@@ -40,8 +42,10 @@ export default function Encuesta() {
         <strong>Sede:</strong> {encuesta.asignatura.sede}
       </p>
       {encuesta.encuesta_base?.variables.map((variable: any) => (
-        <Variable key={variable.id} variable={variable} 
-        getSeleccion={(idPregunta: number | string) =>
+        <Variable
+          key={variable.id}
+          variable={variable}
+          getSeleccion={(idPregunta: number | string) =>
             respuestas[idPregunta] ?? null
           }
           onSeleccionar={handleSeleccionar}
