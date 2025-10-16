@@ -1,51 +1,80 @@
-import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { useReportes } from "../hook/useReportes";
-import Table from "react-bootstrap/Table";
+import { Container, Row, Col, Card, ListGroup, ProgressBar } from "react-bootstrap";
 
 
-export default function Reporte(){
-    const { id } = useParams<{ id: string }>();
-    const { fetchReporteById } = useReportes();
-    const [reporte, setReporte] = useState<any>(null);
+    export default function ReporteGeneral() {
 
-    useEffect(() => {
-        console.log("ID recibido:", id); // <-- Agrega este log
-        if (id) {
-            fetchReporteById(Number(id)).then((data) => {
-                console.log("Datos recibidos:", data); // <-- Y este log
-                setReporte(data);
-            });
+    const reporteSimulado = {
+    variable: "Comunicación y desarrollo",
+    preguntas: [
+        {
+        texto: "¿El procfesor brindo al inicio del curso, informacion referida al desarrollo de la asignatura?",
+        respuestas: [
+            { opcion: "Muy bueno, muy satifactorio", cantidad: 15 },
+            { opcion: "Bueno, satifactorio", cantidad: 10 },
+            { opcion: "Regular, Poco satifactorio", cantidad: 3 },
+            { opcion: "Malo, No satifactorio", cantidad: 2 },
+        ],
+        },
+        {
+        texto: "¿Se respeto la planificacion de las actividades programadas al inicio del cursado y el catalogo academico?",
+        respuestas: [
+            { opcion: "Muy bueno, muy satifactorio", cantidad: 18 },
+            { opcion: "Bueno, satifactorio", cantidad: 7 },
+            { opcion: "Regular, Poco satifactorio", cantidad: 4 },
+            { opcion: "Malo, No satifactorio", cantidad: 1 },
+        ],
         }
-    }, [id]);
-
-    if (!reporte) return <p>Cargando reporte...</p>;
+    ],
+    };
 
     return (
-        <div>
-            <h1>Reporte de {reporte.asignatura}</h1>
-            <div className="container mt-4 ">
-                <p className="">Año: {reporte.año}</p>
-                <p>
-                    <strong>Cursado:</strong> {reporte.cursado}
-                </p>
-            </div>
-            <Table striped bordered hover size="sm">
-                <thead>
-                    <tr>
-                        <th>Nombre del campo del reporte</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <p>Contenido del campo del reporte:
+    <Container className="mt-5">
+      <Row className="justify-content-center">
+        <Col md={8}>
+          <Card className="shadow-lg border-0">
+            <Card.Body>
+              <Card.Title className="mb-4 text-center ">
+                <h3>{reporteSimulado.variable}</h3>
+              </Card.Title>
 
-                            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quae, nesciunt cupiditate! Veniam quasi at enim aut eveniet recusandae, eligendi minima natus minus, voluptatem dignissimos omnis?
-                        </p>
-                    </tr>
-                </tbody>
-            </Table>
+              {reporteSimulado.preguntas.map((pregunta, i) => (
+                <Card key={i} className="mb-4 border-0">
+                  <Card.Subtitle className="mb-4 mt-2 fw-bold">
+                    {pregunta.texto}
+                  </Card.Subtitle>
 
-        </div>
-    );
+                  <ListGroup variant="flush">
+                    {pregunta.respuestas.map((resp, j) => {
+                      const total = pregunta.respuestas.reduce(
+                        (sum, r) => sum + r.cantidad,
+                        0
+                      );
+                      const porcentaje = Math.round(
+                        (resp.cantidad / total) * 100
+                      );
+
+                      return (
+                        <ListGroup.Item key={j}>
+                          <div className="d-flex justify-content-between align-items-center mb-1">
+                            <span>{resp.opcion}</span>
+                            <span>{porcentaje}%</span>
+                          </div>
+                          <ProgressBar
+                            now={porcentaje}
+                            label={`${resp.cantidad}`}
+                            variant="info"
+                            style={{ height: "15px" }}
+                          />
+                        </ListGroup.Item>
+                      );
+                    })}
+                  </ListGroup>
+                </Card>
+              ))}
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
+  );
 }

@@ -6,9 +6,9 @@ import LayoutDepartamento from "./componentes/LayoutDepartamento.tsx";
 import EncuestasPendientes from "./paginas/EncuestasPendientes.tsx";
 import Encuesta from "./paginas/Encuesta.tsx";
 import Reporte from "./paginas/Reporte.tsx";
-import InformesDisponibles from "./paginas/InformesDisponibles.tsx";
-import Informe from "./paginas/Informe.tsx";
-import 'bootstrap/dist/css/bootstrap.min.css';
+import InformesCurricularesDisponibles from "./paginas/InformesCurricularesDisponibles.tsx";
+import InformeCurricular from "./paginas/InformeCurricular.tsx";
+import "bootstrap/dist/css/bootstrap.min.css";
 import ReportesDisponibles from "./paginas/ReportesDisponibles.tsx";
 
 function App() {
@@ -16,34 +16,29 @@ function App() {
     <Routes>
       <Route path="/" element={<LayoutHome />}></Route>
 
-      <Route path="/login" element={<h1>Login</h1>}></Route>
-
       <Route path="/alumno" element={<LayoutAlumno />}>
+        <Route index element={<EncuestasPendientes />} />
         <Route path="encuestas">
+          <Route path=":id" element={<Encuesta />} />
           <Route index element={<EncuestasPendientes />} />
-          <Route path=":id" element={<Encuesta />} /> {/*  ruta dinámica */}
         </Route>
       </Route>
-      
+
       <Route path="/docente" element={<LayoutDocente />}>
-        <Route path="reportes" >
+        <Route index element={<ReportesDisponibles />} />
+        <Route path="reportes">
+          <Route path=":id" element={<Reporte />} />
           <Route index element={<ReportesDisponibles />} />
-          <Route path=":id" element={<Reporte/>} /> {/*  ruta dinámica */}
         </Route>
       </Route>
-
-      <Route path="/informe" element={<h1>Informe</h1>}></Route>
-
-      <Route path="/docente" element={<LayoutDocente />}></Route>
 
       <Route path="/departamento" element={<LayoutDepartamento />}>
+        <Route index element={<InformesCurricularesDisponibles />} />
         <Route path="informes">
-          <Route index element={<InformesDisponibles />} />
-          <Route path=":id" element={<Informe />} />
+          <Route path=":id" element={<InformeCurricular />} />
+          <Route index element={<InformesCurricularesDisponibles />} />
         </Route>
       </Route>
-
-      
     </Routes>
   );
 }
