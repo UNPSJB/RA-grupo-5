@@ -2,13 +2,15 @@ from pydantic import BaseModel
 from typing import Optional
 
 class RespuestaBase(BaseModel):
-    alumno: str  # Esto es una relacion con la tabla alumnos
-    id_encuesta_asignatura: int
+    pass
 
 class RespuestaCreate(RespuestaBase):
-    pass
+    id_persona: int
+    id_encuesta_asignatura: int
 
 class Respuesta(RespuestaBase):
     id: int
+    id_persona: int
+    id_encuesta_asignatua: int
 
     model_config = {"from_attributes": True}

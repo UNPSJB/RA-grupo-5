@@ -19,9 +19,3 @@ def leer_respuesta(db: Session, respuesta_id: int) -> Respuesta:
     if db_respuesta is None:
         raise exception.RespuestaNoEncontrada()
     return db_respuesta
-
-def eliminar_respuesta(db: Session, respuesta_id: int) -> Respuesta:
-    db_respuesta = leer_respuesta(db, respuesta_id)
-    db.delete(db_respuesta)
-    db.commit()
-    return db_respuesta

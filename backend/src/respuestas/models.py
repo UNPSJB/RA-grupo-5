@@ -7,8 +7,8 @@ class Respuesta(ModeloBase):
     __abstract__ = "respuestas" 
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)   
-    alumno: Mapped[str] = mapped_column(String, index=True) # Esto es una relacion con la tabla alumnos/usuario
+    id_persona: Mapped[int] = mapped_column(ForeignKey("persona.id"))
     id_encuesta_asignatura: Mapped[int] = mapped_column(ForeignKey("encuesta_asignatura.id"))
     encuesta_asignatura = relationship("Encuesta_asignatura", back_populates="respuestas")
-    
-    det_respuesta = relationship("Detalle_respuesta", back_populates="respuesta")
+    persona = relationship("Persona")
+    detalles_respuesta = relationship("Detalle_respuesta", back_populates="respuesta")
