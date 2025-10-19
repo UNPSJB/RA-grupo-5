@@ -4,13 +4,14 @@ from typing import List
 from src.models import ModeloBase
 
 class Respuesta(ModeloBase):
+
     __tablename__ = "respuestas" 
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)   
-    id_persona: Mapped[int] = mapped_column(ForeignKey("personas.id_persona"))
-    id_encuesta_asignatura: Mapped[int] = mapped_column(ForeignKey("encuestas_asignaturas.id")) 
+    id_persona: Mapped[int] = mapped_column(ForeignKey("personas.id"))
+    id_encuesta_asignatura: Mapped[int] = mapped_column(ForeignKey("encuestas_asignaturas.id"))
 
     encuesta_asignatura = relationship("EncuestaAsignatura", back_populates="respuestas")
-    persona = relationship("Persona", back_populates="respuestas") 
     
+    persona = relationship("Persona", back_populates="respuestas") 
     detalles = relationship("DetalleRespuesta", back_populates="respuesta")

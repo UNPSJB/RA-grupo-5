@@ -8,7 +8,7 @@ class EstadoInformeCurricular(str, Enum):
     cerrado = "cerrado"
 
 class InformeCurricular(ModeloBase):
-    __tablename__ = "informes"
+    __tablename__ = "informes_curriculares"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     sede: Mapped[str] = mapped_column(String, index=True)

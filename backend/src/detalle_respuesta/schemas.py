@@ -2,15 +2,15 @@ from pydantic import BaseModel
 from typing import Optional, List
 
 class DetalleRespuestaBase(BaseModel):
-    id_opc_respuesta: int
-    id_respuesta: int
+    pass
 
 class DetalleRespuestaCreate(DetalleRespuestaBase):
-    pass
+    id_opciones_respuesta: int
+    id_respuesta: int
 
 class DetalleRespuesta(DetalleRespuestaBase):
     id: int
-    id_opc_respuesta: int
+    id_opciones_respuesta: int
     id_respuesta: int
     
     model_config = {"from_attributes": True}

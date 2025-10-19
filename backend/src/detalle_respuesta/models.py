@@ -7,12 +7,10 @@ class DetalleRespuesta(ModeloBase):
     __tablename__ = "detalles_respuestas"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    id_opciones_respuesta: Mapped[int] = mapped_column(ForeignKey("opciones_respuesta.id"), index=True)
-    id_respuesta: Mapped[int] = mapped_column(ForeignKey("respuesta.id"), index=True)
+    id_opciones_respuesta: Mapped[int] = mapped_column(ForeignKey("opciones_respuestas.id"), index=True)
+    id_respuesta: Mapped[int] = mapped_column(ForeignKey("respuestas.id"), index=True)
     
-    opcion_respuesta = relationship("opcionesRespuesta", back_populates="detalle_respuesta")
+    opcion_respuesta = relationship("OpcionRespuesta", back_populates="detalles_respuestas")
+    respuesta = relationship("Respuesta", back_populates="detalles")
     
-    respuesta = relationship("Respuesta", back_populates="detalle_respuesta")   
-
-
     
