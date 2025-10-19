@@ -1,14 +1,17 @@
-from pydantic import BaseModel
-from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import Mapped,mapped_column,relationship
+from sqlalchemy import Integer, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from typing import List
 from src.models import ModeloBase
 
 class Respuesta(ModeloBase):
-    __abstract__ = "respuestas" 
+
+    __tablename__ = "respuestas" 
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)   
-    id_persona: Mapped[int] = mapped_column(ForeignKey("persona.id"))
-    id_encuesta_asignatura: Mapped[int] = mapped_column(ForeignKey("encuesta_asignatura.id"))
-    encuesta_asignatura = relationship("Encuesta_asignatura", back_populates="respuestas")
-    persona = relationship("Persona")
-    detalles_respuesta = relationship("Detalle_respuesta", back_populates="respuesta")
+    id_persona: Mapped[int] = mapped_column(ForeignKey("personas.id"))
+    id_encuesta_asignatura: Mapped[int] = mapped_column(ForeignKey("encuestas_asignaturas.id"))
+
+    encuesta_asignatura = relationship("EncuestaAsignatura", back_populates="respuestas")
+    
+    persona = relationship("Persona", back_populates="respuestas") 
+    detalles = relationship("DetalleRespuesta", back_populates="respuesta")

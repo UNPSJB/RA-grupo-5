@@ -11,6 +11,6 @@ class RespuestaCreate(RespuestaBase):
 class Respuesta(RespuestaBase):
     id: int
     id_persona: int
-    id_encuesta_asignatua: int
+    id_encuesta_asignatura: int
 
     model_config = {"from_attributes": True}
