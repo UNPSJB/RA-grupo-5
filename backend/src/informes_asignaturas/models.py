@@ -1,20 +1,21 @@
 from datetime import date
-from sqlalchemy import Enum, Integer, String
+from sqlalchemy import Integer, String, Date, Enum as SQLEnum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.models import ModeloBase
+from enum import Enum
 
 class EstadoInforme(str, Enum):
-    abierta = "abierto"
-    cerrada = "cerrado"
+    abierto = "abierto"
+    cerrado = "cerrado"
 
 class InformeAsignatura(ModeloBase):
-    tablename__ = "informes_asignaturas"
+    __tablename__ = "informes_asignaturas"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     id_informe_base: Mapped[int] = mapped_column(Integer, index=True)
     id_asignatura: Mapped[str] = mapped_column(String, index=True)
-    fecha_inicio: Mapped[date] = mapped_column(String, index=True)
-    fecha_fin: Mapped[date] = mapped_column(String, index=True)
-    estado: Mapped[EstadoInforme] = mapped_column(Enum(EstadoInforme), nullable=False, default=EstadoInforme.abierta)
+    fecha_inicio: Mapped[date] = mapped_column(Date, index=True)
+    fecha_fin: Mapped[date] = mapped_column(Date, index=True)
+    estado: Mapped[EstadoInforme] = mapped_column(SQLEnum(EstadoInforme), nullable=False, default=EstadoInforme.abierto)
 
     informe_base = relationship("InformeBase", back_populates="informes_asignaturas")
     asignatura = relationship("Asignatura", back_populates="informes_asignaturas")
