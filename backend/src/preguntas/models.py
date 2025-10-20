@@ -1,4 +1,3 @@
-#preguntas
 from typing import Optional
 from sqlalchemy import Integer, String, Boolean, ForeignKey, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
