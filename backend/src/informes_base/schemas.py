@@ -10,6 +10,7 @@ class InformeBaseBase(BaseModel):
     cant_alumnos_insc: int
     cant_comisiones_teoricas: int
     cant_comisiones_practicas: int
+    preguntas: List[PreguntaRead] = []
 
 class InformeBaseCreate(InformeBaseBase):
     pass
@@ -19,5 +20,4 @@ class InformeBaseUpdate(InformeBaseBase):
 
 class InformeBaseRead(InformeBaseBase):
     id: int
-    preguntas: List[PreguntaRead] = []
     model_config = {"from_attributes": True}
