@@ -19,5 +19,5 @@ class InformeBase(ModeloBase):
     cant_comisiones_teoricas: Mapped[int] = mapped_column(Integer, index=True)
     cant_comisiones_practicas: Mapped[int] = mapped_column(Integer, index=True)
     
-    informes_asignaturas = relationship("InformeAsignatura", back_populates="informe_base")
     preguntas = relationship("Pregunta", back_populates="informe_base")
+    informes_asignaturas = relationship("InformeAsignatura", back_populates="informe_base")

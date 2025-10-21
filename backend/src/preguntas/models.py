@@ -19,7 +19,7 @@ class Pregunta(ModeloBase):
 
     #SI PERTENECE A UN INFORME
     id_informe_base: Mapped[Optional[int]] = mapped_column(ForeignKey("informes_base.id"), nullable=True)
-    informe = relationship("Informe", back_populates="preguntas")
+    informe_base = relationship("InformeBase", back_populates="preguntas")
 
     #SI PERTENECE A UNA VARIABLE
     id_variable: Mapped[Optional[int]] = mapped_column(ForeignKey("variables.id"), nullable=True)

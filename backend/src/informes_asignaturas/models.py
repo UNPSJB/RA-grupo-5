@@ -11,8 +11,8 @@ class EstadoInforme(str, Enum):
 class InformeAsignatura(ModeloBase):
     __tablename__ = "informes_asignaturas"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    id_informe_base: Mapped[int] = mapped_column(Integer, index=True)
-    id_asignatura: Mapped[str] = mapped_column(String, index=True)
+    id_informe_base: Mapped[int] = mapped_column(ForeignKey("informes_base.id"), nullable=False)
+    id_asignatura: Mapped[str] = mapped_column(ForeignKey("asignaturas.id"), nullable=False)
     fecha_inicio: Mapped[date] = mapped_column(Date, index=True)
     fecha_fin: Mapped[date] = mapped_column(Date, index=True)
     estado: Mapped[EstadoInforme] = mapped_column(SQLEnum(EstadoInforme), nullable=False, default=EstadoInforme.abierto)
