@@ -4,6 +4,7 @@ from enum import Enum
 from src.asignaturas.models import Cursado
 from datetime import date
 from src.reportes.models import Reporte
+from src.encuestas_asignaturas.schemas import EncuestaAsignaturaRead
 
 
 class ReporteBase(BaseModel):
@@ -14,13 +15,14 @@ class ReporteBase(BaseModel):
     sede: str
 
 class ReporteCreate(ReporteBase):
-    pass
+    id_encuesta_asignatura: int
 
 class ReporteUpdate(ReporteBase):
-    pass    
+    id_encuesta_asignatura: int
 
 class Reporte(ReporteBase):
     id: int
+    encuesta_asignatura: EncuestaAsignaturaRead
     model_config = {"from_attributes": True}
 
 

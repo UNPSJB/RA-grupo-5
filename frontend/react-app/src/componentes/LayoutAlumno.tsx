@@ -1,27 +1,27 @@
 import { Link, Outlet } from "react-router-dom";
 import { Container, Navbar, Nav } from "react-bootstrap";
 import "../styles/Layout.css";
-import logoUnpsjb from "../assets/unpsjb.png"
+import logoUnpsjb from "../assets/unpsjb.png";
 
 export default function LayoutAlumno() {
   return (
     <div className="layout">
       <Navbar bg="dark" variant="dark" expand="lg">
         <Navbar.Brand className="ms-3" href="/">
-          <img 
+          <img
             src={logoUnpsjb}
             width="80"
-            height="80" 
+            height="80"
             className="d-inline-block align-top ms-3"
-            alt="Logo UNPSJB" 
-            />
+            alt="Logo UNPSJB"
+          />
         </Navbar.Brand>
         <Nav className="me-auto">
-          <Nav.Link as={Link} to="/alumno/encuestas">
-            Encuestas Pendientes
+          <Nav.Link as={Link} to="/alumno/encuestas-pendientes">
+            Encuestas pendientes
           </Nav.Link>
-          <Nav.Link as={Link} to="/alumno/mis-encuestas">
-            Mis encuestas
+          <Nav.Link as={Link} to="/alumno/encuestas-respondidas">
+            Encuestas respondidas
           </Nav.Link>
         </Nav>
       </Navbar>
