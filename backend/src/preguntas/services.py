@@ -1,12 +1,15 @@
 from typing import List
+from fastapi import HTTPException
 from sqlalchemy import delete, select, update
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from src.preguntas.models import Pregunta
 from src.preguntas import schemas, exceptions
 
+from src.opciones_respuesta.models import OpcionRespuesta
+
 # operaciones CRUD para Preguntas
 
-def crear_pregunta(db: Session, pregunta: schemas.PreguntaCreate) -> schemas.PreguntaRead:
+def crear_pregunta(db: Session, pregunta: schemas.PreguntaCreate) -> Pregunta:
     _pregunta = Pregunta(**pregunta.model_dump())
     db.add(_pregunta)
     db.commit()
@@ -16,16 +19,16 @@ def crear_pregunta(db: Session, pregunta: schemas.PreguntaCreate) -> schemas.Pre
 
 def listar_preguntas(db: Session) -> List[schemas.PreguntaRead]:
     return db.scalars(select(Pregunta)).all()
+    
 
-
-def leer_pregunta(db: Session, pregunta_id: int) -> schemas.PreguntaRead:
+def leer_pregunta(db: Session, pregunta_id: int) -> Pregunta:
     db_pregunta = db.scalar(select(Pregunta).where(Pregunta.id == pregunta_id))
     if db_pregunta is None:
         raise exceptions.PreguntaNoEncontrada()
     return db_pregunta
 
 
-def modificar_pregunta(db: Session, pregunta_id: int, pregunta: schemas.PreguntaUpdate) -> Pregunta:
+def modificar_pregunta(db: Session, pregunta_id: int, pregunta: Pregunta) -> Pregunta:
     db_pregunta = leer_pregunta(db, pregunta_id)
     for key, value in pregunta.model_dump(exclude_unset=True).items():
         setattr(db_pregunta, key, value)
@@ -34,8 +37,28 @@ def modificar_pregunta(db: Session, pregunta_id: int, pregunta: schemas.Pregunta
     return db_pregunta
 
 
-def eliminar_pregunta(db: Session, pregunta_id: int) -> schemas.PreguntaRead:
+def eliminar_pregunta(db: Session, pregunta_id: int) -> Pregunta:
     db_pregunta = leer_pregunta(db, pregunta_id)
     db.execute(delete(Pregunta).where(Pregunta.id == pregunta_id))
     db.commit()
     return db_pregunta
+
+
+
+def asociar_opcion_a_pregunta(db: Session, pregunta_id: int, opcion_id: int) -> Pregunta:
+
+    db_pregunta = db.get(Pregunta, pregunta_id)
+    if not db_pregunta:
+        raise HTTPException(status_code=404, detail="Pregunta no encontrada")
+
+    db_opcion = db.get(OpcionRespuesta, opcion_id)
+    if not db_opcion:
+        raise HTTPException(status_code=404, detail="Opción de respuesta no encontrada")
+
+    if db_opcion in db_pregunta.opciones_respuestas:
+        raise HTTPException(status_code=400, detail="Esta opción ya está asociada a la pregunta")
+    db_pregunta.opciones_respuestas.append(db_opcion)
+    db.commit()
+    db.refresh(db_pregunta)
+
+    return db_pregunta 

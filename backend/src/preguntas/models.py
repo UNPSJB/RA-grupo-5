@@ -1,8 +1,10 @@
-from typing import Optional
+from typing import Optional, List , TYPE_CHECKING
 from sqlalchemy import Integer, String, Boolean, ForeignKey, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.ext.associationproxy import association_proxy
 from src.models import ModeloBase
 import enum
+
 
 class TipoPreguntaEnum(str, enum.Enum):
     single_choice = "single_choice"
@@ -31,4 +33,4 @@ class Pregunta(ModeloBase):
     pregunta_padre = relationship("Pregunta",remote_side="Pregunta.id",back_populates="subpreguntas")
 
     #OPCIONES DE RESPUESTAS
-    opcionesRespuestas = relationship("OpcionRespuesta",back_populates="pregunta")
+    pregunta_opcion = relationship("PreguntaOpcion", back_populates="pregunta")

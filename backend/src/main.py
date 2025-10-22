@@ -5,7 +5,6 @@ from fastapi import FastAPI
 from src.database import engine
 from src import models
 
-# importamos los routers desde nuestros modulos
 
 from src.personas.router import router as personas_router 
 from src.encuestas_base.router import router as encuestas_base_router
@@ -13,11 +12,12 @@ from src.informes_base.router import router as informes_base_router
 from src.reportes.router import router as reportes_router
 from src.variables.router import router as variables_router
 from src.preguntas.router import router as preguntas_router
-from src.opciones_respuestas.router import router as opciones_respuestas_router
+from src.opciones_respuesta.router import router as opciones_respuestas_router
 from src.asignaturas.router import router as asignaturas_router
 from src.encuestas_asignaturas.router import router as encuestas_asignaturas_router
 from src.respuestas.router import router as respuestas_router
 from src.detalle_respuesta.router import router as detalle_respuesta_router
+from src.pregunta_opcion.router import router as pregunta_opcion_router
 from src.informes_asignaturas.router import router as informes_asignaturas_router
 
 
@@ -64,4 +64,5 @@ app.include_router(informes_base_router)
 app.include_router(reportes_router)
 app.include_router(respuestas_router)
 app.include_router(detalle_respuesta_router)
+app.include_router(pregunta_opcion_router)
 app.include_router(informes_asignaturas_router)

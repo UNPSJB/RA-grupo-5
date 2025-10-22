@@ -6,8 +6,6 @@ from datetime import date
 from enum import Enum
 
 
-
-
 class EstadoEncuesta(str, Enum):
     abierta = "abierta"
     cerrada = "cerrada"

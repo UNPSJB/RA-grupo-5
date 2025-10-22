@@ -1,11 +1,11 @@
 from pydantic import BaseModel
 from typing import Optional, List
 from src.preguntas.models import TipoPreguntaEnum
-from src.opciones_respuestas.schemas import OpcionRespuestaRead
-
+from src.opciones_respuesta.schemas import OpcionRespuestaRead
+from src.pregunta_opcion.schemas import PreguntaOpcionRead
 
 class PreguntaBase(BaseModel):
-    texto_pregunta: str
+    texto_pregunta: str 
     tipo: TipoPreguntaEnum
     obligatoria: bool
 
@@ -23,5 +23,5 @@ class PreguntaRead(PreguntaBase):
     id_variable: Optional[int]
     id_informe_base: Optional[int]
     id_pregunta_padre: Optional[int]
-    opcionesRespuestas: List[OpcionRespuestaRead]  = []
+    pregunta_opcion: List[PreguntaOpcionRead]
     model_config = {"from_attributes": True}

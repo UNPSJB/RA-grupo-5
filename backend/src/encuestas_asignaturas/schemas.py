@@ -27,4 +27,5 @@ class EncuestaAsignaturaRead(EncuestaAsignaturaBase):
     id_asignatura: int
     encuesta_base: EncuestaBaseBase
     asignatura: AsignaturaRead
+    respuestas: List[RespuestaRead]
     model_config = {"from_attributes": True}

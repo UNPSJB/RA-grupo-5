@@ -8,7 +8,8 @@ class RespuestaCreate(RespuestaBase):
     id_persona: int
     id_encuesta_asignatura: int
 
-class Respuesta(RespuestaBase):
+
+class RespuestaRead(RespuestaBase):
     id: int
     id_persona: int
     id_encuesta_asignatura: int
