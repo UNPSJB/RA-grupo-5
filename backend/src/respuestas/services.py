@@ -1,6 +1,6 @@
 from typing import List
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from src.respuestas.models import Respuesta
 from src.respuestas import schemas, exception
 
@@ -15,7 +15,14 @@ def listar_respuestas(db: Session) -> List[Respuesta]:
     return db.scalars(select(Respuesta)).all()
 
 def leer_respuesta(db: Session, respuesta_id: int) -> Respuesta:
-    db_respuesta = db.scalar(select(Respuesta).where(Respuesta.id == respuesta_id))
+    
+    query = (
+        select(Respuesta)
+        .where(Respuesta.id == respuesta_id)
+        .options(joinedload(Respuesta.detalles)) 
+    )
+    db_respuesta = db.scalar(query)
+    
     if db_respuesta is None:
         raise exception.RespuestaNoEncontrada()
     return db_respuesta

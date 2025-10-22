@@ -8,11 +8,11 @@ router = APIRouter(prefix="/respuestas", tags=["respuestas"])
 
 # Rutas para Respuestas
 
-@router.post("/", response_model=schemas.Respuesta)
+@router.post("/", response_model=schemas.RespuestaCreate)
 def create_respuesta(respuesta: schemas.RespuestaCreate, db: Session = Depends(get_db)):
     return services.crear_respuesta(db, respuesta)
 
-@router.get("/", response_model=List[schemas.Respuesta])
+@router.get("/", response_model=List[schemas.RespuestaRead])
 def get_respuestas(db: Session = Depends(get_db)):
     return services.listar_respuestas(db)
 
