@@ -16,6 +16,6 @@ def create_respuesta(respuesta: schemas.RespuestaCreate, db: Session = Depends(g
 def get_respuestas(db: Session = Depends(get_db)):
     return services.listar_respuestas(db)
 
-@router.get("/{respuesta_id}", response_model=schemas.Respuesta)
+@router.get("/{respuesta_id}", response_model=schemas.RespuestaRead)
 def get_respuesta(respuesta_id: int, db: Session = Depends(get_db)):
     return services.leer_respuesta(db, respuesta_id)

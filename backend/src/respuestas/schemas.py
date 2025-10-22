@@ -9,12 +9,8 @@ class RespuestaCreate(RespuestaBase):
     id_persona: int
     id_encuesta_asignatura: int
 
-class RespuestaRead(RespuestaBase):
-    id_persona: int
-    id_encuesta_asignatura: int
-    detalles: List[DetalleRespuesta]
 
-class Respuesta(RespuestaBase):
+class RespuestaRead(RespuestaBase):
     id: int
     id_persona: int
     id_encuesta_asignatura: int

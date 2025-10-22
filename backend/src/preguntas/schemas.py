@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import Optional, List
 from src.preguntas.models import TipoPreguntaEnum
 from src.opciones_respuesta.schemas import OpcionRespuestaRead
-
+from src.pregunta_opcion.schemas import PreguntaOpcionRead
 
 class PreguntaBase(BaseModel):
     texto_pregunta: str 
@@ -20,4 +20,5 @@ class PreguntaUpdate(PreguntaBase):
 class PreguntaRead(PreguntaBase):
     id: int
     id_variable: int
+    pregunta_opcion: List[PreguntaOpcionRead]
     model_config = {"from_attributes": True}
