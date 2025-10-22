@@ -16,7 +16,19 @@ class Pregunta(ModeloBase):
     texto_pregunta: Mapped[str] = mapped_column(String, index=True)
     tipo: Mapped[TipoPreguntaEnum] = mapped_column(Enum(TipoPreguntaEnum), nullable=False)
     obligatoria: Mapped[bool] = mapped_column(Boolean, default=False)
-    id_variable: Mapped[int] = mapped_column(ForeignKey("variables.id"), nullable=False)
+
+    #SI PERTENECE A UN INFORME
+    id_informe_base: Mapped[Optional[int]] = mapped_column(ForeignKey("informes_base.id"), nullable=True)
+    informe_base = relationship("InformeBase", back_populates="preguntas")
+
+    #SI PERTENECE A UNA VARIABLE
+    id_variable: Mapped[Optional[int]] = mapped_column(ForeignKey("variables.id"), nullable=True)
     variable = relationship("Variable", back_populates="preguntas")
-    
+
+    #SI CONTIENE PREGUNTAS DENTRO
+    id_pregunta_padre: Mapped[Optional[int]] = mapped_column(ForeignKey("preguntas.id"), nullable=True)
+    subpreguntas = relationship("Pregunta",back_populates="pregunta_padre",cascade="all, delete-orphan")
+    pregunta_padre = relationship("Pregunta",remote_side="Pregunta.id",back_populates="subpreguntas")
+
+    #OPCIONES DE RESPUESTAS
     opcionesRespuestas = relationship("OpcionRespuesta",back_populates="pregunta")
