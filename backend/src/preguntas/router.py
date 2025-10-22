@@ -31,3 +31,4 @@ def update_pregunta(
 @router.delete("/{pregunta_id}", response_model=schemas.PreguntaRead)
 def delete_pregunta(pregunta_id: int, db: Session = Depends(get_db)): 
     return services.eliminar_pregunta(db, pregunta_id)
+
