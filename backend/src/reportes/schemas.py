@@ -8,11 +8,7 @@ from src.encuestas_asignaturas.schemas import EncuestaAsignaturaRead
 
 
 class ReporteBase(BaseModel):
-    asignatura: str
-    año: int
-    cursado: Cursado
-    carrera: str
-    sede: str
+    pass
 
 class ReporteCreate(ReporteBase):
     id_encuesta_asignatura: int
