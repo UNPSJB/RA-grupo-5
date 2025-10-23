@@ -1,23 +1,38 @@
 import { useState, useEffect } from "react";
 
-enum Cursado {
-    PrimerCuatrimestre = "cuatrimestre 1",
-    SegundoCuatrimestre = "cuatrimestre 2",
-    Anual = "Anual"
-}   
+interface Asignatura {
+id: number;
+nombre: string;
+carrera: string;
+cursado: string;
+año: number;
+nombre_docente: string;
+sede: string;
+}
 
-interface Encuesta {
-    id: number;
-    asignatura: string;
-    año: number;
-    cursado: Cursado;
-    
-   // variables?: Variable[];
+interface EncuestaBase {
+id: number;
+nombre: string;
+ciclo: string;
+}
+
+interface EncuestaAsignatura {
+asignatura: Asignatura;
+encuesta_base: EncuestaBase;
+estado: string;
+fecha_inicio: string;
+fecha_fin: string;
+}
+
+interface Reporte {
+id: number;
+encuesta_asignatura: EncuestaAsignatura;
+respuestas: any[];
 }
 
 export function useReportes(){
 
-const [reportes, setReportes] = useState<Encuesta[]>([]);
+const [reportes, setReportes] = useState<Reporte[]>([]);
 const [loading, setLoading] = useState<boolean>(true);
 const [error, setError] = useState<string | null>(null);
     const API_URL = "http://localhost:8000/reportes"; //definimos la URL como una const

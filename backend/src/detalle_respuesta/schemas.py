@@ -6,9 +6,12 @@ class DetalleRespuestaBase(BaseModel):
     texto_respuesta_abierta: Optional[str] = None
 
 class DetalleRespuestaCreate(DetalleRespuestaBase):
-    pass 
+    id_pregunta_opcion: int
+    id_respuesta: int
+    texto_respuesta_abierta: Optional[str] = None
 
 class DetalleRespuestaRead(DetalleRespuestaBase):
     id: int
-    id_respuesta: int
+    id_pregunta_opcion: int
+    texto_respuesta_abierta: Optional[str] = None
     model_config = {"from_attributes": True}

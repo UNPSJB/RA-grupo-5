@@ -10,9 +10,9 @@ class PreguntaBase(BaseModel):
     obligatoria: bool
 
 class PreguntaCreate(PreguntaBase):
-    id_variable: Optional[int]   # al crear hay que especificar la variable
-    id_informe_base: Optional[int]  # o el informe base al que pertenece
-    id_pregunta_padre: Optional[int]  # o la pregunta padre si es subpregunta
+    id_variable: Optional[int] = None   # al crear hay que especificar la variable
+    id_informe_base: Optional[int] = None  # o el informe base al que pertenece
+    id_pregunta_padre: Optional[int] = None  # o la pregunta padre si es subpregunta
 
 class PreguntaUpdate(PreguntaBase):
     pass
@@ -20,8 +20,8 @@ class PreguntaUpdate(PreguntaBase):
 
 class PreguntaRead(PreguntaBase):
     id: int
-    id_variable: Optional[int]
-    id_informe_base: Optional[int]
-    id_pregunta_padre: Optional[int]
+    id_variable: Optional[int] = None
+    id_informe_base: Optional[int] = None
+    id_pregunta_padre: Optional[int] = None
     pregunta_opcion: List[PreguntaOpcionRead]
     model_config = {"from_attributes": True}

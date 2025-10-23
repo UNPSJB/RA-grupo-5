@@ -25,3 +25,7 @@ def delete_reporte(reporte_id: int, db=Depends(get_db)):
 def update_reporte(reporte_id: int, reporte: schemas.ReporteUpdate, db=Depends(get_db)):
     return services.actualizar_reporte(db, reporte_id, reporte)
 
+
+@router.get("/generar/{reporte_id}", response_model=dict)
+def resumir_variable(reporte_id: int, db=Depends(get_db)):
+    return services.generar_resumen_variable(db, reporte_id)  
