@@ -23,10 +23,9 @@ def leer_reporte(db: Session, reporte_id: int)-> schemas.Reporte:
 
 def eliminar_reporte(db: Session, reporte_id: int) -> None:    
     db_reporte = leer_reporte(db, reporte_id)
-    nombre_reporte = db_reporte.asignatura
     db.delete(db_reporte)
     db.commit()
-    return {"message": f"Reporte {nombre_reporte} eliminado"}
+    return {"message": f"Reporte {db_reporte.id} eliminado"}
 
 def actualizar_reporte(db: Session, reporte_id: int, reporte: schemas.ReporteUpdate) -> schemas.Reporte:
     db_reporte = leer_reporte(db, reporte_id)

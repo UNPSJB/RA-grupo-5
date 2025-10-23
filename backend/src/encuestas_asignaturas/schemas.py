@@ -3,6 +3,7 @@ from typing import List, Optional
 from src.encuestas_asignaturas.models import EstadoEncuesta
 from src.asignaturas.schemas import AsignaturaRead
 from src.encuestas_base.schemas import EncuestaBaseBase
+from src.respuestas.schemas import RespuestaRead
 from datetime import date
 
 class EncuestaAsignaturaBase(BaseModel):
