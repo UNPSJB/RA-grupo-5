@@ -1,19 +1,16 @@
 from pydantic import BaseModel
 from typing import Optional, List
-from src.detalle_respuesta.schemas import DetalleRespuesta
+from src.detalle_respuesta.schemas import DetalleRespuestaCreate, DetalleRespuestaRead
 
 class RespuestaBase(BaseModel):
-    pass
-
-class RespuestaCreate(RespuestaBase):
     id_persona: int
     id_encuesta_asignatura: int
 
+class RespuestaCreate(RespuestaBase):
+    detalles: List[DetalleRespuestaCreate]
 
 class RespuestaRead(RespuestaBase):
     id: int
-    id_persona: int
-    id_encuesta_asignatura: int
-    detalles: List[DetalleRespuesta]
+    detalles: List[DetalleRespuestaRead]
 
     model_config = {"from_attributes": True}

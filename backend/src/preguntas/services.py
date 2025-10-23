@@ -5,13 +5,21 @@ from sqlalchemy.orm import Session, joinedload
 from src.preguntas.models import Pregunta
 from src.preguntas import schemas, exceptions
 
-from src.opciones_respuesta.models import OpcionRespuesta
-
+from src.pregunta_opcion.models import PreguntaOpcion
 # operaciones CRUD para Preguntas
 
 def crear_pregunta(db: Session, pregunta: schemas.PreguntaCreate) -> Pregunta:
     _pregunta = Pregunta(**pregunta.model_dump())
     db.add(_pregunta)
+    db.flush()
+    
+    if _pregunta.tipo == "open": #Si la pregunta es abierta el id_opcion_respuesta se inicializa en NULL
+        db_receptor_op = PreguntaOpcion(
+            id_pregunta = _pregunta.id,
+            id_opcion_respuesta = None
+        )
+        db.add(db_receptor_op)
+
     db.commit()
     db.refresh(_pregunta)
     return _pregunta
