@@ -7,15 +7,18 @@ export default function ReportesDisponibles() {
 
     if (loading) return <p>Cargando reportes...</p>;
     if (error) return <p>Error: {error}</p>;
+
 return (
-    <div className="container mt-3 p-4 border">
-        <h2 className="m-3">Reportes Disponibles</h2>
+<div className="container mt-3 p-4 border">
+    <h2 className="m-3">Reportes Disponibles</h2>
         <Table className="table table-striped border mt-5">
         <thead>
             <tr className="border">
                 <th>Asignatura</th>
                 <th>Año</th>
                 <th>Cursado</th>
+                <th>Docente</th>
+                <th>Carrera</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -25,25 +28,29 @@ return (
                 <td colSpan={4}>No hay reportes disponibles.</td>
             </tr>
             ) : (
-            reportes.map((reporte) => (
-                <tr key={reporte.id}>
-                <td>{reporte.asignatura}</td>
-                <td>{reporte.año}</td>
-                <td>{reporte.cursado}</td>
-                <td>
-                    <Link
-                    to={`/Docente/reportes/${reporte.id}`}
-                    className="btn btn-primary m-2"
-                    >
-                    ir a reporte  
-                    </Link>
-                    
+        reportes.map((reporte) => {
+        const asignatura = reporte.encuesta_asignatura.asignatura;
+        return (
+            <tr key={reporte.id}>
+            <td>{asignatura.nombre}</td>
+            <td>{asignatura.año}</td>
+            <td>{asignatura.cursado}</td>
+            <td>{asignatura.nombre_docente}</td>
+            <td>{asignatura.carrera}</td>
+            <td>
+            <Link
+                to={`/Docente/reportes/${reporte.id}`}
+                className="btn btn-primary m-2"
+                >
+                Ir a reporte
+                </Link>
                 </td>
-                </tr>
-            ))
-            )}
-        </tbody>
-        </Table>
-    </div>
-    );
+            </tr>
+        );
+        })
+        )}
+    </tbody>
+    </Table>
+</div>
+);
 }
