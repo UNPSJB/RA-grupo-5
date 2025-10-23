@@ -19,3 +19,4 @@ class Asignatura(ModeloBase):
     carrera: Mapped[str] = mapped_column(String, index=True)
     sede: Mapped[str] = mapped_column(String, index=True)
     encuestas_asignaturas = relationship("EncuestaAsignatura", back_populates="asignatura")
+    informes_asignaturas = relationship("InformeAsignatura", back_populates="asignatura")

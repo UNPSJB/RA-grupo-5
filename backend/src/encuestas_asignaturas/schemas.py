@@ -2,8 +2,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 from src.encuestas_asignaturas.models import EstadoEncuesta
 from src.asignaturas.schemas import AsignaturaRead
-from src.encuestas_base.schemas import EncuestaBaseRead
-from src.respuestas.schemas import RespuestaRead
+from src.encuestas_base.schemas import EncuestaBaseBase
 from datetime import date
 
 class EncuestaAsignaturaBase(BaseModel):
@@ -26,7 +25,7 @@ class EncuestaAsignaturaRead(EncuestaAsignaturaBase):
     id: int
     id_encuesta_base: int
     id_asignatura: int
-    encuesta_base: EncuestaBaseRead
+    encuesta_base: EncuestaBaseBase
     asignatura: AsignaturaRead
     respuestas: List[RespuestaRead]
     model_config = {"from_attributes": True}
