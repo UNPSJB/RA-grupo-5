@@ -1,27 +1,24 @@
 import { Link, Outlet } from "react-router-dom";
 import { Container, Navbar, Nav } from "react-bootstrap";
 import "../styles/Layout.css";
-import logoUnpsjb from "../assets/unpsjb.png"
+import logoUnpsjb from "../assets/unpsjb.png";
 
 export default function LayoutDocente() {
   return (
     <div className="layout">
       <Navbar bg="dark" variant="dark" expand="lg">
         <Navbar.Brand className="ms-3" href="/">
-          <img 
+          <img
             src={logoUnpsjb}
             width="80"
-            height="80" 
+            height="80"
             className="d-inline-block align-top ms-3"
-            alt="Logo UNPSJB" 
-            />
+            alt="Logo UNPSJB"
+          />
         </Navbar.Brand>
         <Nav className="me-auto">
           <Nav.Link as={Link} to="/docente/reportes">
             Listado de reportes disponibles
-          </Nav.Link>
-          <Nav.Link as={Link} to="/docente/crear-informe">
-            Nuevo informe curricular
           </Nav.Link>
         </Nav>
       </Navbar>
