@@ -19,4 +19,4 @@ class InformeAsignatura(ModeloBase):
 
     informe_base = relationship("InformeBase", back_populates="informes_asignaturas")
     asignatura = relationship("Asignatura", back_populates="informes_asignaturas")
-    respuesta = relationship("Respuesta", back_populates="informe_asignatura")
+    respuestas = relationship("Respuesta", back_populates="informe_asignatura")

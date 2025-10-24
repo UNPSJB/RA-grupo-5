@@ -13,7 +13,7 @@ class Respuesta(ModeloBase):
     id_informe_asignatura: Mapped[Optional[int]] = mapped_column(ForeignKey("informes_asignaturas.id"), nullable=True)
 
     encuesta_asignatura = relationship("EncuestaAsignatura", back_populates="respuestas")
-    informe_asignatura = relationship("InformeAsignatura", back_populates="respuesta")
+    informe_asignatura = relationship("InformeAsignatura", back_populates="respuestas")
 
     persona = relationship("Persona", back_populates="respuestas") 
     detalles = relationship("DetalleRespuesta", back_populates="respuesta")

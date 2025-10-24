@@ -6,6 +6,7 @@ class RespuestaBase(BaseModel):
     id_persona: int
     id_encuesta_asignatura: Optional[int] = None
     id_informe_asignatura: Optional[int] = None
+    
 class RespuestaCreate(RespuestaBase):
     detalles: List[DetalleRespuestaCreate]
     

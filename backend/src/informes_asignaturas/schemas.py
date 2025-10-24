@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from src.informes_asignaturas.models import EstadoInforme
 from src.informes_base.schemas import InformeBaseBase
 from src.asignaturas.schemas import AsignaturaRead
+from src.respuestas.schemas import RespuestaRead
 from datetime import date
 
 class InformeAsignaturaBase(BaseModel):
@@ -19,4 +20,5 @@ class InformeAsignaturaRead(InformeAsignaturaBase):
     id_asignatura: int
     informe_base: InformeBaseBase
     asignatura: AsignaturaRead
+    respuestas: list[RespuestaRead] = []
     model_config = {"from_attributes": True}
