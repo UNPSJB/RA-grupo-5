@@ -4,6 +4,7 @@ from sqlalchemy import delete, select, update
 from sqlalchemy.orm import Session, joinedload
 from src.preguntas.models import Pregunta
 from src.preguntas import schemas, exceptions
+from src.opciones_respuesta.models import OpcionRespuesta
 
 from src.pregunta_opcion.models import PreguntaOpcion
 # operaciones CRUD para Preguntas
@@ -25,19 +26,29 @@ def crear_pregunta(db: Session, pregunta: schemas.PreguntaCreate) -> Pregunta:
     return _pregunta
 
 
-def listar_preguntas(db: Session) -> List[schemas.PreguntaRead]:
-    return db.scalars(select(Pregunta)).all()
-    
+def listar_preguntas(db: Session) -> List[Pregunta]: 
+    query = (
+        select(Pregunta)
+
+        .options(joinedload(Pregunta.pregunta_opcion)) 
+    )
+    return db.scalars(query).all()
 
 def leer_pregunta(db: Session, pregunta_id: int) -> Pregunta:
-    db_pregunta = db.scalar(select(Pregunta).where(Pregunta.id == pregunta_id))
+    query = (
+        select(Pregunta)
+        .where(Pregunta.id == pregunta_id)
+        .options(joinedload(Pregunta.pregunta_opcion)) 
+    )
+    db_pregunta = db.scalar(query)
     if db_pregunta is None:
         raise exceptions.PreguntaNoEncontrada()
     return db_pregunta
 
 
-def modificar_pregunta(db: Session, pregunta_id: int, pregunta: Pregunta) -> Pregunta:
-    db_pregunta = leer_pregunta(db, pregunta_id)
+def modificar_pregunta(db: Session, pregunta_id: int, pregunta: schemas.PreguntaUpdate ) -> Pregunta:
+    
+    db_pregunta = leer_pregunta(db, pregunta_id) 
     for key, value in pregunta.model_dump(exclude_unset=True).items():
         setattr(db_pregunta, key, value)
     db.commit()
