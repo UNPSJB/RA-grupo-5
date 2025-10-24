@@ -2,15 +2,13 @@ from pydantic import BaseModel
 from typing import Optional, List
 
 class DetalleRespuestaBase(BaseModel):
-    pass
+    id_pregunta_opcion: int
+    texto_respuesta_abierta: Optional[str] = None
 
 class DetalleRespuestaCreate(DetalleRespuestaBase):
-    id_pregunta_opcion: int
-    id_respuesta: int
-    texto_respuesta_abierta: Optional[str] = None
+    pass 
 
-class DetalleRespuesta(DetalleRespuestaBase):
+class DetalleRespuestaRead(DetalleRespuestaBase):
     id: int
-    id_pregunta_opcion: int
-    texto_respuesta_abierta: Optional[str] = None
+    id_respuesta: int
     model_config = {"from_attributes": True}

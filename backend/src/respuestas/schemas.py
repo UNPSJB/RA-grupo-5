@@ -1,20 +1,24 @@
-from pydantic import BaseModel
-from typing import List, Optional
-from src.detalle_respuesta.schemas import DetalleRespuesta
-
+from pydantic import BaseModel, model_validator
+from typing import Optional, List
+from src.detalle_respuesta.schemas import DetalleRespuestaCreate, DetalleRespuestaRead
 
 class RespuestaBase(BaseModel):
-    pass
-
-class RespuestaCreate(RespuestaBase):
     id_persona: int
     id_encuesta_asignatura: Optional[int] = None
     id_informe_asignatura: Optional[int] = None
+class RespuestaCreate(RespuestaBase):
+    detalles: List[DetalleRespuestaCreate]
+    
+    @model_validator(mode='after')
+    def check_exactly_one_context(self):
+        if self.id_encuesta_asignatura and self.id_informe_asignatura:
+            raise ValueError("La respuesta no puede pertenecer a una encuesta y un informe a la vez.")
+        if not self.id_encuesta_asignatura and not self.id_informe_asignatura:
+            raise ValueError("La respuesta debe pertenecer a una encuesta o a un informe.")
+        return self
 
 class RespuestaRead(RespuestaBase):
     id: int
-    id_persona: int
-    id_encuesta_asignatura: Optional[int] = None
-    id_informe_asignatura: Optional[int]  = None
-    detalles: List[DetalleRespuesta]  = []  #incluimos las preguntas
+    detalles: List[DetalleRespuestaRead]
+
     model_config = {"from_attributes": True}

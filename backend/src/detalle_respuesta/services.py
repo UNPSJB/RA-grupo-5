@@ -4,13 +4,6 @@ from sqlalchemy.orm import Session
 from src.detalle_respuesta.models import DetalleRespuesta
 from src.detalle_respuesta import schemas
 
-def create_detalle_respuesta(db: Session, detalle_respuesta: schemas.DetalleRespuestaCreate) -> DetalleRespuesta:
-    _detalle_respuesta = DetalleRespuesta(**detalle_respuesta.model_dump())
-    db.add(_detalle_respuesta)
-    db.commit()
-    db.refresh(_detalle_respuesta)
-    return _detalle_respuesta
-
 def listar_detalle_respuestas(db: Session) -> List[DetalleRespuesta]:
     return db.scalars(select(DetalleRespuesta)).all()   
 
