@@ -39,7 +39,7 @@ export default function EncuestasPendientes() {
                 <td>{encuesta.fecha_fin}</td>
                 <td>
                     <Link
-                    to={`/alumno/encuestas/${encuesta.id}`}
+                    to={`/alumno/encuestas-pendientes/${encuesta.id}`}
                     className="btn btn-primary m-2"
                     >
                     Ir a encuesta
