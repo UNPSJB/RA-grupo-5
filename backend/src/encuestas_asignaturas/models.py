@@ -22,6 +22,6 @@ class EncuestaAsignatura(ModeloBase):
 
     encuesta_base = relationship("EncuestaBase", back_populates="encuestas_asignaturas")
     asignatura = relationship("Asignatura", back_populates="encuestas_asignaturas")
-    
+    reportes = relationship("Reporte", back_populates="encuesta_asignatura")
     respuestas = relationship("Respuesta", back_populates="encuesta_asignatura")
     

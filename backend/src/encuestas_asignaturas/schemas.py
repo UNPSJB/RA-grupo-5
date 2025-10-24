@@ -6,6 +6,7 @@ from src.encuestas_base.schemas import EncuestaBaseBase
 from src.respuestas.schemas import RespuestaRead
 from datetime import date
 
+
 class EncuestaAsignaturaBase(BaseModel):
     fecha_inicio: date
     fecha_fin: date
