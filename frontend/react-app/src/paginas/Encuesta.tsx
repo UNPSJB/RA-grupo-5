@@ -1,56 +1,73 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { useEncuestas } from "../hook/useEncuestas";
-import Variable from "../componentes/Variable";
+import React from 'react';
+import { useParams } from 'react-router-dom'; 
+import { useResponderEncuesta } from '../hook/useResponderEncuesta';
+import Variable from '../componentes/Variable'; 
 
-export default function Encuesta() {
+function PaginaResponderEncuesta() {
   const { id } = useParams<{ id: string }>();
-  const { fetchEncuestaById } = useEncuestas();
-  const [encuesta, setEncuesta] = useState<any>(null);
+  const idEncuesta = id ? Number(id) : null;
+ const { 
+    encuesta, 
+    asignatura, 
+    loading, 
+    error,
+    respuestas,
+    handleRespuestaChange,
+    guardarRespuestas 
+  } = useResponderEncuesta(idEncuesta);
 
-  // Mapa: preguntaId -> opcionId
-  const [respuestas, setRespuestas] = useState<
-    Record<string | number, string | number>
-  >({});
-
-  useEffect(() => {
-    if (id) {
-      fetchEncuestaById(Number(id)).then((data) => setEncuesta(data));
-    }
-  }, [id]);
-
-  const handleSeleccionar = (
-    idPregunta: number | string,
-    idOpcion: number | string
-  ) => {
-    setRespuestas((prev) => ({ ...prev, [idPregunta]: idOpcion }));
-    //acá podríamos llamar al backend u otro hook para guardar la respuesta
+  const getSeleccion = (preguntaId: number) => {
+    return respuestas.get(preguntaId);
   };
 
-  if (!encuesta) return <p>Cargando encuesta...</p>;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault(); 
+    const idPersona = 1; 
+
+    const resultado = await guardarRespuestas(idPersona);
+
+    if (resultado) {
+      alert("¡Encuesta guardada con éxito!");
+    }
+  };
+
+  if (loading && !encuesta) return <div className="container mt-4">Cargando encuesta... ⏳</div>;
 
   return (
-    <div>
-      <h1>Encuesta de: {encuesta.asignatura.nombre}</h1>
-      <p>
-        <strong>Estado:</strong> {encuesta.estado}
-      </p>
-      <p>
-        <strong>Carrera:</strong> {encuesta.asignatura.carrera}
-      </p>
-      <p>
-        <strong>Sede:</strong> {encuesta.asignatura.sede}
-      </p>
-      {encuesta.encuesta_base?.variables.map((variable: any) => (
-        <Variable
-          key={variable.id}
-          variable={variable}
-          getSeleccion={(idPregunta: number | string) =>
-            respuestas[idPregunta] ?? null
-          }
-          onSeleccionar={handleSeleccionar}
-        />
-      ))}
+    <div className="container mt-4"> \
+      <form onSubmit={handleSubmit}>
+  
+        {error && <div className="alert alert-danger">Error: {error}</div>}
+
+        <h1>{encuesta?.nombre}</h1>
+        <h2>{asignatura?.nombre}</h2>
+        <p>Docente: {asignatura?.nombre_docente}</p>
+        <hr />
+
+        {encuesta?.variables.map(variable => (
+          <Variable
+            key={variable.id}
+            variable={variable}
+            getSeleccion={getSeleccion}
+            onSeleccionar={handleRespuestaChange} 
+          />
+        ))}
+
+        <button 
+          type="submit"
+          className="btn btn-primary mt-3" 
+          disabled={loading} 
+        >
+          {loading ? 'Guardando...' : 'Guardar Respuestas'}
+        </button>
+
+        <pre className="mt-4" style={{backgroundColor: '#f0f0f0', padding: '10px'}}>
+          <strong>Estado de las respuestas:</strong>
+          {JSON.stringify(Array.from(respuestas.entries()), null, 2)}
+        </pre>
+      </form>
     </div>
   );
 }
+
+export default PaginaResponderEncuesta;

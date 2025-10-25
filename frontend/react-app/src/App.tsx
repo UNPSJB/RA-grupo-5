@@ -20,9 +20,9 @@ function App() {
       <Route path="/alumno" element={<LayoutAlumno />}>
         <Route index element={<EncuestasPendientes />} />
         <Route path="encuestas-pendientes">
-          <Route path=":id" element={<Encuesta />} />
-          <Route index element={<EncuestasPendientes />} />
-        </Route>
+        <Route path=":id" element={<Encuesta />} />  
+        <Route index element={<EncuestasPendientes />} />
+      </Route>
         <Route path="encuestas-respondidas">
           <Route path=":id" element={<Encuesta />} />
           <Route index element={<EncuestasRespondidas />} />

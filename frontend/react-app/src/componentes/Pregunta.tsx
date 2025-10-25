@@ -1,47 +1,53 @@
-import type { PreguntaProps } from "../types/Preguntas";
+// components/Pregunta.tsx
+
 import OpcionRespuesta from "./OpcionRespuesta";
-import type { Extras } from "../types/OpcionRespuesta";
+import type { PreguntaProps } from "../types/Preguntas"; // Asegúrate de importar tus tipos
 
 export default function Pregunta({
   pregunta,
   seleccionActual,
   onSeleccionar,
-}: PreguntaProps & Extras) {
+}: PreguntaProps) { // PreguntaProps ahora debe incluir 'onSeleccionar' y 'seleccionActual'
+  
   return (
     <tr>
       <td style={{ width: "40%", fontWeight: "bold" }}>
         {pregunta.texto_pregunta}
       </td>
+
+      {/* --- PREGUNTA ABIERTA --- */}
       {pregunta.tipo === "open" ? (
         <td style={{ textAlign: "center", minWidth: 400 }}>
           <textarea
             placeholder="Escriba su respuesta aquí"
             value={seleccionActual || ""}
-            onChange={(e) => onSeleccionar(pregunta.id, e.target.value)}
+            // 👇 Pasa los 3 argumentos
+            onChange={(e) => 
+              onSeleccionar(pregunta.id, e.target.value, 'open')
+            } 
             rows={3}
-            style={{
-              //mover a la carpeta de syles...
-              width: "100%",
-              resize: "vertical",
-              padding: "6px",
-              fontSize: "0.95rem",
-            }}
+            style={{ width: "100%", resize: "vertical", padding: "6px", fontSize: "0.95rem" }}
           />
         </td>
       ) : (
-        pregunta.opcionesRespuestas?.map((opcion: any) => {
-          const idOpcion =
-            opcion?.id ??
-            opcion?.opcionRespuesta?.id ??
-            opcion?.opcionRespuesta?.id_opcion ??
-            opcion?.valor;
+        /* --- PREGUNTAS DE OPCIÓN (Single/Multiple) --- */
+        pregunta.pregunta_opcion?.map((opcion: any) => { 
+          
+          const idOpcionAGuardar = opcion.id_opcion_respuesta;
 
           return (
-            <td key={idOpcion} style={{ textAlign: "center", minWidth: 90 }}>
+            <td key={opcion.id} style={{ textAlign: "center", minWidth: 90 }}>
               <OpcionRespuesta
-                opcionRespuesta={opcion}
-                seleccionada={seleccionActual === idOpcion}
-                onSeleccionar={(id) => onSeleccionar(pregunta.id, id)}
+                opcionRespuesta={opcion.opcion_respuesta} 
+                seleccionada={
+                  pregunta.tipo === 'multiple_choice' 
+                    ? seleccionActual?.includes(idOpcionAGuardar)
+                    : seleccionActual === idOpcionAGuardar
+                }
+                onSeleccionar={(idDelBoton) => 
+                  // 👇 Pasa los 3 argumentos
+                  onSeleccionar(pregunta.id, idDelBoton, pregunta.tipo) 
+                }
               />
             </td>
           );

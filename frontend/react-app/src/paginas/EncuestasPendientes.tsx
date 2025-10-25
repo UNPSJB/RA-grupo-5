@@ -1,4 +1,4 @@
-import { useEncuestas } from "../hook/useEncuestas";
+import { useEncuestas } from '../hook/useEncuestas';
 import Table from "react-bootstrap/Table";
 import { Link } from "react-router-dom";
 
