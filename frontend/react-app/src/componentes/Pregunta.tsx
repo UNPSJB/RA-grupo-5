@@ -1,27 +1,22 @@
-// components/Pregunta.tsx
-
 import OpcionRespuesta from "./OpcionRespuesta";
-import type { PreguntaProps } from "../types/Preguntas"; // Asegúrate de importar tus tipos
+import type { PreguntaProps } from "../types/Preguntas"; 
 
 export default function Pregunta({
   pregunta,
   seleccionActual,
   onSeleccionar,
-}: PreguntaProps) { // PreguntaProps ahora debe incluir 'onSeleccionar' y 'seleccionActual'
-  
+}: PreguntaProps) {  
   return (
     <tr>
       <td style={{ width: "40%", fontWeight: "bold" }}>
         {pregunta.texto_pregunta}
       </td>
 
-      {/* --- PREGUNTA ABIERTA --- */}
       {pregunta.tipo === "open" ? (
         <td style={{ textAlign: "center", minWidth: 400 }}>
           <textarea
             placeholder="Escriba su respuesta aquí"
             value={seleccionActual || ""}
-            // 👇 Pasa los 3 argumentos
             onChange={(e) => 
               onSeleccionar(pregunta.id, e.target.value, 'open')
             } 
@@ -30,7 +25,6 @@ export default function Pregunta({
           />
         </td>
       ) : (
-        /* --- PREGUNTAS DE OPCIÓN (Single/Multiple) --- */
         pregunta.pregunta_opcion?.map((opcion: any) => { 
           
           const idOpcionAGuardar = opcion.id_opcion_respuesta;
@@ -45,7 +39,6 @@ export default function Pregunta({
                     : seleccionActual === idOpcionAGuardar
                 }
                 onSeleccionar={(idDelBoton) => 
-                  // 👇 Pasa los 3 argumentos
                   onSeleccionar(pregunta.id, idDelBoton, pregunta.tipo) 
                 }
               />

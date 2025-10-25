@@ -4,7 +4,7 @@ import LayoutAlumno from "./componentes/LayoutAlumno.tsx";
 import LayoutDocente from "./componentes/LayoutDocente.tsx";
 import LayoutDepartamento from "./componentes/LayoutDepartamento.tsx";
 import EncuestasPendientes from "./paginas/EncuestasPendientes.tsx";
-import Encuesta from "./paginas/Encuesta.tsx";
+import Encuesta from "./paginas/ResponderEncuesta.tsx";
 import Reporte from "./paginas/Reporte.tsx";
 import InformesCurricularesDisponibles from "./paginas/InformesCurricularesDisponibles.tsx";
 import InformeCurricular from "./paginas/InformeCurricular.tsx";

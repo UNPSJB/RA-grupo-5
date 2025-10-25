@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useResponderEncuesta } from '../hook/useResponderEncuesta';
 import Variable from '../componentes/Variable'; 
 
-function PaginaResponderEncuesta() {
+function ResponderEncuesta() {
   const { id } = useParams<{ id: string }>();
   const idEncuesta = id ? Number(id) : null;
  const { 
@@ -70,4 +70,4 @@ function PaginaResponderEncuesta() {
   );
 }
 
-export default PaginaResponderEncuesta;
+export default ResponderEncuesta;

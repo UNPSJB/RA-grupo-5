@@ -14,7 +14,6 @@ type RespuestasState = Map<number, string | number | number[]>;
 
 export function useResponderEncuesta(idEncuestaAsignatura: number | null) {
 
-  // --- 1. ESTADOS DEL HOOK ---
   const [encuesta, setEncuesta] = useState<EncuestaBase | null>(null);
   const [asignatura, setAsignatura] = useState<Asignatura | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -22,7 +21,6 @@ export function useResponderEncuesta(idEncuestaAsignatura: number | null) {
   const [respuestas, setRespuestas] = useState<RespuestasState>(new Map());
 
   
-  // --- 2. FUNCIÓN PARA MANEJAR RESPUESTAS ---
   const handleRespuestaChange = (
     preguntaId: number, 
     valor: string | number,
@@ -45,7 +43,6 @@ export function useResponderEncuesta(idEncuestaAsignatura: number | null) {
     });
   };
 
-  // --- 3. EFECTO PARA CARGAR DATOS ---
   useEffect(() => {
     if (!idEncuestaAsignatura) {
       setLoading(false);
@@ -128,14 +125,12 @@ export function useResponderEncuesta(idEncuestaAsignatura: number | null) {
         });
       });
       
-      // --- Creación del Payload ---
       const payload: RespuestaCreate = {
         id_persona: idPersona, 
         id_encuesta_asignatura: idEncuestaAsignatura,
         detalles: detalles
       };
 
-      // --- Envío a la API ---
       const response = await fetch(`${API_URL}/respuestas`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
