@@ -44,6 +44,38 @@ export function useInformesCurriculares() {
       setLoading(false);
     }
   };
+  const crearInformeCurricular = async (payload: {
+    reporte_id: number;
+    descripcion_actividades: string;
+    dificultades?: string;
+    sugerencias_mejora?: string;
+  }) => {
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error("No se pudo crear el informe curricular");
+      }
+
+      const creado = await response.json();
+
+      // opcional: refrescá la lista en memoria
+      // esto sirve si estás en una pantalla que lista todos los informes
+      setInformesCurriculares((prev) => [...prev, creado]);
+
+      return creado; // MUY IMPORTANTE, para saber cuál se creó
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Error creando informe curricular");
+      throw err; // dejamos que el componente maneje el mensaje
+    }
+  };
 
   useEffect(() => {
     fetchInformes();
@@ -55,5 +87,6 @@ export function useInformesCurriculares() {
     error,
     refetch: fetchInformes,
     fetchInformeById,
+    crearInformeCurricular, // <- agregado
   };
 }

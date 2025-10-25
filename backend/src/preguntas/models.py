@@ -27,10 +27,5 @@ class Pregunta(ModeloBase):
     id_variable: Mapped[Optional[int]] = mapped_column(ForeignKey("variables.id"), nullable=True)
     variable = relationship("Variable", back_populates="preguntas")
 
-    #SI CONTIENE PREGUNTAS DENTRO
-    id_pregunta_padre: Mapped[Optional[int]] = mapped_column(ForeignKey("preguntas.id"), nullable=True)
-    subpreguntas = relationship("Pregunta",back_populates="pregunta_padre",cascade="all, delete-orphan")
-    pregunta_padre = relationship("Pregunta",remote_side="Pregunta.id",back_populates="subpreguntas")
-
     #OPCIONES DE RESPUESTAS
     pregunta_opcion = relationship("PreguntaOpcion", back_populates="pregunta")

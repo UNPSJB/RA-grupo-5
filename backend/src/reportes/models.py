@@ -13,3 +13,4 @@ class Reporte(ModeloBase):
     id_encuesta_asignatura: Mapped[int] = mapped_column(ForeignKey("encuestas_asignaturas.id"), nullable=False)
 
     encuesta_asignatura = relationship("EncuestaAsignatura", back_populates="reportes")
+    informes_asignaturas = relationship("InformeAsignatura", back_populates="reporte")

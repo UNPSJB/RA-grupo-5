@@ -36,7 +36,10 @@ function App() {
           <Route index element={<ReportesDisponibles />} />
         </Route>
         <Route path="nuevo-informe">
-          <Route path=":id" element={<InformeCurricular />} />
+          <Route
+            path="/docente/nuevo-informe/:reporteId"
+            element={<InformeCurricular />}
+          />
           <Route index element={<ReportesDisponibles />} />
         </Route>
       </Route>
