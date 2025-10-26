@@ -30,4 +30,5 @@ class EncuestaAsignaturaRead(EncuestaAsignaturaBase):
     encuesta_base: EncuestaBaseBase
     asignatura: AsignaturaRead
     respuestas: List[RespuestaRead]
+    estado: EstadoEncuesta
     model_config = {"from_attributes": True}
