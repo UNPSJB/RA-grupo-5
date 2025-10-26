@@ -1,8 +1,6 @@
 from sqlalchemy import Integer, String, Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.models import ModeloBase
-from enum import Enum
-
 
 class InformeBase(ModeloBase):
     __tablename__ = "informes_base"

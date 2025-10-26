@@ -1,29 +1,53 @@
-// NuevoInformeCurricular.tsx
-import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+
 import { useReportes } from "../hook/useReportes";
 import { useInformesCurriculares } from "../hook/useInformesCurriculares";
+import { useInformeBase } from "../hook/useInformeBase";
 
-export default function NuevoInformeCurricular() {
-  // Antes: const [params] = useSearchParams();
-  //        const reporteId = params.get("reporteId");
+export default function InformeCurricular() {
+  // 1. ID del reporte que eligió el docente en la pantalla anterior
+  const { reporteId } = useParams();
 
-  const { reporteId } = useParams(); // <-- ahora viene del path /:reporteId
-
+  // 2. Hooks para hablar con la API
   const { fetchReporteById } = useReportes();
   const { crearInformeCurricular } = useInformesCurriculares();
+  const { fetchInformeBaseActual } = useInformeBase();
 
+  // 3. Estados para los datos que tengo que precargar
   const [reporte, setReporte] = useState<any>(null);
-  const [loadingReporte, setLoadingReporte] = useState<boolean>(true);
+  const [loadingReporte, setLoadingReporte] = useState(true);
   const [errorReporte, setErrorReporte] = useState<string | null>(null);
 
-  const [actividades, setActividades] = useState("");
-  const [dificultades, setDificultades] = useState("");
-  const [sugerencias, setSugerencias] = useState("");
+  const [informeBase, setInformeBase] = useState<any>(null);
+  const [loadingBase, setLoadingBase] = useState(true);
+  const [errorBase, setErrorBase] = useState<string | null>(null);
+
+  // 4. Estados para los campos administrativos del informe_asignatura
+  const [fechaInicio, setFechaInicio] = useState("");
+  const [fechaFin, setFechaFin] = useState("");
+  const [estado, setEstado] = useState("abierto");
+
+  const [sede, setSede] = useState("");
+  const [cicloLectivo, setCicloLectivo] = useState("");
+  const [docente, setDocente] = useState("");
+
+  const [cantInscriptos, setCantInscriptos] = useState<number | "">("");
+  const [cantTeoricas, setCantTeoricas] = useState<number | "">("");
+  const [cantPracticas, setCantPracticas] = useState<number | "">("");
+
+  // 5. Estados para renderizar las preguntas abiertas del informe_base
+  // Estructura: { [preguntaId]: "texto respuesta" }
+  const [respuestas, setRespuestas] = useState<Record<number, string>>({});
+
+  // 6. Feedback de guardado
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveOk, setSaveOk] = useState(false);
 
+  // ------------------------
+  // Carga inicial: Reporte
+  // ------------------------
   useEffect(() => {
     async function cargarReporte() {
       if (!reporteId) {
@@ -33,13 +57,13 @@ export default function NuevoInformeCurricular() {
       }
 
       try {
-        setLoadingReporte(true);
         const data = await fetchReporteById(reporteId);
-        if (!data) {
-          setErrorReporte("No se encontró el reporte indicado.");
-        } else {
-          setReporte(data);
-        }
+        setReporte(data);
+
+        const asignatura = data.encuesta_asignatura?.asignatura;
+        setSede(asignatura?.sede || "");
+        setDocente(asignatura?.nombre_docente || "");
+        setCicloLectivo(asignatura?.ciclo_lectivo || "");
       } catch (err) {
         setErrorReporte("Error cargando el reporte.");
       } finally {
@@ -50,60 +74,118 @@ export default function NuevoInformeCurricular() {
     cargarReporte();
   }, [reporteId, fetchReporteById]);
 
+  // ------------------------
+  // Carga inicial: InformeBase
+  // ------------------------
+  useEffect(() => {
+    async function cargarInformeBase() {
+      try {
+        const base = await fetchInformeBaseActual();
+        setInformeBase(base);
+        // init respuestas por pregunta:
+        if (base?.preguntas) {
+          const initResp: Record<number, string> = {};
+          base.preguntas.forEach((p: any) => {
+            initResp[p.id] = "";
+          });
+          setRespuestas(initResp);
+        }
+      } catch (err) {
+        setErrorBase("Error cargando la plantilla del informe.");
+      } finally {
+        setLoadingBase(false);
+      }
+    }
+
+    cargarInformeBase();
+  }, [fetchInformeBaseActual]);
+
+  // ------------------------
+  // Enviar formulario
+  // ------------------------
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!reporteId) return;
+    if (!reporte || !informeBase) return;
 
     setSaving(true);
     setSaveError(null);
     setSaveOk(false);
 
     try {
-      const payload = {
-        reporte_id: Number(reporteId),
-        descripcion_actividades: actividades,
-        dificultades: dificultades,
-        sugerencias_mejora: sugerencias,
+      const asignatura = reporte.encuesta_asignatura?.asignatura;
+      const id_asignatura =
+        asignatura?.id || asignatura?.id_asignatura || asignatura?.idAsignatura;
+
+      const payloadCabecera = {
+        fecha_inicio: fechaInicio,
+        fecha_fin: fechaFin,
+        estado: estado,
+
+        sede: sede,
+        ciclo_lectivo: cicloLectivo,
+        docente: docente,
+
+        cant_alumnos_insc: cantInscriptos === "" ? 0 : Number(cantInscriptos),
+        cant_comisiones_teoricas:
+          cantTeoricas === "" ? 0 : Number(cantTeoricas),
+        cant_comisiones_practicas:
+          cantPracticas === "" ? 0 : Number(cantPracticas),
+
+        id_informe_base: informeBase.id,
+        id_asignatura: id_asignatura,
+        id_reporte: Number(reporteId),
       };
 
-      await crearInformeCurricular(payload);
+      const informeCreado = await crearInformeCurricular(payloadCabecera);
+
+      // fase 2 después podés usar informeCreado.id para postear las respuestas pregunta por pregunta
 
       setSaveOk(true);
     } catch (err) {
-      setSaveError("No se pudo guardar el informe.");
+      console.error(err);
+      setSaveError("No se pudo guardar el informe curricular.");
     } finally {
       setSaving(false);
     }
   }
 
-  if (loadingReporte) {
-    return <div>Cargando datos del reporte...</div>;
+  // ------------------------
+  // Render
+  // ------------------------
+  if (loadingReporte || loadingBase) {
+    return <div className="container mt-4">Cargando...</div>;
   }
 
   if (errorReporte) {
-    return <div style={{ color: "red" }}>{errorReporte}</div>;
+    return <div className="container mt-4 text-danger">{errorReporte}</div>;
   }
-
+  if (errorBase) {
+    return <div className="container mt-4 text-danger">{errorBase}</div>;
+  }
   if (!reporte) {
-    return <div>No hay datos del reporte.</div>;
+    return <div className="container mt-4">No hay datos del reporte.</div>;
+  }
+  if (!informeBase) {
+    return (
+      <div className="container mt-4">
+        No hay plantilla de Informe Base disponible.
+      </div>
+    );
   }
 
   const asignatura = reporte.encuesta_asignatura?.asignatura || {};
 
   return (
-    <div style={{ maxWidth: "800px", margin: "2rem auto" }}>
-      <h2>Nuevo Informe Curricular</h2>
+    <div className="container mt-4">
+      <h2>Informe Curricular</h2>
 
-      <div
-        style={{
-          background: "#f5f5f5",
-          padding: "1rem",
-          borderRadius: "8px",
-          marginBottom: "1.5rem",
-        }}
-      >
+      {/* CONTEXTO DE LA ASIGNATURA / REPORTE */}
+      <div className="alert alert-secondary">
         <p>
           <strong>Asignatura:</strong> {asignatura.nombre}
+        </p>
+        <p>
+          <strong>Carrera:</strong> {asignatura.carrera}
         </p>
         <p>
           <strong>Año:</strong> {asignatura.año}
@@ -112,59 +194,177 @@ export default function NuevoInformeCurricular() {
           <strong>Cursado:</strong> {asignatura.cursado}
         </p>
         <p>
-          <strong>Carrera:</strong> {asignatura.carrera}
-        </p>
-        <p>
-          <strong>Docente:</strong> {asignatura.nombre_docente}
+          <strong>Docente según reporte:</strong> {asignatura.nombre_docente}
         </p>
       </div>
 
+      {/* FORMULARIO */}
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: "1rem" }}>
-          <label>
-            Actividades desarrolladas
-            <textarea
-              value={actividades}
-              onChange={(e) => setActividades(e.target.value)}
+        {/* Datos administrativos que van en InformeAsignatura */}
+        <div className="mb-3">
+          <label className="form-label">
+            Fecha inicio
+            <input
+              type="date"
+              className="form-control"
+              value={fechaInicio}
+              onChange={(e) => setFechaInicio(e.target.value)}
               required
-              style={{ width: "100%", minHeight: "80px" }}
             />
           </label>
         </div>
 
-        <div style={{ marginBottom: "1rem" }}>
-          <label>
-            Dificultades encontradas
-            <textarea
-              value={dificultades}
-              onChange={(e) => setDificultades(e.target.value)}
-              style={{ width: "100%", minHeight: "80px" }}
+        <div className="mb-3">
+          <label className="form-label">
+            Fecha fin
+            <input
+              type="date"
+              className="form-control"
+              value={fechaFin}
+              onChange={(e) => setFechaFin(e.target.value)}
+              required
             />
           </label>
         </div>
 
-        <div style={{ marginBottom: "1rem" }}>
-          <label>
-            Sugerencias de mejora
-            <textarea
-              value={sugerencias}
-              onChange={(e) => setSugerencias(e.target.value)}
-              style={{ width: "100%", minHeight: "80px" }}
-            />
+        <div className="mb-3">
+          <label className="form-label">
+            Estado
+            <select
+              className="form-select"
+              value={estado}
+              onChange={(e) => setEstado(e.target.value)}
+            >
+              <option value="abierto">abierto</option>
+              <option value="cerrado">cerrado</option>
+            </select>
           </label>
         </div>
 
-        {saveError && (
-          <div style={{ color: "red", marginBottom: "1rem" }}>{saveError}</div>
-        )}
+        <div className="row">
+          <div className="mb-3 col-md-4">
+            <label className="form-label">
+              Sede
+              <input
+                type="text"
+                className="form-control"
+                value={sede}
+                onChange={(e) => setSede(e.target.value)}
+              />
+            </label>
+          </div>
+
+          <div className="mb-3 col-md-4">
+            <label className="form-label">
+              Ciclo lectivo
+              <input
+                type="text"
+                className="form-control"
+                value={cicloLectivo}
+                onChange={(e) => setCicloLectivo(e.target.value)}
+                placeholder="2025 - 1er cuatrimestre"
+              />
+            </label>
+          </div>
+
+          <div className="mb-3 col-md-4">
+            <label className="form-label">
+              Docente responsable
+              <input
+                type="text"
+                className="form-control"
+                value={docente}
+                onChange={(e) => setDocente(e.target.value)}
+              />
+            </label>
+          </div>
+        </div>
+
+        <div className="row">
+          <div className="mb-3 col-md-4">
+            <label className="form-label">
+              Cant. alumnos inscriptos
+              <input
+                type="number"
+                className="form-control"
+                value={cantInscriptos}
+                onChange={(e) =>
+                  setCantInscriptos(
+                    e.target.value === "" ? "" : Number(e.target.value)
+                  )
+                }
+                min={0}
+              />
+            </label>
+          </div>
+
+          <div className="mb-3 col-md-4">
+            <label className="form-label">
+              Cant. comisiones teóricas
+              <input
+                type="number"
+                className="form-control"
+                value={cantTeoricas}
+                onChange={(e) =>
+                  setCantTeoricas(
+                    e.target.value === "" ? "" : Number(e.target.value)
+                  )
+                }
+                min={0}
+              />
+            </label>
+          </div>
+
+          <div className="mb-3 col-md-4">
+            <label className="form-label">
+              Cant. comisiones prácticas
+              <input
+                type="number"
+                className="form-control"
+                value={cantPracticas}
+                onChange={(e) =>
+                  setCantPracticas(
+                    e.target.value === "" ? "" : Number(e.target.value)
+                  )
+                }
+                min={0}
+              />
+            </label>
+          </div>
+        </div>
+
+        {/* Preguntas dinámicas de la plantilla */}
+        <div className="mb-4">
+          <h5>Desarrollo del cursado</h5>
+          {informeBase.preguntas?.map((pregunta: any) => (
+            <div className="mb-3" key={pregunta.id}>
+              <label className="form-label">
+                {pregunta.texto_pregunta ?? pregunta.texto ?? "Pregunta"}
+                <textarea
+                  className="form-control"
+                  style={{ minHeight: "80px" }}
+                  value={respuestas[pregunta.id] ?? ""}
+                  onChange={(e) =>
+                    setRespuestas((prev) => ({
+                      ...prev,
+                      [pregunta.id]: e.target.value,
+                    }))
+                  }
+                />
+              </label>
+            </div>
+          ))}
+        </div>
+
+        {saveError && <div className="text-danger mb-3">{saveError}</div>}
 
         {saveOk && (
-          <div style={{ color: "green", marginBottom: "1rem" }}>
+          <div className="text-success mb-3">
             Informe guardado correctamente ✔
           </div>
         )}
 
-        <button type="submit" disabled={saving}>
+        <button type="submit" className="btn btn-primary" disabled={saving}>
           {saving ? "Guardando..." : "Guardar Informe"}
         </button>
       </form>

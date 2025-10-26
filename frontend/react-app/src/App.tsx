@@ -36,10 +36,7 @@ function App() {
           <Route index element={<ReportesDisponibles />} />
         </Route>
         <Route path="nuevo-informe">
-          <Route
-            path="/docente/nuevo-informe/:reporteId"
-            element={<InformeCurricular />}
-          />
+          <Route path=":reporteId" element={<InformeCurricular />} />
           <Route index element={<ReportesDisponibles />} />
         </Route>
       </Route>
