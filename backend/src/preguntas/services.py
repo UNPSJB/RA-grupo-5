@@ -28,10 +28,14 @@ def crear_pregunta(db: Session, pregunta: schemas.PreguntaCreate) -> Pregunta:
 def listar_preguntas(db: Session) -> List[Pregunta]: 
     query = (
         select(Pregunta)
-
-        .options(joinedload(Pregunta.pregunta_opcion)) 
+        .options(
+            joinedload(Pregunta.pregunta_opcion)
+            .joinedload(PreguntaOpcion.opcion_respuesta)
+        )
     )
-    return db.scalars(query).all()
+    result = db.execute(query)
+
+    return result.unique().scalars().all()
 
 def leer_pregunta(db: Session, pregunta_id: int) -> Pregunta:
     query = (
