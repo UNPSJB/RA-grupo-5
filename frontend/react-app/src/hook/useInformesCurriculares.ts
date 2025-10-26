@@ -1,57 +1,39 @@
-import { useState, useEffect } from "react";
-import type { InformeCurricular } from "../types/InformeCurricular";
+const API_URL = "http://localhost:8000";
 
 export function useInformesCurriculares() {
-    const [informesCurriculares, setInformesCurriculares] = useState<InformeCurricular[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
-    const API_URL = "http://localhost:8000/informes-curriculares";
+  async function crearInformeCurricular(payload: {
+    fecha_inicio: string;
+    fecha_fin: string;
+    estado: string;
 
-    const fetchInformes = async () => {
-    try {
-        setLoading(true);
-        const response = await fetch(API_URL);
-        if (!response.ok) {
-            throw new Error("Error al obtener los informes");
-        }
-        const data = await response.json();
-        setInformesCurriculares(data);
-        setError(null);
-        } catch (err: any) {
-        setError(err.message);
-        }finally {
-        setLoading(false);
+    sede: string;
+    ciclo_lectivo: string;
+    docente: string;
+
+    cant_alumnos_insc: number;
+    cant_comisiones_teoricas: number;
+    cant_comisiones_practicas: number;
+
+    id_informe_base: number;
+    id_asignatura: number;
+    id_reporte: number;
+  }) {
+    const res = await fetch(`${API_URL}/informes-asignaturas/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      throw new Error("Error al crear el informe curricular");
     }
-};
 
-    const fetchInformeById = async (id: number) => {
-        try {
-        setLoading(true);
-        const response = await fetch(`${API_URL}/${id}`);
-        if (!response.ok) {
-            throw new Error("Error al obtener el informe");
-        }
-        const data = await response.json();
-        setInformesCurriculares((prev) => [...prev, data]);
-        setError(null);
-        return data;
-        } catch (err: any) {
-        setError(err.message);
-        return null;
-        } finally {
-        setLoading(false);
-    }
-};
+    return await res.json();
+  }
 
-    useEffect(() => {
-    fetchInformes();
-    }, []);
-
-return {
-    informesCurriculares,
-    loading,
-    error,
-    refetch: fetchInformes,
-    fetchInformeById,
-};
+  return {
+    crearInformeCurricular,
+  };
 }

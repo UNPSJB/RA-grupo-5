@@ -1,84 +1,387 @@
-import {useState, useEffect} from "react";
-import {useInformesCurriculares} from "../hook/useInformesCurriculares";
-import {useParams} from "react-router-dom";
-import { Container, Row, Col, Card } from "react-bootstrap";
-import "../styles/informe.css"
+import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+
+import { useReportes } from "../hook/useReportes";
+import { useInformesCurriculares } from "../hook/useInformesCurriculares";
+import { useInformeBase } from "../hook/useInformeBase";
+
 export default function InformeCurricular() {
-    const {id} = useParams<{id: string}>();
-    const {fetchInformeById} = useInformesCurriculares();
-    const [informe, setInforme] = useState<any>(null);
+  // 1. ID del reporte que eligió el docente en la pantalla anterior
+  const { reporteId } = useParams();
 
+  // 2. Hooks para hablar con la API
+  const { fetchReporteById } = useReportes();
+  const { crearInformeCurricular } = useInformesCurriculares();
+  const { fetchInformeBaseActual } = useInformeBase();
 
-useEffect(() => {
-        if (id) {
-        fetchInformeById(Number(id)).then((data) => {
-            console.log("Datos recibidos:", data); // <-- Y este log
-            setInforme(data);
-        });
+  // 3. Estados para los datos que tengo que precargar
+  const [reporte, setReporte] = useState<any>(null);
+  const [loadingReporte, setLoadingReporte] = useState(true);
+  const [errorReporte, setErrorReporte] = useState<string | null>(null);
+
+  const [informeBase, setInformeBase] = useState<any>(null);
+  const [loadingBase, setLoadingBase] = useState(true);
+  const [errorBase, setErrorBase] = useState<string | null>(null);
+
+  // 4. Estados para los campos administrativos del informe_asignatura
+  const [fechaInicio, setFechaInicio] = useState("");
+  const [fechaFin, setFechaFin] = useState("");
+  const [estado, setEstado] = useState("abierto");
+
+  const [sede, setSede] = useState("");
+  const [cicloLectivo, setCicloLectivo] = useState("");
+  const [docente, setDocente] = useState("");
+
+  const [cantInscriptos, setCantInscriptos] = useState<number | "">("");
+  const [cantTeoricas, setCantTeoricas] = useState<number | "">("");
+  const [cantPracticas, setCantPracticas] = useState<number | "">("");
+
+  // 5. Estados para renderizar las preguntas abiertas del informe_base
+  // Estructura: { [preguntaId]: "texto respuesta" }
+  const [respuestas, setRespuestas] = useState<Record<number, string>>({});
+
+  // 6. Feedback de guardado
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveOk, setSaveOk] = useState(false);
+
+  // ------------------------
+  // Carga inicial: Reporte
+  // ------------------------
+  useEffect(() => {
+    async function cargarReporte() {
+      if (!reporteId) {
+        setErrorReporte("Falta reporteId en la URL");
+        setLoadingReporte(false);
+        return;
+      }
+
+      try {
+        const data = await fetchReporteById(reporteId);
+        setReporte(data);
+
+        const asignatura = data.encuesta_asignatura?.asignatura;
+        setSede(asignatura?.sede || "");
+        setDocente(asignatura?.nombre_docente || "");
+        setCicloLectivo(asignatura?.ciclo_lectivo || "");
+      } catch (err) {
+        setErrorReporte("Error cargando el reporte.");
+      } finally {
+        setLoadingReporte(false);
+      }
     }
-}, [id]);
 
-const preguntas_informe= {
-    preguntas: [
-        "¿Se logró desarrollar la totalidad de los contenidos planificados?",
-        "¿Cuáles fueron los principales aspectos positivos y los obstáculos que se manifestaron durante el desarrollo del espacio curricular?",
-    ],
-    respuestas: [
-        "Sí, se logró desarrollar la mayoría de los contenidos planificados, aunque algunos temas se abordaron de manera resumida por cuestiones de tiempo.",
-        "Entre los aspectos positivos se destaca la participación activa de los estudiantes y el trabajo colaborativo. Como obstáculos, se presentaron dificultades en la adaptación a nuevas metodologías y la falta de recursos tecnológicos en algunos casos.",
-    ]};
+    cargarReporte();
+  }, [reporteId, fetchReporteById]);
 
-if (!informe) return <p>Cargando informe curricular...</p>;
+  // ------------------------
+  // Carga inicial: InformeBase
+  // ------------------------
+  useEffect(() => {
+    async function cargarInformeBase() {
+      try {
+        const base = await fetchInformeBaseActual();
+        setInformeBase(base);
 
-return (
-    <Container className=" my-5">
-        <Col>
-            <Card style={{maxWidth: '800px'}} className="mi-card p-5 shadow-lg mx-auto">
-                <h2 className="text-center mb-4 text-primary">Informe curricular</h2>
-                <Card.Body>
-                    <Row className="border mb-2">
-                        <Card.Title className="ps-5 m-3 bg-light fw-semibold text-start">A-1</Card.Title>
-                        <Col md={8} className="">
-                            <Card.Text className="m-4 bg-light fw-semibold">{preguntas_informe.preguntas[0]}</Card.Text>
-                            <Card.Text className="m-4 bg-light fw-semibold">{preguntas_informe.respuestas[0]}</Card.Text>
-                        </Col>
-                        <Col md={4} className="">
-                            <Card className="shadow-sm border-0 bg-light">
-                            <Card.Body className="text-center">
-                                <Card.Title className="text-primary fw-semibold mb-3">
-                                Horas dictadas / Horas establecidas
-                                </Card.Title>
-                                <div style={{ height: "150px" }}>
-                                <h3 className="text-success fw-bold">80%</h3>
-                                <p className="text-muted small">Cumplimiento total</p>
-                                </div>
-                            </Card.Body>
-                            </Card>
-                        </Col>
-                    </Row>
-                    <Row className="border mb-2">
-                        <Card.Title className="ps-5 m-3 bg-light fw-semibold text-start">A-2</Card.Title>
-                        <Col md={8} className="">
-                            <Card.Text className="m-4 bg-light fw-semibold">{preguntas_informe.preguntas[1]}</Card.Text>
-                            <Card.Text className="m-4 bg-light fw-semibold">{preguntas_informe.respuestas[1]}</Card.Text>
-                        </Col>
-                        <Col md={4} className="">
-                            <Card className="shadow-sm border-0 bg-light">
-                            <Card.Body className="text-center">
-                                <Card.Title className="text-primary fw-semibold mb-3">
-                                Contenidos alcanzados / Contenidos planificados
-                                </Card.Title>
-                                <div style={{ height: "150px" }}>
-                                <h3 className="text-success fw-bold">90%</h3>
-                                <p className="text-muted small">Cumplimiento total</p>
-                                </div>
-                            </Card.Body>
-                            </Card>
-                        </Col>
-                    </Row>
-                </Card.Body > 
-            </Card>
-        </Col>
-    </Container>
-);
+        if (base?.preguntas) {
+          setRespuestas((prev) => {
+            // si ya teníamos respuestas cargadas (porque el usuario empezó a escribir),
+            // no las pises
+            if (Object.keys(prev).length > 0) {
+              return prev;
+            }
+
+            const initResp: Record<number, string> = {};
+            base.preguntas.forEach((p: any) => {
+              const pid = p.id ?? p.id_pregunta ?? p.idPregunta;
+              initResp[pid] = "";
+            });
+            return initResp;
+          });
+        }
+      } catch (err) {
+        setErrorBase("Error cargando la plantilla del informe.");
+      } finally {
+        setLoadingBase(false);
+      }
+    }
+
+    cargarInformeBase();
+  }, [fetchInformeBaseActual]);
+
+  // ------------------------
+  // Enviar formulario
+  // ------------------------
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!reporte || !informeBase) return;
+
+    setSaving(true);
+    setSaveError(null);
+    setSaveOk(false);
+
+    try {
+      const asignatura = reporte.encuesta_asignatura?.asignatura;
+      const id_asignatura =
+        asignatura?.id || asignatura?.id_asignatura || asignatura?.idAsignatura;
+
+      const payloadCabecera = {
+        fecha_inicio: fechaInicio,
+        fecha_fin: fechaFin,
+        estado: estado,
+
+        sede: sede,
+        ciclo_lectivo: cicloLectivo,
+        docente: docente,
+
+        cant_alumnos_insc: cantInscriptos === "" ? 0 : Number(cantInscriptos),
+        cant_comisiones_teoricas:
+          cantTeoricas === "" ? 0 : Number(cantTeoricas),
+        cant_comisiones_practicas:
+          cantPracticas === "" ? 0 : Number(cantPracticas),
+
+        id_informe_base: informeBase.id,
+        id_asignatura: id_asignatura,
+        id_reporte: Number(reporteId),
+      };
+
+      const informeCreado = await crearInformeCurricular(payloadCabecera);
+
+      // fase 2 después podés usar informeCreado.id para postear las respuestas pregunta por pregunta
+
+      setSaveOk(true);
+    } catch (err) {
+      console.error(err);
+      setSaveError("No se pudo guardar el informe curricular.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  // ------------------------
+  // Render
+  // ------------------------
+  if (loadingReporte || loadingBase) {
+    return <div className="container mt-4">Cargando...</div>;
+  }
+
+  if (errorReporte) {
+    return <div className="container mt-4 text-danger">{errorReporte}</div>;
+  }
+  if (errorBase) {
+    return <div className="container mt-4 text-danger">{errorBase}</div>;
+  }
+  if (!reporte) {
+    return <div className="container mt-4">No hay datos del reporte.</div>;
+  }
+  if (!informeBase) {
+    return (
+      <div className="container mt-4">
+        No hay plantilla de Informe Base disponible.
+      </div>
+    );
+  }
+
+  const asignatura = reporte.encuesta_asignatura?.asignatura || {};
+
+  return (
+    <div className="container mt-4">
+      <h2>Informe Curricular</h2>
+
+      {/* CONTEXTO DE LA ASIGNATURA / REPORTE */}
+      <div className="alert alert-secondary">
+        <p>
+          <strong>Asignatura:</strong> {asignatura.nombre}
+        </p>
+        <p>
+          <strong>Carrera:</strong> {asignatura.carrera}
+        </p>
+        <p>
+          <strong>Año:</strong> {asignatura.año}
+        </p>
+        <p>
+          <strong>Cursado:</strong> {asignatura.cursado}
+        </p>
+        <p>
+          <strong>Docente según reporte:</strong> {asignatura.nombre_docente}
+        </p>
+      </div>
+
+      {/* FORMULARIO */}
+      <form onSubmit={handleSubmit}>
+        {/* Datos administrativos que van en InformeAsignatura */}
+        <div className="mb-3">
+          <label className="form-label">
+            Fecha inicio
+            <input
+              type="date"
+              className="form-control"
+              value={fechaInicio}
+              onChange={(e) => setFechaInicio(e.target.value)}
+              required
+            />
+          </label>
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label">
+            Fecha fin
+            <input
+              type="date"
+              className="form-control"
+              value={fechaFin}
+              onChange={(e) => setFechaFin(e.target.value)}
+              required
+            />
+          </label>
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label">
+            Estado
+            <select
+              className="form-select"
+              value={estado}
+              onChange={(e) => setEstado(e.target.value)}
+            >
+              <option value="abierto">abierto</option>
+              <option value="cerrado">cerrado</option>
+            </select>
+          </label>
+        </div>
+
+        <div className="row">
+          <div className="mb-3 col-md-4">
+            <label className="form-label">
+              Sede
+              <input
+                type="text"
+                className="form-control"
+                value={sede}
+                onChange={(e) => setSede(e.target.value)}
+              />
+            </label>
+          </div>
+
+          <div className="mb-3 col-md-4">
+            <label className="form-label">
+              Ciclo lectivo
+              <input
+                type="text"
+                className="form-control"
+                value={cicloLectivo}
+                onChange={(e) => setCicloLectivo(e.target.value)}
+                placeholder="2025 - 1er cuatrimestre"
+              />
+            </label>
+          </div>
+
+          <div className="mb-3 col-md-4">
+            <label className="form-label">
+              Docente responsable
+              <input
+                type="text"
+                className="form-control"
+                value={docente}
+                onChange={(e) => setDocente(e.target.value)}
+              />
+            </label>
+          </div>
+        </div>
+
+        <div className="row">
+          <div className="mb-3 col-md-4">
+            <label className="form-label">
+              Cant. alumnos inscriptos
+              <input
+                type="number"
+                className="form-control"
+                value={cantInscriptos}
+                onChange={(e) =>
+                  setCantInscriptos(
+                    e.target.value === "" ? "" : Number(e.target.value)
+                  )
+                }
+                min={0}
+              />
+            </label>
+          </div>
+
+          <div className="mb-3 col-md-4">
+            <label className="form-label">
+              Cant. comisiones teóricas
+              <input
+                type="number"
+                className="form-control"
+                value={cantTeoricas}
+                onChange={(e) =>
+                  setCantTeoricas(
+                    e.target.value === "" ? "" : Number(e.target.value)
+                  )
+                }
+                min={0}
+              />
+            </label>
+          </div>
+
+          <div className="mb-3 col-md-4">
+            <label className="form-label">
+              Cant. comisiones prácticas
+              <input
+                type="number"
+                className="form-control"
+                value={cantPracticas}
+                onChange={(e) =>
+                  setCantPracticas(
+                    e.target.value === "" ? "" : Number(e.target.value)
+                  )
+                }
+                min={0}
+              />
+            </label>
+          </div>
+        </div>
+
+        {/* Preguntas dinámicas de la plantilla */}
+        <div className="mb-4">
+          <h5>Desarrollo del cursado</h5>
+          {informeBase.preguntas?.map((pregunta: any) => {
+            const preguntaId =
+              pregunta.id ?? pregunta.id_pregunta ?? pregunta.idPregunta;
+
+            return (
+              <div className="mb-3" key={preguntaId}>
+                <label className="form-label">
+                  {pregunta.texto_pregunta ?? pregunta.texto ?? "Pregunta"}
+                  <textarea
+                    className="form-control"
+                    style={{ minHeight: "80px" }}
+                    value={respuestas[preguntaId] ?? ""}
+                    onChange={(e) =>
+                      setRespuestas((prev) => ({
+                        ...prev,
+                        [preguntaId]: e.target.value,
+                      }))
+                    }
+                  />
+                </label>
+              </div>
+            );
+          })}
+        </div>
+
+        {saveError && <div className="text-danger mb-3">{saveError}</div>}
+
+        {saveOk && (
+          <div className="text-success mb-3">
+            Informe guardado correctamente ✔
+          </div>
+        )}
+
+        <button type="submit" className="btn btn-primary" disabled={saving}>
+          {saving ? "Guardando..." : "Guardar Informe"}
+        </button>
+      </form>
+    </div>
+  );
 }

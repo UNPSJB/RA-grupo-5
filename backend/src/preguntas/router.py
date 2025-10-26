@@ -1,11 +1,9 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from src.database import get_db
 from src.preguntas import schemas, services
 
 router = APIRouter(prefix="/preguntas", tags=["preguntas"])
-
-# Rutas para Preguntas
 
 @router.post("/", response_model=schemas.PreguntaRead)
 def create_pregunta(pregunta: schemas.PreguntaCreate, db: Session = Depends(get_db)):

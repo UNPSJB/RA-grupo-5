@@ -1,13 +1,12 @@
 from typing import List
 from fastapi import HTTPException
-from sqlalchemy import delete, select, update
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session, joinedload
 from src.preguntas.models import Pregunta
 from src.preguntas import schemas, exceptions
 from src.opciones_respuesta.models import OpcionRespuesta
 
 from src.pregunta_opcion.models import PreguntaOpcion
-# operaciones CRUD para Preguntas
 
 def crear_pregunta(db: Session, pregunta: schemas.PreguntaCreate) -> Pregunta:
     _pregunta = Pregunta(**pregunta.model_dump())

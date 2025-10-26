@@ -1,5 +1,5 @@
 from typing import List
-from sqlalchemy import select
+from sqlalchemy import select, desc
 from sqlalchemy.orm import Session
 from src.informes_base.models import InformeBase
 from src.informes_base import schemas, exceptions
@@ -20,3 +20,9 @@ def leer_informe_base(db: Session, informe_base_id: int)-> schemas.InformeBaseRe
         raise exceptions.InformeBaseNoEncontrado()
     return db_informe_base
 
+def leer_informe_base_actual(db: Session):
+    return (
+        db.query(InformeBase)
+        .order_by(desc(InformeBase.id))
+        .first()
+    )
