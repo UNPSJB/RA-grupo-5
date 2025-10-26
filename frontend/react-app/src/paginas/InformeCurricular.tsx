@@ -82,13 +82,22 @@ export default function InformeCurricular() {
       try {
         const base = await fetchInformeBaseActual();
         setInformeBase(base);
-        // init respuestas por pregunta:
+
         if (base?.preguntas) {
-          const initResp: Record<number, string> = {};
-          base.preguntas.forEach((p: any) => {
-            initResp[p.id] = "";
+          setRespuestas((prev) => {
+            // si ya teníamos respuestas cargadas (porque el usuario empezó a escribir),
+            // no las pises
+            if (Object.keys(prev).length > 0) {
+              return prev;
+            }
+
+            const initResp: Record<number, string> = {};
+            base.preguntas.forEach((p: any) => {
+              const pid = p.id ?? p.id_pregunta ?? p.idPregunta;
+              initResp[pid] = "";
+            });
+            return initResp;
           });
-          setRespuestas(initResp);
         }
       } catch (err) {
         setErrorBase("Error cargando la plantilla del informe.");
@@ -336,24 +345,29 @@ export default function InformeCurricular() {
         {/* Preguntas dinámicas de la plantilla */}
         <div className="mb-4">
           <h5>Desarrollo del cursado</h5>
-          {informeBase.preguntas?.map((pregunta: any) => (
-            <div className="mb-3" key={pregunta.id}>
-              <label className="form-label">
-                {pregunta.texto_pregunta ?? pregunta.texto ?? "Pregunta"}
-                <textarea
-                  className="form-control"
-                  style={{ minHeight: "80px" }}
-                  value={respuestas[pregunta.id] ?? ""}
-                  onChange={(e) =>
-                    setRespuestas((prev) => ({
-                      ...prev,
-                      [pregunta.id]: e.target.value,
-                    }))
-                  }
-                />
-              </label>
-            </div>
-          ))}
+          {informeBase.preguntas?.map((pregunta: any) => {
+            const preguntaId =
+              pregunta.id ?? pregunta.id_pregunta ?? pregunta.idPregunta;
+
+            return (
+              <div className="mb-3" key={preguntaId}>
+                <label className="form-label">
+                  {pregunta.texto_pregunta ?? pregunta.texto ?? "Pregunta"}
+                  <textarea
+                    className="form-control"
+                    style={{ minHeight: "80px" }}
+                    value={respuestas[preguntaId] ?? ""}
+                    onChange={(e) =>
+                      setRespuestas((prev) => ({
+                        ...prev,
+                        [preguntaId]: e.target.value,
+                      }))
+                    }
+                  />
+                </label>
+              </div>
+            );
+          })}
         </div>
 
         {saveError && <div className="text-danger mb-3">{saveError}</div>}
