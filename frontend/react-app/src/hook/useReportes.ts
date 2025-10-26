@@ -1,34 +1,5 @@
-    import { useState, useEffect } from "react";
-
-    interface Asignatura {
-    id: number;
-    nombre: string;
-    carrera: string;
-    cursado: string;
-    año: number;
-    nombre_docente: string;
-    sede: string;
-    }
-
-    interface EncuestaBase {
-    id: number;
-    nombre: string;
-    ciclo: string;
-    }
-
-    interface EncuestaAsignatura {
-    asignatura: Asignatura;
-    encuesta_base: EncuestaBase;
-    estado: string;
-    fecha_inicio: string;
-    fecha_fin: string;
-    }
-
-    interface Reporte {
-    id: number;
-    encuesta_asignatura: EncuestaAsignatura;
-    respuestas: any[];
-    }
+import { useState, useEffect } from "react";
+import type { Reporte } from "../types/models/Reporte";
 
     export function useReportes(){
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import type { InformeCurricular } from "../types/InformeCurricular";
+import type { InformeCurricular } from "../types/models/InformeCurricular";
 
 export function useInformesCurriculares() {
     const [informesCurriculares, setInformesCurriculares] = useState<InformeCurricular[]>([]);

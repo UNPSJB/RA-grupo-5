@@ -1,47 +1,5 @@
 import { useState, useEffect } from "react";
-
-enum EstadoEncuesta {
-    abierta = "abierta",
-    cerrada = "cerrada",
-}
-
-enum Cursado {
-    PrimerCuatrimestre = "cuatrimestre 1",
-    SegundoCuatrimestre = "cuatrimestre 2",
-    Anual = "Anual"
-}   
-
-enum Ciclo{
-    ciclo_basico = "ciclo basico",
-    ciclo_superior = "ciclo superior"
-}
-
-interface Asignatura {
-    id: number;
-    nombre: string;
-    nombre_docente: string;
-    año: number;
-    cursado: Cursado;
-}
-
-interface EncuestaBase {
-    id: number;
-    nombre: string;
-    ciclo: Ciclo
-    variables?: any[];
-}
-
-interface Encuesta{
-    id: number;
-    id_asignatura: number;
-    id_encuesta_base: number;
-    estado: EstadoEncuesta;  
-    fecha_inicio: string;
-    fecha_fin: string;
-    asignatura?: Asignatura;
-    encuesta_base?: EncuestaBase;
-}
-
+import type { Encuesta } from "../types/models/Encuesta";
 
 export function useEncuestas(){
 

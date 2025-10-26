@@ -1,6 +1,6 @@
-import type { PreguntaProps } from "../types/Preguntas";
+import type { PreguntaProps } from "../types/models/Preguntas";
 import OpcionRespuesta from "./OpcionRespuesta";
-import type { Extras } from "../types/OpcionRespuesta";
+import type { Extras } from "../types/models/OpcionRespuesta";
 
 export default function Pregunta({
   pregunta,
