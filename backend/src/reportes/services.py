@@ -99,7 +99,7 @@ def generar_resumen_variable(db: Session, reporte_id: int) -> dict:
                 conteo_opciones[pregunta_id][opcion_id] += 1
                 total_respuestas_por_pregunta[pregunta_id] += 1
 
-    # --- ETAPA 2: ESTRUCTURAR EL RESUMEN Y CALCULAR PORCENTAJES ---
+   # --- ETAPA 2: ESTRUCTURAR EL RESUMEN Y CALCULAR PORCENTAJES ---
 
     resumen_por_variable = {}
 
@@ -111,34 +111,47 @@ def generar_resumen_variable(db: Session, reporte_id: int) -> dict:
         # 2. Recorremos las preguntas que pertenecen a esta variable
         for pregunta in variable.preguntas:
             
-            total_votos = total_respuestas_por_pregunta[pregunta.id]
-            
-            opciones_con_porcentaje = []
-            
-            # CAMBIO: Iteramos sobre 'pregunta.pregunta_opcion' (la lista de joins)
-            for pregunta_opcion_obj in pregunta.pregunta_opcion:
+            # --- FIX 1: Corregir el tipeo ("choice" en lugar de "choise") ---
+            if pregunta.tipo == "single_choice":
                 
-                # Obtenemos el objeto OpcionRespuesta real desde el join
-                opcion = pregunta_opcion_obj.opcion_respuesta
+                total_votos = total_respuestas_por_pregunta[pregunta.id]
                 
-                # Consultamos los votos usando el ID de la opción
-                votos_opcion = conteo_opciones[pregunta.id][opcion.id]
-                porcentaje = (votos_opcion / total_votos * 100) if total_votos > 0 else 0
+                opciones_con_porcentaje = []
                 
-                opciones_con_porcentaje.append({
-                    "opcion_texto": opcion.texto_opcion, # Obtenemos el texto
-                    "porcentaje": round(porcentaje, 2)
-                })
-            
-            preguntas_de_la_variable.append({
-                "pregunta_texto": pregunta.texto_pregunta,
-                "opciones": opciones_con_porcentaje
-            })
+                # CAMBIO: Iteramos sobre 'pregunta.pregunta_opcion' (la lista de joins)
+                for pregunta_opcion_obj in pregunta.pregunta_opcion:
+                    
+                    # Obtenemos el objeto OpcionRespuesta real desde el join
+                    opcion = pregunta_opcion_obj.opcion_respuesta
+                    
+                    # --- FIX 2: Añadir esta validación para evitar el AttributeError ---
+                    if opcion is None:
+                        # Esta opción está rota en la BD (registro huérfano), la saltamos.
+                        continue 
+                    # --- Fin del FIX 2 ---
+
+                    # Consultamos los votos usando el ID de la opción
+                    votos_opcion = conteo_opciones[pregunta.id][opcion.id]
+                    porcentaje = (votos_opcion / total_votos * 100) if total_votos > 0 else 0
+                    
+                    opciones_con_porcentaje.append({
+                        "opcion_texto": opcion.texto_opcion, # Obtenemos el texto
+                        "porcentaje": round(porcentaje, 2)
+                    })
+                
+                # Solo añadimos la pregunta si realmente tiene opciones calculadas
+                if opciones_con_porcentaje:
+                    preguntas_de_la_variable.append({
+                        "pregunta_texto": pregunta.texto_pregunta,
+                        "opciones": opciones_con_porcentaje
+                    })
 
         # 3. Finalmente, añadimos la variable y su lista de preguntas al resumen
-        resumen_por_variable[variable.nombre] = {
-            "variable_id": variable.id,
-            "preguntas": preguntas_de_la_variable
-        }
+        # (Mejora: Solo añadir la variable si tiene preguntas procesadas)
+        if preguntas_de_la_variable:
+            resumen_por_variable[variable.nombre] = {
+                "variable_id": variable.id,
+                "preguntas": preguntas_de_la_variable
+            }
 
     return {"message": "Resumen por variable generado", "resumen": resumen_por_variable}
