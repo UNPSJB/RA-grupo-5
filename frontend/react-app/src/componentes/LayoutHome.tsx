@@ -56,7 +56,16 @@ export default function LayoutHome() {
                 </Link>
               </Col>
             </div>
+            <div>
+            <Col className="d-flex flex-column align-items-center">
+                <img src={logoDepartamento} alt="logoDepartamento" />
+                <Link to="/secretaria" className="btn btn-secondary">
+                  Secretaria
+                </Link>
+              </Col>
           </div>
+          </div>
+          
         </Container>
       </main>
 

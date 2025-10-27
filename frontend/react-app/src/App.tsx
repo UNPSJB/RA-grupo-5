@@ -11,6 +11,8 @@ import InformeCurricular from "./paginas/InformeCurricular.tsx";
 import "bootstrap/dist/css/bootstrap.min.css";
 import ReportesDisponibles from "./paginas/ReportesDisponibles.tsx";
 import EncuestasRespondidas from "./componentes/EncuestasRespondidas.tsx";
+import LayoutSecretaria from "./componentes/LayoutSecretaria.tsx";
+import CrearEncuestaBase from "./paginas/secretaria/CrearEncuestaBase.tsx";
 
 function App() {
   return (
@@ -44,6 +46,13 @@ function App() {
           <Route index element={<InformesCurricularesDisponibles />} />
         </Route>
       </Route>
+
+      <Route path="/secretaria" element={<LayoutSecretaria />}> 
+        <Route path="encuesta-base" element= {CrearEncuestaBase}></Route>
+      </Route>
+        
+        
+      
     </Routes>
   );
 }
