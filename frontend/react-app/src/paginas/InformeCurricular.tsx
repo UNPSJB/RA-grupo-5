@@ -1,9 +1,11 @@
+// src/pages/InformeCurricular.tsx
 import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 import { useReportes } from "../hook/useReportes";
 import { useInformesCurriculares } from "../hook/useInformesCurriculares";
 import { useInformeBase } from "../hook/useInformeBase";
+import { useResponderInforme } from "../hook/useResponderInforme";
 
 export default function InformeCurricular() {
   // 1. ID del reporte que eligió el docente en la pantalla anterior
@@ -14,7 +16,14 @@ export default function InformeCurricular() {
   const { crearInformeCurricular } = useInformesCurriculares();
   const { fetchInformeBaseActual } = useInformeBase();
 
-  // 3. Estados para los datos que tengo que precargar
+  // Hook para manejar respuestas libres del docente
+  const {
+    answersByPreguntaOpcion,
+    setTextoRespuesta,
+    guardarRespuestasInforme,
+  } = useResponderInforme();
+
+  // 3. Estados para datos precargados
   const [reporte, setReporte] = useState<any>(null);
   const [loadingReporte, setLoadingReporte] = useState(true);
   const [errorReporte, setErrorReporte] = useState<string | null>(null);
@@ -36,11 +45,7 @@ export default function InformeCurricular() {
   const [cantTeoricas, setCantTeoricas] = useState<number | "">("");
   const [cantPracticas, setCantPracticas] = useState<number | "">("");
 
-  // 5. Estados para renderizar las preguntas abiertas del informe_base
-  // Estructura: { [preguntaId]: "texto respuesta" }
-  const [respuestas, setRespuestas] = useState<Record<number, string>>({});
-
-  // 6. Feedback de guardado
+  // 5. Feedback de guardado
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveOk, setSaveOk] = useState(false);
@@ -75,30 +80,26 @@ export default function InformeCurricular() {
   }, [reporteId, fetchReporteById]);
 
   // ------------------------
-  // Carga inicial: InformeBase
+  // Carga inicial: InformeBase (plantilla vigente)
   // ------------------------
   useEffect(() => {
     async function cargarInformeBase() {
       try {
         const base = await fetchInformeBaseActual();
+        // IMPORTANTE:
+        // base.preguntas[i] DEBE traer también las opciones (pregunta_opcion)
+        // para cada pregunta. Al menos una pregunta_opcion por pregunta,
+        // y cada pregunta_opcion debe tener su `id`.
+        //
+        // Ej:
+        // {
+        //   id: 10,
+        //   texto_pregunta: "...",
+        //   pregunta_opcion: [
+        //     { id: 999, id_pregunta: 10, id_opcion_respuesta: null }
+        //   ]
+        // }
         setInformeBase(base);
-
-        if (base?.preguntas) {
-          setRespuestas((prev) => {
-            // si ya teníamos respuestas cargadas (porque el usuario empezó a escribir),
-            // no las pises
-            if (Object.keys(prev).length > 0) {
-              return prev;
-            }
-
-            const initResp: Record<number, string> = {};
-            base.preguntas.forEach((p: any) => {
-              const pid = p.id ?? p.id_pregunta ?? p.idPregunta;
-              initResp[pid] = "";
-            });
-            return initResp;
-          });
-        }
       } catch (err) {
         setErrorBase("Error cargando la plantilla del informe.");
       } finally {
@@ -110,53 +111,81 @@ export default function InformeCurricular() {
   }, [fetchInformeBaseActual]);
 
   // ------------------------
-  // Enviar formulario
+  // Submit del formulario
   // ------------------------
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!reporte || !informeBase) return;
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!reporte || !informeBase) return;
 
-    setSaving(true);
-    setSaveError(null);
-    setSaveOk(false);
+      setSaving(true);
+      setSaveError(null);
+      setSaveOk(false);
 
-    try {
-      const asignatura = reporte.encuesta_asignatura?.asignatura;
-      const id_asignatura =
-        asignatura?.id || asignatura?.id_asignatura || asignatura?.idAsignatura;
+      try {
+        // 1. Armamos la "cabecera" del informe_asignatura
+        const asignatura = reporte.encuesta_asignatura?.asignatura;
+        const id_asignatura =
+          asignatura?.id ||
+          asignatura?.id_asignatura ||
+          asignatura?.idAsignatura;
 
-      const payloadCabecera = {
-        fecha_inicio: fechaInicio,
-        fecha_fin: fechaFin,
-        estado: estado,
+        const payloadCabecera = {
+          fecha_inicio: fechaInicio,
+          fecha_fin: fechaFin,
+          estado: estado,
 
-        sede: sede,
-        ciclo_lectivo: cicloLectivo,
-        docente: docente,
+          sede: sede,
+          ciclo_lectivo: cicloLectivo,
+          docente: docente,
 
-        cant_alumnos_insc: cantInscriptos === "" ? 0 : Number(cantInscriptos),
-        cant_comisiones_teoricas:
-          cantTeoricas === "" ? 0 : Number(cantTeoricas),
-        cant_comisiones_practicas:
-          cantPracticas === "" ? 0 : Number(cantPracticas),
+          cant_alumnos_insc: cantInscriptos === "" ? 0 : Number(cantInscriptos),
+          cant_comisiones_teoricas:
+            cantTeoricas === "" ? 0 : Number(cantTeoricas),
+          cant_comisiones_practicas:
+            cantPracticas === "" ? 0 : Number(cantPracticas),
 
-        id_informe_base: informeBase.id,
-        id_asignatura: id_asignatura,
-        id_reporte: Number(reporteId),
-      };
+          id_informe_base: informeBase.id,
+          id_asignatura: id_asignatura,
+          id_reporte: Number(reporteId),
+        };
 
-      const informeCreado = await crearInformeCurricular(payloadCabecera);
+        // 2. Creamos el informe_asignatura en backend
+        const informeCreado = await crearInformeCurricular(payloadCabecera);
+        // informeCreado.id = id_informe_asignatura que vamos a usar abajo
 
-      // fase 2 después podés usar informeCreado.id para postear las respuestas pregunta por pregunta
+        // 3. Guardamos las respuestas abiertas del docente
+        // Necesitamos el id_persona (docente actual).
+        // Por ahora, hasta que tengas auth, lo dejamos fijo.
+        const idDocente = 1; // TODO: reemplazar con el ID real del docente logueado
 
-      setSaveOk(true);
-    } catch (err) {
-      console.error(err);
-      setSaveError("No se pudo guardar el informe curricular.");
-    } finally {
-      setSaving(false);
-    }
-  }
+        await guardarRespuestasInforme(idDocente, informeCreado.id);
+
+        setSaveOk(true);
+      } catch (err) {
+        console.error(err);
+        setSaveError("No se pudo guardar el informe curricular.");
+      } finally {
+        setSaving(false);
+      }
+    },
+    [
+      reporte,
+      informeBase,
+      fechaInicio,
+      fechaFin,
+      estado,
+      sede,
+      cicloLectivo,
+      docente,
+      cantInscriptos,
+      cantTeoricas,
+      cantPracticas,
+      reporteId,
+      crearInformeCurricular,
+      guardarRespuestasInforme,
+    ]
+  );
 
   // ------------------------
   // Render
@@ -345,24 +374,34 @@ export default function InformeCurricular() {
         {/* Preguntas dinámicas de la plantilla */}
         <div className="mb-4">
           <h5>Desarrollo del cursado</h5>
+
           {informeBase.preguntas?.map((pregunta: any) => {
-            const preguntaId =
-              pregunta.id ?? pregunta.id_pregunta ?? pregunta.idPregunta;
+            // IMPORTANTE:
+            // necesitamos el id_pregunta_opcion que corresponde a la respuesta abierta.
+            // asumimos que la primera opción es la abierta.
+            const primeraOpcion = pregunta.pregunta_opcion?.[0];
+            const idPreguntaOpcion = primeraOpcion?.id;
 
             return (
-              <div className="mb-3" key={preguntaId}>
+              <div
+                className="mb-3"
+                key={idPreguntaOpcion ?? pregunta.id ?? Math.random()}
+              >
                 <label className="form-label">
                   {pregunta.texto_pregunta ?? pregunta.texto ?? "Pregunta"}
                   <textarea
                     className="form-control"
                     style={{ minHeight: "80px" }}
-                    value={respuestas[preguntaId] ?? ""}
-                    onChange={(e) =>
-                      setRespuestas((prev) => ({
-                        ...prev,
-                        [preguntaId]: e.target.value,
-                      }))
+                    value={
+                      idPreguntaOpcion
+                        ? answersByPreguntaOpcion[idPreguntaOpcion] ?? ""
+                        : ""
                     }
+                    onChange={(e) => {
+                      if (idPreguntaOpcion) {
+                        setTextoRespuesta(idPreguntaOpcion, e.target.value);
+                      }
+                    }}
                   />
                 </label>
               </div>

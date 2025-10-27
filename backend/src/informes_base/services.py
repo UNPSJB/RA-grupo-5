@@ -1,8 +1,10 @@
 from typing import List
 from sqlalchemy import select, desc
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from src.informes_base.models import InformeBase
 from src.informes_base import schemas, exceptions
+from src.preguntas.models import Pregunta
+from src.pregunta_opcion.models import PreguntaOpcion
 
 def listar_informes_base(db:Session) -> List[schemas.InformeBaseRead]:
     return db.scalars(select(InformeBase)).all()
@@ -20,9 +22,20 @@ def leer_informe_base(db: Session, informe_base_id: int)-> schemas.InformeBaseRe
         raise exceptions.InformeBaseNoEncontrado()
     return db_informe_base
 
+
 def leer_informe_base_actual(db: Session):
-    return (
-        db.query(InformeBase)
+    query = (
+        select(InformeBase)
+        .options(
+            selectinload(InformeBase.preguntas)
+            .selectinload(Pregunta.pregunta_opcion)
+            .selectinload(PreguntaOpcion.opcion_respuesta)
+        )
         .order_by(desc(InformeBase.id))
-        .first()
+        .limit(1)
     )
+
+    result = db.execute(query)
+
+    informe_base = result.unique().scalars().first()
+    return informe_base
