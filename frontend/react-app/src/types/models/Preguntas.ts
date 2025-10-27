@@ -1,8 +1,3 @@
-<<<<<<< Updated upstream
-export interface PreguntaProps {
-  pregunta: any;
-}
-=======
 // (Asumo que este archivo está en 'types/Pregunta.ts')
 
 // 1. (Opcional, pero recomendado) Importa el tipo real de 'Pregunta'
@@ -31,4 +26,3 @@ export interface PreguntaProps {
     tipo: TipoPregunta 
   ) => void;
 }
->>>>>>> Stashed changes
