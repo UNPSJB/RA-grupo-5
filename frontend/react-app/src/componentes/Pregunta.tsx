@@ -1,6 +1,9 @@
 import type { PreguntaProps } from "../types/models/Preguntas";
 import OpcionRespuesta from "./OpcionRespuesta";
+<<<<<<< Updated upstream
 import type { Extras } from "../types/models/OpcionRespuesta";
+=======
+>>>>>>> Stashed changes
 
 export default function Pregunta({
   pregunta,

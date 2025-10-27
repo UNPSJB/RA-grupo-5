@@ -1,7 +1,11 @@
 import { Container, Row, Col, Card, ListGroup, ProgressBar } from "react-bootstrap";
 import { useReportes } from "../hook/useReportes";
 import { useEffect, useState } from "react";
+<<<<<<< Updated upstream
 import { useParams } from "react-router-dom";
+=======
+import { useParams, Link } from "react-router-dom";
+>>>>>>> Stashed changes
 import LayoutReporte from "../componentes/LayoutReporte";
 import TabComponent from "../componentes/TabsVariables";
 
@@ -11,7 +15,11 @@ export default function ResumenReporte() {
   const { fetchResumenByReporteId,fetchReporteById, loading, error } = useReportes();
   const [reporte, setReporte] = useState<any>(null);
   const [reporteCompleto, setReporteCompleto] = useState<any>(null);
+<<<<<<< Updated upstream
   const asignatura = reporteCompleto?.encuesta_asignatura?.asignatura;
+=======
+ 
+>>>>>>> Stashed changes
 
 
   //trae el resumen del reporte desde el back segun el id 
@@ -52,10 +60,18 @@ useEffect(() => {
               </Card.Subtitle>
               <ListGroup variant="flush">
                 {pregunta.opciones.map((opcion: any, k: number) => (
+<<<<<<< Updated upstream
                   <ListGroup.Item key={k}>
                     <div className="d-flex justify-content-between align-items-center mb-1">
                       <span>{opcion.opcion_texto}</span>
                       <span>{opcion.porcentaje}%</span>
+=======
+                  
+                  <ListGroup.Item key={k}>
+                    <div className="d-flex justify-content-between align-items-center mb-1">
+                      <span>{opcion.opcion_texto}</span>
+                      <span>{opcion.cantidad} ({opcion.porcentaje}%)</span>
+>>>>>>> Stashed changes
                     </div>
                     <ProgressBar
                       now={opcion.porcentaje}
@@ -107,9 +123,18 @@ const Datosasignatura = reporteCompleto.encuesta_asignatura.asignatura;
   </div>
 
   <div className="d-grid">
+<<<<<<< Updated upstream
     <button className="btn btn-outline-primary btn-sm">
       Crear informe curricular
     </button>
+=======
+   <Link
+    to={`/docente/nuevo-informe/${reporteCompleto.id}`}
+    className="btn btn-primary m-2"
+         >
+      Crear informe curricular
+  </Link>
+>>>>>>> Stashed changes
   </div>
 </Card.Body>
 

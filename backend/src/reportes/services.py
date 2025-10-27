@@ -127,7 +127,8 @@ def generar_resumen_variable(db: Session, reporte_id: int) -> dict:
                 
                 opciones_con_porcentaje.append({
                     "opcion_texto": opcion.texto_opcion, # Obtenemos el texto
-                    "porcentaje": round(porcentaje, 2)
+                    "porcentaje": round(porcentaje, 2),
+                    "cantidad": votos_opcion
                 })
             
             preguntas_de_la_variable.append({

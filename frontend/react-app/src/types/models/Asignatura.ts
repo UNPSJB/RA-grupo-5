@@ -5,5 +5,9 @@ export interface Asignatura {
     nombre: string;
     nombre_docente: string;
     año: number;
+<<<<<<< Updated upstream
+    carrera: string;
+=======
+>>>>>>> Stashed changes
     cursado: Cursado;
 }

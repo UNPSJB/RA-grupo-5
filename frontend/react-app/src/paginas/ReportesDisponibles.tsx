@@ -21,6 +21,7 @@ return (
                 <th>Carrera</th>
                 <th>Acciones</th>
             </tr>
+<<<<<<< Updated upstream
         </thead>
             <tbody>
             {reportes.length === 0 ? (
@@ -53,4 +54,38 @@ return (
     </Table>
 </div>
 );
+=======
+          ) : (
+            reportes.map((reporte) => {
+              const asignatura = reporte.encuesta_asignatura.asignatura;
+              return (
+                <tr key={reporte.id}>
+                  <td>{asignatura.nombre}</td>
+                  <td>{asignatura.año}</td>
+                  <td>{asignatura.cursado}</td>
+                  <td>{asignatura.nombre_docente}</td>
+                  <td>{asignatura.carrera}</td>
+                  <td>
+                    <Link
+                      to={`/docente/nuevo-informe/${reporte.id}`}
+                      className="btn btn-primary m-2"
+                    >
+                      Responder Informe
+                    </Link>
+                    <Link
+                      to={`/docente/reportes/${reporte.id}`}
+                      className="btn btn-secondary m-2"
+                    >
+                      Ver Reporte
+                    </Link>
+                  </td>
+                </tr>
+              );
+            })
+          )}
+        </tbody>
+      </Table>
+    </div>
+  );
+>>>>>>> Stashed changes
 }
