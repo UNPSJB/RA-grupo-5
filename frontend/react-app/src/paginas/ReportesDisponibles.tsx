@@ -1,17 +1,17 @@
-import { useReportes } from "../hook/useReportes";
+import { useReportes } from "../hook/useReportes";  
 import Table from "react-bootstrap/Table";
 import { Link } from "react-router-dom";
 
 export default function ReportesDisponibles() {
-  const { reportes, loading, error } = useReportes();
+    const { reportes, loading, error } = useReportes();
 
-  if (loading) return <p>Cargando reportes...</p>;
-  if (error) return <p>Error: {error}</p>;
+    if (loading) return <p>Cargando reportes...</p>;
+    if (error) return <p>Error: {error}</p>;
 
-  return (
-    <div className="container mt-3 p-4 border">
-      <h2 className="m-3">Reportes Disponibles</h2>
-      <Table className="table table-striped border mt-5">
+return (
+<div className="container mt-3 p-4 border">
+    <h2 className="m-3">Reportes Disponibles</h2>
+        <Table className="table table-striped border mt-5">
         <thead>
           <tr className="border">
             <th>Asignatura</th>

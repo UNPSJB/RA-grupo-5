@@ -53,7 +53,7 @@ const fetchResumenByReporteId = async (id: number) => {
   useEffect(() => {
     fetchReportes();
   }, [fetchReportes]);
-
+}
   return {
     reportes,
     loading,
@@ -62,5 +62,4 @@ const fetchResumenByReporteId = async (id: number) => {
     fetchReporteById,
     fetchResumenByReporteId
   };
-}
-};
+}   
