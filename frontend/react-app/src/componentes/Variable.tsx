@@ -1,6 +1,6 @@
 import Table from "react-bootstrap/Table";
 import Pregunta from "./Pregunta";
-import type { Props } from "../types/Variable";
+import type { Props } from "../types/models/Variable";
 
 export default function Variable({
   variable,
