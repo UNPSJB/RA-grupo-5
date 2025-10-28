@@ -1,5 +1,5 @@
 import { Button } from "react-bootstrap";
-import type { OpcionRespuesta as ORType } from "../types/OpcionRespuesta";
+import type { OpcionRespuesta as ORType } from "../types/models/OpcionRespuesta";
 
 type Props = {
   opcionRespuesta: ORType | any;
