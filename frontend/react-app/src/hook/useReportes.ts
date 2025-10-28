@@ -33,7 +33,7 @@ export function useReportes() {
     console.log("Reportes desde el hook:", reportes);
     try {
       setLoading(true);
-     const res = await fetch(`${API_URL}/generar/${id}`);
+     const res = await fetch(`${API_URL}/reportes/generar/${id}`);
       
       if (!res.ok) throw new Error("Error al obtener el resumen");
       return await res.json();
