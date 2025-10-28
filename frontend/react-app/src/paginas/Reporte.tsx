@@ -1,80 +1,141 @@
 import { Container, Row, Col, Card, ListGroup, ProgressBar } from "react-bootstrap";
+import { useReportes } from "../hook/useReportes";
+import { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import LayoutReporte from "../componentes/LayoutReporte.tsx";
+import TabComponent from "../componentes/TabsVariables.tsx";
+
+export default function ResumenReporte() {
+  const { id } = useParams();
+  const idReporte = Number(id);
+  const { fetchResumenByReporteId,fetchReporteById , loading, error } = useReportes();
+  const [reporte, setReporte] = useState<any>(null);
+  const [reporteCompleto, setReporteCompleto] = useState<any>(null);
+ 
 
 
-    export default function ReporteGeneral() {
+  //trae el resumen del reporte desde el back segun el id 
+  useEffect(() => {
+    if (!isNaN(idReporte)) {
+      const cargarResumen = async () => {
+        const data = await fetchResumenByReporteId(idReporte);
+        setReporte(data);
+      };
+      cargarResumen();
+    }
+  }, [idReporte]);
+useEffect(() => {
+  const cargarReporte = async () => {
+    const data = await fetchReporteById(idReporte);
+    if (data) setReporteCompleto(data);
+  };
+  cargarReporte();
+}, [idReporte]);
+  if (loading) return <p>Cargando resumen...</p>;
+  if (error) return <p>Error: {error}</p>;
+  if (!reporte || !reporteCompleto
+  ) return <p>No hay datos disponibles</p>;
 
-    const reporteSimulado = {
-    variable: "Comunicación y desarrollo",
-    preguntas: [
-        {
-        texto: "¿El procfesor brindo al inicio del curso, informacion referida al desarrollo de la asignatura?",
-        respuestas: [
-            { opcion: "Muy bueno, muy satifactorio", cantidad: 15 },
-            { opcion: "Bueno, satifactorio", cantidad: 10 },
-            { opcion: "Regular, Poco satifactorio", cantidad: 3 },
-            { opcion: "Malo, No satifactorio", cantidad: 2 },
-        ],
-        },
-        {
-        texto: "¿Se respeto la planificacion de las actividades programadas al inicio del cursado y el catalogo academico?",
-        respuestas: [
-            { opcion: "Muy bueno, muy satifactorio", cantidad: 18 },
-            { opcion: "Bueno, satifactorio", cantidad: 7 },
-            { opcion: "Regular, Poco satifactorio", cantidad: 4 },
-            { opcion: "Malo, No satifactorio", cantidad: 1 },
-        ],
-        }
-    ],
-    };
+  const tabs = Object.entries(reporte.resumen).map(
+    
+    ([nombreVariable, variableData]: [string, any]) => ({
+      key: nombreVariable,
+      title: nombreVariable,
+      content: (
+        <Card className="mb-4 border-0">
+          <Card.Title className="mb-4 text-center">
+            <h4>{nombreVariable}</h4>
+          </Card.Title>
+          {variableData.preguntas.map((pregunta: any, j: number) => (
+            <Card key={j} className="mb-3 border-0">
+              <Card.Subtitle className="mb-3 mt-2 fw-bold">
+                {pregunta.pregunta_texto}
+              </Card.Subtitle>
+              <ListGroup variant="flush">
+                {pregunta.opciones.map((opcion: any, k: number) => (
+                  
+                  <ListGroup.Item key={k}>
+                    <div className="d-flex justify-content-between align-items-center mb-1">
+                      <span>{opcion.opcion_texto}</span>
+                      <span>{opcion.cantidad} ({opcion.porcentaje}%)</span>
+                    </div>
+                    <ProgressBar
+                      now={opcion.porcentaje}
+                      label={`${opcion.porcentaje}%`}
+                      variant="info"
+                      style={{ height: "15px" }}
+                    />
+                  </ListGroup.Item>
+                ))}
+              </ListGroup>
+            </Card>
+          ))}
+        </Card>
+      ),
+    })
+  );
 
-    return (
-    <Container className="mt-5">
-      <Row className="justify-content-center">
-        <Col md={8}>
-          <Card className="shadow-lg border-0">
-            <Card.Body>
-              <Card.Title className="mb-4 text-center ">
-                <h3>{reporteSimulado.variable}</h3>
-              </Card.Title>
+const Datosasignatura = reporteCompleto.encuesta_asignatura.asignatura;
 
-              {reporteSimulado.preguntas.map((pregunta, i) => (
-                <Card key={i} className="mb-4 border-0">
-                  <Card.Subtitle className="mb-4 mt-2 fw-bold">
-                    {pregunta.texto}
-                  </Card.Subtitle>
+  return (
+    
+    <LayoutReporte
+      asignatura={Datosasignatura.nombre}
+      anio={Datosasignatura.año}
+      docente={Datosasignatura.nombre_docente}
+      carrera={Datosasignatura.carrera}
+    >
+      
+<Container className="mt-5">
+  <Row>
+    {/* Columna izquierda: Card lateral */}
+    <Col md={3}>
+      <Card className="shadow-sm mb-4" style={{ fontSize: "0.9rem" }}>
+<Card.Body className="p-2">
+  <div className="d-flex justify-content-between align-items-center mb-2">
+    <span className="text-muted fw-semibold" style={{ fontSize: "0.8rem" }}>
+      Total inscriptos
+    </span>
+    <span className="text-dark fw-bold" style={{ fontSize: "0.9rem" }}>25</span>
+  </div>
 
-                  <ListGroup variant="flush">
-                    {pregunta.respuestas.map((resp, j) => {
-                      const total = pregunta.respuestas.reduce(
-                        (sum, r) => sum + r.cantidad,
-                        0
-                      );
-                      const porcentaje = Math.round(
-                        (resp.cantidad / total) * 100
-                      );
+  <div className="d-flex justify-content-between align-items-center mb-3">
+    <span className="text-muted fw-semibold" style={{ fontSize: "0.8rem" }}>
+      Encuestas procesadas
+    </span>
+    <span className="text-primary fw-bold" style={{ fontSize: "0.9rem" }}>
+      {reporteCompleto.encuesta_asignatura.respuestas.length}
+    </span>
+  </div>
 
-                      return (
-                        <ListGroup.Item key={j}>
-                          <div className="d-flex justify-content-between align-items-center mb-1">
-                            <span>{resp.opcion}</span>
-                            <span>{porcentaje}%</span>
-                          </div>
-                          <ProgressBar
-                            now={porcentaje}
-                            label={`${resp.cantidad}`}
-                            variant="info"
-                            style={{ height: "15px" }}
-                          />
-                        </ListGroup.Item>
-                      );
-                    })}
-                  </ListGroup>
-                </Card>
-              ))}
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+  <div className="d-grid">
+   <Link
+    to={`/docente/nuevo-informe/${reporteCompleto.id}`}
+    className="btn btn-primary m-2"
+         >
+      Crear informe curricular
+  </Link>
+  </div>
+</Card.Body>
+
+      </Card>
+    </Col>
+
+    {/* Columna derecha: Tabs */}
+    <Col md={8}>
+      <Card className="shadow-lg border-0">
+        <Card.Body>
+          <TabComponent
+            tabs={tabs}
+            defaultKey={tabs[0]?.key}
+            className="mb-4"
+          />
+        </Card.Body>
+      </Card>
+    </Col>
+  </Row>
+</Container>
+
+    </LayoutReporte>
   );
 }
