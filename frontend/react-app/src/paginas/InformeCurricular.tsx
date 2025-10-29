@@ -1,11 +1,11 @@
-// src/pages/InformeCurricular.tsx
 import { useParams } from "react-router-dom";
 import { useEffect, useState, useCallback } from "react";
-
 import { useReportes } from "../hook/useReportes";
 import { useInformesCurriculares } from "../hook/useInformesCurriculares";
 import { useInformeBase } from "../hook/useInformeBase";
 import { useResponderInforme } from "../hook/useResponderInforme";
+import LayoutReporte from "../componentes/LayoutReporte";
+import { Container, Card } from "react-bootstrap";
 
 export default function InformeCurricular() {
   // 1. ID del reporte que eligió el docente en la pantalla anterior
@@ -38,7 +38,10 @@ export default function InformeCurricular() {
   const [estado, setEstado] = useState("abierto");
 
   const [sede, setSede] = useState("");
-  const [cicloLectivo, setCicloLectivo] = useState("");
+
+  // 👇 este es el que cambiamos: ahora puede ser number o "" mientras se edita
+  const [cicloLectivo, setCicloLectivo] = useState<number | "">("");
+
   const [docente, setDocente] = useState("");
 
   const [cantInscriptos, setCantInscriptos] = useState<number | "">("");
@@ -66,9 +69,22 @@ export default function InformeCurricular() {
         setReporte(data);
 
         const asignatura = data.encuesta_asignatura?.asignatura;
+
         setSede(asignatura?.sede || "");
         setDocente(asignatura?.nombre_docente || "");
-        setCicloLectivo(asignatura?.ciclo_lectivo || "");
+
+        // ciclo_lectivo debería ser un año (número).
+        // Si viene del backend como string o number, normalizamos:
+        if (
+          asignatura?.ciclo_lectivo === 0 ||
+          asignatura?.ciclo_lectivo === "" ||
+          asignatura?.ciclo_lectivo === undefined ||
+          asignatura?.ciclo_lectivo === null
+        ) {
+          setCicloLectivo("");
+        } else {
+          setCicloLectivo(Number(asignatura.ciclo_lectivo));
+        }
       } catch (err) {
         setErrorReporte("Error cargando el reporte.");
       } finally {
@@ -86,19 +102,6 @@ export default function InformeCurricular() {
     async function cargarInformeBase() {
       try {
         const base = await fetchInformeBaseActual();
-        // IMPORTANTE:
-        // base.preguntas[i] DEBE traer también las opciones (pregunta_opcion)
-        // para cada pregunta. Al menos una pregunta_opcion por pregunta,
-        // y cada pregunta_opcion debe tener su `id`.
-        //
-        // Ej:
-        // {
-        //   id: 10,
-        //   texto_pregunta: "...",
-        //   pregunta_opcion: [
-        //     { id: 999, id_pregunta: 10, id_opcion_respuesta: null }
-        //   ]
-        // }
         setInformeBase(base);
       } catch (err) {
         setErrorBase("Error cargando la plantilla del informe.");
@@ -136,7 +139,7 @@ export default function InformeCurricular() {
           estado: estado,
 
           sede: sede,
-          ciclo_lectivo: cicloLectivo,
+          ciclo_lectivo: Number(cicloLectivo),
           docente: docente,
 
           cant_alumnos_insc: cantInscriptos === "" ? 0 : Number(cantInscriptos),
@@ -155,9 +158,8 @@ export default function InformeCurricular() {
         // informeCreado.id = id_informe_asignatura que vamos a usar abajo
 
         // 3. Guardamos las respuestas abiertas del docente
-        // Necesitamos el id_persona (docente actual).
-        // Por ahora, hasta que tengas auth, lo dejamos fijo.
-        const idDocente = 1; // TODO: reemplazar con el ID real del docente logueado
+        // TODO: reemplazar esto cuando tengas auth real
+        const idDocente = 1;
 
         await guardarRespuestasInforme(idDocente, informeCreado.id);
 
@@ -188,7 +190,7 @@ export default function InformeCurricular() {
   );
 
   // ------------------------
-  // Render
+  // Renderizado
   // ------------------------
   if (loadingReporte || loadingBase) {
     return <div className="container mt-4">Cargando...</div>;
@@ -215,212 +217,204 @@ export default function InformeCurricular() {
 
   return (
     <div className="container mt-4">
-      <h2>Informe Curricular</h2>
+      <h2>Informe de Actividad Curricular</h2>
 
-      {/* CONTEXTO DE LA ASIGNATURA / REPORTE */}
-      <div className="alert alert-secondary">
-        <p>
-          <strong>Asignatura:</strong> {asignatura.nombre}
-        </p>
-        <p>
-          <strong>Carrera:</strong> {asignatura.carrera}
-        </p>
-        <p>
-          <strong>Año:</strong> {asignatura.año}
-        </p>
-        <p>
-          <strong>Cursado:</strong> {asignatura.cursado}
-        </p>
-        <p>
-          <strong>Docente según reporte:</strong> {asignatura.nombre_docente}
-        </p>
-      </div>
-
-      {/* FORMULARIO */}
-      <form onSubmit={handleSubmit}>
-        {/* Datos administrativos que van en InformeAsignatura */}
-        <div className="mb-3">
-          <label className="form-label">
-            Fecha inicio
-            <input
-              type="date"
-              className="form-control"
-              value={fechaInicio}
-              onChange={(e) => setFechaInicio(e.target.value)}
-              required
-            />
-          </label>
-        </div>
-
-        <div className="mb-3">
-          <label className="form-label">
-            Fecha fin
-            <input
-              type="date"
-              className="form-control"
-              value={fechaFin}
-              onChange={(e) => setFechaFin(e.target.value)}
-              required
-            />
-          </label>
-        </div>
-
-        <div className="mb-3">
-          <label className="form-label">
-            Estado
-            <select
-              className="form-select"
-              value={estado}
-              onChange={(e) => setEstado(e.target.value)}
+      <LayoutReporte
+        asignatura={asignatura.nombre}
+        anio={asignatura.año}
+        docente={asignatura.nombre_docente}
+        carrera={asignatura.carrera}
+      >
+        <Container className="mt-5">
+          {/* FORMULARIO */}
+          <form onSubmit={handleSubmit}>
+            {/* Datos administrativos que van en InformeAsignatura */}
+            <Card
+              className="shadow-sm p-4 mb-4 border-0"
+              style={{ fontSize: "0.95rem", borderRadius: "0.75rem" }}
             >
-              <option value="abierto">abierto</option>
-              <option value="cerrado">cerrado</option>
-            </select>
-          </label>
-        </div>
+              <h5 className="mb-3 fw-semibold text-secondary">
+                Datos de su informe
+              </h5>
 
-        <div className="row">
-          <div className="mb-3 col-md-4">
-            <label className="form-label">
-              Sede
-              <input
-                type="text"
-                className="form-control"
-                value={sede}
-                onChange={(e) => setSede(e.target.value)}
-              />
-            </label>
-          </div>
-
-          <div className="mb-3 col-md-4">
-            <label className="form-label">
-              Ciclo lectivo
-              <input
-                type="text"
-                className="form-control"
-                value={cicloLectivo}
-                onChange={(e) => setCicloLectivo(e.target.value)}
-                placeholder="2025 - 1er cuatrimestre"
-              />
-            </label>
-          </div>
-
-          <div className="mb-3 col-md-4">
-            <label className="form-label">
-              Docente responsable
-              <input
-                type="text"
-                className="form-control"
-                value={docente}
-                onChange={(e) => setDocente(e.target.value)}
-              />
-            </label>
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="mb-3 col-md-4">
-            <label className="form-label">
-              Cant. alumnos inscriptos
-              <input
-                type="number"
-                className="form-control"
-                value={cantInscriptos}
-                onChange={(e) =>
-                  setCantInscriptos(
-                    e.target.value === "" ? "" : Number(e.target.value)
-                  )
-                }
-                min={0}
-              />
-            </label>
-          </div>
-
-          <div className="mb-3 col-md-4">
-            <label className="form-label">
-              Cant. comisiones teóricas
-              <input
-                type="number"
-                className="form-control"
-                value={cantTeoricas}
-                onChange={(e) =>
-                  setCantTeoricas(
-                    e.target.value === "" ? "" : Number(e.target.value)
-                  )
-                }
-                min={0}
-              />
-            </label>
-          </div>
-
-          <div className="mb-3 col-md-4">
-            <label className="form-label">
-              Cant. comisiones prácticas
-              <input
-                type="number"
-                className="form-control"
-                value={cantPracticas}
-                onChange={(e) =>
-                  setCantPracticas(
-                    e.target.value === "" ? "" : Number(e.target.value)
-                  )
-                }
-                min={0}
-              />
-            </label>
-          </div>
-        </div>
-
-        {/* Preguntas dinámicas de la plantilla */}
-        <div className="mb-4">
-          <h5>Desarrollo del cursado</h5>
-
-          {informeBase.preguntas?.map((pregunta: any) => {
-            // IMPORTANTE:
-            // necesitamos el id_pregunta_opcion que corresponde a la respuesta abierta.
-            // asumimos que la primera opción es la abierta.
-            const primeraOpcion = pregunta.pregunta_opcion?.[0];
-            const idPreguntaOpcion = primeraOpcion?.id;
-
-            return (
-              <div
-                className="mb-3"
-                key={idPreguntaOpcion ?? pregunta.id ?? Math.random()}
-              >
-                <label className="form-label">
-                  {pregunta.texto_pregunta ?? pregunta.texto ?? "Pregunta"}
-                  <textarea
+              <div className="row g-3">
+                <div className="col-md-6">
+                  <label className="form-label fw-semibold">Fecha inicio</label>
+                  <input
+                    type="date"
                     className="form-control"
-                    style={{ minHeight: "80px" }}
-                    value={
-                      idPreguntaOpcion
-                        ? answersByPreguntaOpcion[idPreguntaOpcion] ?? ""
-                        : ""
-                    }
-                    onChange={(e) => {
-                      if (idPreguntaOpcion) {
-                        setTextoRespuesta(idPreguntaOpcion, e.target.value);
-                      }
-                    }}
+                    value={fechaInicio}
+                    onChange={(e) => setFechaInicio(e.target.value)}
+                    required
                   />
-                </label>
+                </div>
+
+                <div className="col-md-6">
+                  <label className="form-label fw-semibold">Fecha fin</label>
+                  <input
+                    type="date"
+                    className="form-control"
+                    value={fechaFin}
+                    onChange={(e) => setFechaFin(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">Estado</label>
+                  <select
+                    className="form-select"
+                    value={estado}
+                    onChange={(e) => setEstado(e.target.value)}
+                  >
+                    <option value="abierto">Abierto</option>
+                    <option value="cerrado">Cerrado</option>
+                  </select>
+                </div>
+
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">Sede</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={sede}
+                    onChange={(e) => setSede(e.target.value)}
+                  />
+                </div>
+
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">
+                    Ciclo lectivo (año)
+                  </label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={cicloLectivo}
+                    onChange={(e) =>
+                      setCicloLectivo(
+                        e.target.value === "" ? "" : Number(e.target.value)
+                      )
+                    }
+                    min={2000}
+                    placeholder="2025"
+                  />
+                </div>
+
+                <div className="col-md-6">
+                  <label className="form-label fw-semibold">
+                    Docente responsable
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={docente}
+                    onChange={(e) => setDocente(e.target.value)}
+                  />
+                </div>
+
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">
+                    Cant. alumnos inscriptos
+                  </label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={cantInscriptos}
+                    onChange={(e) =>
+                      setCantInscriptos(
+                        e.target.value === "" ? "" : Number(e.target.value)
+                      )
+                    }
+                    min={0}
+                  />
+                </div>
+
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">
+                    Cant. comisiones teóricas
+                  </label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={cantTeoricas}
+                    onChange={(e) =>
+                      setCantTeoricas(
+                        e.target.value === "" ? "" : Number(e.target.value)
+                      )
+                    }
+                    min={0}
+                  />
+                </div>
+
+                <div className="col-md-4">
+                  <label className="form-label fw-semibold">
+                    Cant. comisiones prácticas
+                  </label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={cantPracticas}
+                    onChange={(e) =>
+                      setCantPracticas(
+                        e.target.value === "" ? "" : Number(e.target.value)
+                      )
+                    }
+                    min={0}
+                  />
+                </div>
               </div>
-            );
-          })}
-        </div>
+            </Card>
 
-        {saveError && <div className="text-danger mb-3">{saveError}</div>}
+            {/* Preguntas dinámicas de la plantilla */}
+            <div className="mb-4">
+              <h5>Desarrollo del cursado</h5>
 
-        {saveOk && (
-          <div className="text-success mb-3">
-            Informe guardado correctamente ✔
-          </div>
-        )}
+              {informeBase.preguntas?.map((pregunta: any) => {
+                // asumimos que la primera opción es la abierta.
+                const primeraOpcion = pregunta.pregunta_opcion?.[0];
+                const idPreguntaOpcion = primeraOpcion?.id;
 
-        <button type="submit" className="btn btn-primary" disabled={saving}>
-          {saving ? "Guardando..." : "Guardar Informe"}
-        </button>
-      </form>
+                return (
+                  <div
+                    className="mb-3"
+                    key={idPreguntaOpcion ?? pregunta.id ?? Math.random()}
+                  >
+                    <label className="form-label">
+                      {pregunta.texto_pregunta ?? pregunta.texto ?? "Pregunta"}
+                      <textarea
+                        className="form-control"
+                        style={{ minHeight: "80px" }}
+                        value={
+                          idPreguntaOpcion
+                            ? answersByPreguntaOpcion[idPreguntaOpcion] ?? ""
+                            : ""
+                        }
+                        onChange={(e) => {
+                          if (idPreguntaOpcion) {
+                            setTextoRespuesta(idPreguntaOpcion, e.target.value);
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+                );
+              })}
+            </div>
+
+            {saveError && <div className="text-danger mb-3">{saveError}</div>}
+
+            {saveOk && (
+              <div className="text-success mb-3">
+                Informe guardado correctamente ✔
+              </div>
+            )}
+
+            <button type="submit" className="btn btn-primary" disabled={saving}>
+              {saving ? "Guardando..." : "Guardar Informe"}
+            </button>
+          </form>
+        </Container>
+      </LayoutReporte>
     </div>
   );
 }

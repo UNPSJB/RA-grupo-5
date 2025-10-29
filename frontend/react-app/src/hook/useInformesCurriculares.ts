@@ -1,23 +1,20 @@
 const API_URL = "http://localhost:8000";
 
 export function useInformesCurriculares() {
-  async function crearInformeCurricular(payload: {
+  const crearInformeCurricular = async (payload: {
     fecha_inicio: string;
     fecha_fin: string;
     estado: string;
-
     sede: string;
-    ciclo_lectivo: string;
+    ciclo_lectivo: number; // <-- ahora número
     docente: string;
-
     cant_alumnos_insc: number;
     cant_comisiones_teoricas: number;
     cant_comisiones_practicas: number;
-
     id_informe_base: number;
     id_asignatura: number;
     id_reporte: number;
-  }) {
+  }) => {
     const res = await fetch(`${API_URL}/informes-asignaturas/`, {
       method: "POST",
       headers: {
@@ -31,7 +28,7 @@ export function useInformesCurriculares() {
     }
 
     return await res.json();
-  }
+  };
 
   return {
     crearInformeCurricular,
