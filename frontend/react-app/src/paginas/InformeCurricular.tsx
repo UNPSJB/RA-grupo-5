@@ -32,18 +32,10 @@ export default function InformeCurricular() {
   const [loadingBase, setLoadingBase] = useState(true);
   const [errorBase, setErrorBase] = useState<string | null>(null);
 
-  // 4. Estados para los campos administrativos del informe_asignatura
-  const [fechaInicio, setFechaInicio] = useState("");
-  const [fechaFin, setFechaFin] = useState("");
-  const [estado, setEstado] = useState("abierto");
-
+  // 4. Estados visibles/editables en la Card
   const [sede, setSede] = useState("");
-
-  // 👇 este es el que cambiamos: ahora puede ser number o "" mientras se edita
   const [cicloLectivo, setCicloLectivo] = useState<number | "">("");
-
   const [docente, setDocente] = useState("");
-
   const [cantInscriptos, setCantInscriptos] = useState<number | "">("");
   const [cantTeoricas, setCantTeoricas] = useState<number | "">("");
   const [cantPracticas, setCantPracticas] = useState<number | "">("");
@@ -73,8 +65,7 @@ export default function InformeCurricular() {
         setSede(asignatura?.sede || "");
         setDocente(asignatura?.nombre_docente || "");
 
-        // ciclo_lectivo debería ser un año (número).
-        // Si viene del backend como string o number, normalizamos:
+        // ciclo_lectivo debería ser un año (número)
         if (
           asignatura?.ciclo_lectivo === 0 ||
           asignatura?.ciclo_lectivo === "" ||
@@ -133,10 +124,12 @@ export default function InformeCurricular() {
           asignatura?.id_asignatura ||
           asignatura?.idAsignatura;
 
+        // estado inicial: "abierto"
+        // fechas fijas/hardcodeadas (docente no las ve ni edita)
         const payloadCabecera = {
-          fecha_inicio: fechaInicio,
-          fecha_fin: fechaFin,
-          estado: estado,
+          fecha_inicio: "2025-03-01",
+          fecha_fin: "2025-07-30",
+          estado: "abierto",
 
           sede: sede,
           ciclo_lectivo: Number(cicloLectivo),
@@ -155,12 +148,10 @@ export default function InformeCurricular() {
 
         // 2. Creamos el informe_asignatura en backend
         const informeCreado = await crearInformeCurricular(payloadCabecera);
-        // informeCreado.id = id_informe_asignatura que vamos a usar abajo
 
         // 3. Guardamos las respuestas abiertas del docente
         // TODO: reemplazar esto cuando tengas auth real
         const idDocente = 1;
-
         await guardarRespuestasInforme(idDocente, informeCreado.id);
 
         setSaveOk(true);
@@ -174,9 +165,6 @@ export default function InformeCurricular() {
     [
       reporte,
       informeBase,
-      fechaInicio,
-      fechaFin,
-      estado,
       sede,
       cicloLectivo,
       docente,
@@ -226,9 +214,8 @@ export default function InformeCurricular() {
         carrera={asignatura.carrera}
       >
         <Container className="mt-5">
-          {/* FORMULARIO */}
           <form onSubmit={handleSubmit}>
-            {/* Datos administrativos que van en InformeAsignatura */}
+            {/* Card de datos administrativos */}
             <Card
               className="shadow-sm p-4 mb-4 border-0"
               style={{ fontSize: "0.95rem", borderRadius: "0.75rem" }}
@@ -354,7 +341,7 @@ export default function InformeCurricular() {
               </div>
             </Card>
 
-            {/* Preguntas dinámicas de la plantilla */}
+            {/* Card de respuestas abiertas */}
             <Card className="shadow-lg border-0">
               <Card.Body>
                 <div className="mb-4">
@@ -397,14 +384,17 @@ export default function InformeCurricular() {
                     );
                   })}
                 </div>
+
                 {saveError && (
                   <div className="text-danger mb-3">{saveError}</div>
                 )}
+
                 {saveOk && (
                   <div className="text-success mb-3">
                     Informe guardado correctamente ✔
                   </div>
                 )}
+
                 <button
                   type="submit"
                   className="btn btn-primary"
