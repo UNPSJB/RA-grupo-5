@@ -233,185 +233,187 @@ export default function InformeCurricular() {
               className="shadow-sm p-4 mb-4 border-0"
               style={{ fontSize: "0.95rem", borderRadius: "0.75rem" }}
             >
-              <h5 className="mb-3 fw-semibold text-secondary">
-                Datos de su informe
+              <h5 className="mb-3 fw-semibold text-secondary text-center">
+                Informe de Actividad Curricular
               </h5>
 
-              <div className="row g-3">
-                <div className="col-md-6">
-                  <label className="form-label fw-semibold">Fecha inicio</label>
-                  <input
-                    type="date"
-                    className="form-control"
-                    value={fechaInicio}
-                    onChange={(e) => setFechaInicio(e.target.value)}
-                    required
-                  />
+              <div className="border rounded-3 overflow-hidden">
+                {/* Sede */}
+                <div className="d-flex border-bottom">
+                  <div className="bg-light fw-semibold p-2 col-4">Sede</div>
+                  <div className="flex-grow-1 p-2">
+                    <input
+                      type="text"
+                      className="form-control border-0 shadow-none"
+                      value={sede}
+                      onChange={(e) => setSede(e.target.value)}
+                      placeholder="Ej: Puerto Madryn"
+                    />
+                  </div>
                 </div>
 
-                <div className="col-md-6">
-                  <label className="form-label fw-semibold">Fecha fin</label>
-                  <input
-                    type="date"
-                    className="form-control"
-                    value={fechaFin}
-                    onChange={(e) => setFechaFin(e.target.value)}
-                    required
-                  />
+                {/* Ciclo lectivo */}
+                <div className="d-flex border-bottom">
+                  <div className="bg-light fw-semibold p-2 col-4">
+                    Ciclo Lectivo
+                  </div>
+                  <div className="flex-grow-1 p-2">
+                    <input
+                      type="number"
+                      className="form-control border-0 shadow-none"
+                      value={cicloLectivo}
+                      onChange={(e) =>
+                        setCicloLectivo(
+                          e.target.value === "" ? "" : Number(e.target.value)
+                        )
+                      }
+                      placeholder="2025 (ejemplo)"
+                      min={2000}
+                    />
+                  </div>
                 </div>
 
-                <div className="col-md-4">
-                  <label className="form-label fw-semibold">Estado</label>
-                  <select
-                    className="form-select"
-                    value={estado}
-                    onChange={(e) => setEstado(e.target.value)}
-                  >
-                    <option value="abierto">Abierto</option>
-                    <option value="cerrado">Cerrado</option>
-                  </select>
+                {/* Docente responsable */}
+                <div className="d-flex border-bottom">
+                  <div className="bg-light fw-semibold p-2 col-4">
+                    Docente/s Responsable/s
+                  </div>
+                  <div className="flex-grow-1 p-2">
+                    <input
+                      type="text"
+                      className="form-control border-0 shadow-none"
+                      value={docente}
+                      onChange={(e) => setDocente(e.target.value)}
+                      placeholder="Nombre del docente"
+                    />
+                  </div>
                 </div>
 
-                <div className="col-md-4">
-                  <label className="form-label fw-semibold">Sede</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={sede}
-                    onChange={(e) => setSede(e.target.value)}
-                  />
+                {/* Cantidad de alumnos inscriptos */}
+                <div className="d-flex border-bottom">
+                  <div className="bg-light fw-semibold p-2 col-4">
+                    Cantidad de alumnos inscriptos
+                  </div>
+                  <div className="flex-grow-1 p-2">
+                    <input
+                      type="number"
+                      className="form-control border-0 shadow-none"
+                      value={cantInscriptos}
+                      onChange={(e) =>
+                        setCantInscriptos(
+                          e.target.value === "" ? "" : Number(e.target.value)
+                        )
+                      }
+                      min={1}
+                      placeholder="1"
+                    />
+                  </div>
                 </div>
 
-                <div className="col-md-4">
-                  <label className="form-label fw-semibold">
-                    Ciclo lectivo (año)
-                  </label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    value={cicloLectivo}
-                    onChange={(e) =>
-                      setCicloLectivo(
-                        e.target.value === "" ? "" : Number(e.target.value)
-                      )
-                    }
-                    min={2000}
-                    placeholder="2025"
-                  />
+                {/* Cantidad de comisiones teóricas */}
+                <div className="d-flex border-bottom">
+                  <div className="bg-light fw-semibold p-2 col-4">
+                    Cantidad de comisiones clases teóricas
+                  </div>
+                  <div className="flex-grow-1 p-2">
+                    <input
+                      type="number"
+                      className="form-control border-0 shadow-none"
+                      value={cantTeoricas}
+                      onChange={(e) =>
+                        setCantTeoricas(
+                          e.target.value === "" ? "" : Number(e.target.value)
+                        )
+                      }
+                      min={1}
+                      placeholder="1"
+                    />
+                  </div>
                 </div>
 
-                <div className="col-md-6">
-                  <label className="form-label fw-semibold">
-                    Docente responsable
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={docente}
-                    onChange={(e) => setDocente(e.target.value)}
-                  />
-                </div>
-
-                <div className="col-md-4">
-                  <label className="form-label fw-semibold">
-                    Cant. alumnos inscriptos
-                  </label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    value={cantInscriptos}
-                    onChange={(e) =>
-                      setCantInscriptos(
-                        e.target.value === "" ? "" : Number(e.target.value)
-                      )
-                    }
-                    min={0}
-                  />
-                </div>
-
-                <div className="col-md-4">
-                  <label className="form-label fw-semibold">
-                    Cant. comisiones teóricas
-                  </label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    value={cantTeoricas}
-                    onChange={(e) =>
-                      setCantTeoricas(
-                        e.target.value === "" ? "" : Number(e.target.value)
-                      )
-                    }
-                    min={0}
-                  />
-                </div>
-
-                <div className="col-md-4">
-                  <label className="form-label fw-semibold">
-                    Cant. comisiones prácticas
-                  </label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    value={cantPracticas}
-                    onChange={(e) =>
-                      setCantPracticas(
-                        e.target.value === "" ? "" : Number(e.target.value)
-                      )
-                    }
-                    min={0}
-                  />
+                {/* Cantidad de comisiones prácticas */}
+                <div className="d-flex">
+                  <div className="bg-light fw-semibold p-2 col-4">
+                    Cantidad de comisiones clases prácticas
+                  </div>
+                  <div className="flex-grow-1 p-2">
+                    <input
+                      type="number"
+                      className="form-control border-0 shadow-none"
+                      value={cantPracticas}
+                      onChange={(e) =>
+                        setCantPracticas(
+                          e.target.value === "" ? "" : Number(e.target.value)
+                        )
+                      }
+                      min={1}
+                      placeholder="1"
+                    />
+                  </div>
                 </div>
               </div>
             </Card>
 
             {/* Preguntas dinámicas de la plantilla */}
-            <div className="mb-4">
-              <h5>Desarrollo del cursado</h5>
+            <Card className="shadow-lg border-0">
+              <Card.Body>
+                <div className="mb-4">
+                  <h5>Responda:</h5>
 
-              {informeBase.preguntas?.map((pregunta: any) => {
-                // asumimos que la primera opción es la abierta.
-                const primeraOpcion = pregunta.pregunta_opcion?.[0];
-                const idPreguntaOpcion = primeraOpcion?.id;
+                  {informeBase.preguntas?.map((pregunta: any) => {
+                    // asumimos que la primera opción es la abierta.
+                    const primeraOpcion = pregunta.pregunta_opcion?.[0];
+                    const idPreguntaOpcion = primeraOpcion?.id;
 
-                return (
-                  <div
-                    className="mb-3"
-                    key={idPreguntaOpcion ?? pregunta.id ?? Math.random()}
-                  >
-                    <label className="form-label">
-                      {pregunta.texto_pregunta ?? pregunta.texto ?? "Pregunta"}
-                      <textarea
-                        className="form-control"
-                        style={{ minHeight: "80px" }}
-                        value={
-                          idPreguntaOpcion
-                            ? answersByPreguntaOpcion[idPreguntaOpcion] ?? ""
-                            : ""
-                        }
-                        onChange={(e) => {
-                          if (idPreguntaOpcion) {
-                            setTextoRespuesta(idPreguntaOpcion, e.target.value);
-                          }
-                        }}
-                      />
-                    </label>
+                    return (
+                      <div
+                        className="mb-3"
+                        key={idPreguntaOpcion ?? pregunta.id ?? Math.random()}
+                      >
+                        <label className="form-label">
+                          {pregunta.texto_pregunta ??
+                            pregunta.texto ??
+                            "Pregunta"}
+                          <textarea
+                            className="form-control"
+                            style={{ minHeight: "80px" }}
+                            value={
+                              idPreguntaOpcion
+                                ? answersByPreguntaOpcion[idPreguntaOpcion] ??
+                                  ""
+                                : ""
+                            }
+                            onChange={(e) => {
+                              if (idPreguntaOpcion) {
+                                setTextoRespuesta(
+                                  idPreguntaOpcion,
+                                  e.target.value
+                                );
+                              }
+                            }}
+                          />
+                        </label>
+                      </div>
+                    );
+                  })}
+                </div>
+                {saveError && (
+                  <div className="text-danger mb-3">{saveError}</div>
+                )}
+                {saveOk && (
+                  <div className="text-success mb-3">
+                    Informe guardado correctamente ✔
                   </div>
-                );
-              })}
-            </div>
-
-            {saveError && <div className="text-danger mb-3">{saveError}</div>}
-
-            {saveOk && (
-              <div className="text-success mb-3">
-                Informe guardado correctamente ✔
-              </div>
-            )}
-
-            <button type="submit" className="btn btn-primary" disabled={saving}>
-              {saving ? "Guardando..." : "Guardar Informe"}
-            </button>
+                )}
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={saving}
+                >
+                  {saving ? "Guardando..." : "Guardar Informe"}
+                </button>
+              </Card.Body>
+            </Card>
           </form>
         </Container>
       </LayoutReporte>
