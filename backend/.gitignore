@@ -1,3 +1,6 @@
+# Script de carga de datos
+populate_raw_sql.py
+
 # Entorno virtual
 venv/
 .venv/
