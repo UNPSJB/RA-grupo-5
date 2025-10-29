@@ -1,29 +1,26 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState, useCallback } from "react";
 import { useReportes } from "../hook/useReportes";
 import { useInformesCurriculares } from "../hook/useInformesCurriculares";
 import { useInformeBase } from "../hook/useInformeBase";
 import { useResponderInforme } from "../hook/useResponderInforme";
 import LayoutReporte from "../componentes/LayoutReporte";
-import { Container, Card } from "react-bootstrap";
+import { Container, Card, Toast, ToastContainer } from "react-bootstrap";
 
 export default function InformeCurricular() {
-  // 1. ID del reporte que eligió el docente en la pantalla anterior
   const { reporteId } = useParams();
+  const navigate = useNavigate();
 
-  // 2. Hooks para hablar con la API
   const { fetchReporteById } = useReportes();
   const { crearInformeCurricular } = useInformesCurriculares();
   const { fetchInformeBaseActual } = useInformeBase();
 
-  // Hook para manejar respuestas libres del docente
   const {
     answersByPreguntaOpcion,
     setTextoRespuesta,
     guardarRespuestasInforme,
   } = useResponderInforme();
 
-  // 3. Estados para datos precargados
   const [reporte, setReporte] = useState<any>(null);
   const [loadingReporte, setLoadingReporte] = useState(true);
   const [errorReporte, setErrorReporte] = useState<string | null>(null);
@@ -32,7 +29,6 @@ export default function InformeCurricular() {
   const [loadingBase, setLoadingBase] = useState(true);
   const [errorBase, setErrorBase] = useState<string | null>(null);
 
-  // 4. Estados visibles/editables en la Card
   const [sede, setSede] = useState("");
   const [cicloLectivo, setCicloLectivo] = useState<number | "">("");
   const [docente, setDocente] = useState("");
@@ -40,14 +36,15 @@ export default function InformeCurricular() {
   const [cantTeoricas, setCantTeoricas] = useState<number | "">("");
   const [cantPracticas, setCantPracticas] = useState<number | "">("");
 
-  // 5. Feedback de guardado
   const [saving, setSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
-  const [saveOk, setSaveOk] = useState(false);
 
-  // ------------------------
-  // Carga inicial: Reporte
-  // ------------------------
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastVariant, setToastVariant] = useState<"success" | "danger">(
+    "success"
+  );
+
+  // -------- cargar reporte ----------
   useEffect(() => {
     async function cargarReporte() {
       if (!reporteId) {
@@ -65,7 +62,6 @@ export default function InformeCurricular() {
         setSede(asignatura?.sede || "");
         setDocente(asignatura?.nombre_docente || "");
 
-        // ciclo_lectivo debería ser un año (número)
         if (
           asignatura?.ciclo_lectivo === 0 ||
           asignatura?.ciclo_lectivo === "" ||
@@ -86,9 +82,7 @@ export default function InformeCurricular() {
     cargarReporte();
   }, [reporteId, fetchReporteById]);
 
-  // ------------------------
-  // Carga inicial: InformeBase (plantilla vigente)
-  // ------------------------
+  // -------- cargar informe base ----------
   useEffect(() => {
     async function cargarInformeBase() {
       try {
@@ -104,60 +98,52 @@ export default function InformeCurricular() {
     cargarInformeBase();
   }, [fetchInformeBaseActual]);
 
-  // ------------------------
-  // Submit del formulario
-  // ------------------------
+  // -------- submit ----------
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
       if (!reporte || !informeBase) return;
 
       setSaving(true);
-      setSaveError(null);
-      setSaveOk(false);
 
       try {
-        // 1. Armamos la "cabecera" del informe_asignatura
         const asignatura = reporte.encuesta_asignatura?.asignatura;
         const id_asignatura =
           asignatura?.id ||
           asignatura?.id_asignatura ||
           asignatura?.idAsignatura;
 
-        // estado inicial: "abierto"
-        // fechas fijas/hardcodeadas (docente no las ve ni edita)
         const payloadCabecera = {
           fecha_inicio: "2025-03-01",
           fecha_fin: "2025-07-30",
           estado: "abierto",
-
           sede: sede,
           ciclo_lectivo: Number(cicloLectivo),
           docente: docente,
-
           cant_alumnos_insc: cantInscriptos === "" ? 0 : Number(cantInscriptos),
           cant_comisiones_teoricas:
             cantTeoricas === "" ? 0 : Number(cantTeoricas),
           cant_comisiones_practicas:
             cantPracticas === "" ? 0 : Number(cantPracticas),
-
           id_informe_base: informeBase.id,
           id_asignatura: id_asignatura,
           id_reporte: Number(reporteId),
         };
 
-        // 2. Creamos el informe_asignatura en backend
         const informeCreado = await crearInformeCurricular(payloadCabecera);
 
-        // 3. Guardamos las respuestas abiertas del docente
-        // TODO: reemplazar esto cuando tengas auth real
+        // TODO: usar docente logueado real
         const idDocente = 1;
         await guardarRespuestasInforme(idDocente, informeCreado.id);
 
-        setSaveOk(true);
+        setToastVariant("success");
+        setToastMessage("Informe guardado correctamente ✔");
+        setShowToast(true);
       } catch (err) {
         console.error(err);
-        setSaveError("No se pudo guardar el informe curricular.");
+        setToastVariant("danger");
+        setToastMessage("No se pudo guardar el informe curricular.");
+        setShowToast(true);
       } finally {
         setSaving(false);
       }
@@ -177,9 +163,7 @@ export default function InformeCurricular() {
     ]
   );
 
-  // ------------------------
-  // Renderizado
-  // ------------------------
+  // -------- estados iniciales / errores ----------
   if (loadingReporte || loadingBase) {
     return <div className="container mt-4">Cargando...</div>;
   }
@@ -214,6 +198,50 @@ export default function InformeCurricular() {
         carrera={asignatura.carrera}
       >
         <Container className="mt-5">
+          {/* Overlay modal centrado cuando showToast = true */}
+          {showToast && (
+            <div
+              style={{
+                position: "fixed",
+                inset: 0,
+                backgroundColor: "rgba(0,0,0,0.4)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 2000,
+              }}
+            >
+              <ToastContainer
+                style={{
+                  position: "static",
+                  zIndex: 2100,
+                  minWidth: "320px",
+                  maxWidth: "90vw",
+                }}
+              >
+                <Toast
+                  bg={toastVariant === "success" ? "success" : "danger"}
+                  onClose={() => {
+                    setShowToast(false);
+                    if (toastVariant === "success") {
+                      navigate("/docente");
+                    }
+                  }}
+                  show={showToast}
+                  delay={5000}
+                  autohide
+                >
+                  <Toast.Header closeButton={true}>
+                    <strong className="me-auto">
+                      {toastVariant === "success" ? "Listo" : "Error"}
+                    </strong>
+                  </Toast.Header>
+                  <Toast.Body className="text-white">{toastMessage}</Toast.Body>
+                </Toast>
+              </ToastContainer>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit}>
             {/* Card de datos administrativos */}
             <Card
@@ -225,7 +253,6 @@ export default function InformeCurricular() {
               </h5>
 
               <div className="border rounded-3 overflow-hidden">
-                {/* Sede */}
                 <div className="d-flex border-bottom">
                   <div className="bg-light fw-semibold p-2 col-4">Sede</div>
                   <div className="flex-grow-1 p-2">
@@ -235,11 +262,11 @@ export default function InformeCurricular() {
                       value={sede}
                       onChange={(e) => setSede(e.target.value)}
                       placeholder="Ej: Puerto Madryn"
+                      disabled={showToast}
                     />
                   </div>
                 </div>
 
-                {/* Ciclo lectivo */}
                 <div className="d-flex border-bottom">
                   <div className="bg-light fw-semibold p-2 col-4">
                     Ciclo Lectivo
@@ -256,11 +283,11 @@ export default function InformeCurricular() {
                       }
                       placeholder="2025 (ejemplo)"
                       min={2000}
+                      disabled={showToast}
                     />
                   </div>
                 </div>
 
-                {/* Docente responsable */}
                 <div className="d-flex border-bottom">
                   <div className="bg-light fw-semibold p-2 col-4">
                     Docente/s Responsable/s
@@ -272,11 +299,11 @@ export default function InformeCurricular() {
                       value={docente}
                       onChange={(e) => setDocente(e.target.value)}
                       placeholder="Nombre del docente"
+                      disabled={showToast}
                     />
                   </div>
                 </div>
 
-                {/* Cantidad de alumnos inscriptos */}
                 <div className="d-flex border-bottom">
                   <div className="bg-light fw-semibold p-2 col-4">
                     Cantidad de alumnos inscriptos
@@ -293,11 +320,11 @@ export default function InformeCurricular() {
                       }
                       min={1}
                       placeholder="1"
+                      disabled={showToast}
                     />
                   </div>
                 </div>
 
-                {/* Cantidad de comisiones teóricas */}
                 <div className="d-flex border-bottom">
                   <div className="bg-light fw-semibold p-2 col-4">
                     Cantidad de comisiones clases teóricas
@@ -314,11 +341,11 @@ export default function InformeCurricular() {
                       }
                       min={1}
                       placeholder="1"
+                      disabled={showToast}
                     />
                   </div>
                 </div>
 
-                {/* Cantidad de comisiones prácticas */}
                 <div className="d-flex">
                   <div className="bg-light fw-semibold p-2 col-4">
                     Cantidad de comisiones clases prácticas
@@ -335,6 +362,7 @@ export default function InformeCurricular() {
                       }
                       min={1}
                       placeholder="1"
+                      disabled={showToast}
                     />
                   </div>
                 </div>
@@ -343,12 +371,20 @@ export default function InformeCurricular() {
 
             {/* Card de respuestas abiertas */}
             <Card className="shadow-lg border-0">
-              <Card.Body>
+              <Card.Body
+                style={
+                  showToast
+                    ? {
+                        filter: "blur(2px) brightness(0.8)",
+                        pointerEvents: "none",
+                      }
+                    : {}
+                }
+              >
                 <div className="mb-4">
                   <h5>Responda:</h5>
 
                   {informeBase.preguntas?.map((pregunta: any) => {
-                    // asumimos que la primera opción es la abierta.
                     const primeraOpcion = pregunta.pregunta_opcion?.[0];
                     const idPreguntaOpcion = primeraOpcion?.id;
 
@@ -378,6 +414,7 @@ export default function InformeCurricular() {
                                 );
                               }
                             }}
+                            disabled={showToast}
                           />
                         </label>
                       </div>
@@ -385,23 +422,23 @@ export default function InformeCurricular() {
                   })}
                 </div>
 
-                {saveError && (
-                  <div className="text-danger mb-3">{saveError}</div>
-                )}
-
-                {saveOk && (
-                  <div className="text-success mb-3">
-                    Informe guardado correctamente ✔
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={saving}
+                {/* contenedor del botón. lo dejamos centrado y reservamos altura */}
+                <div
+                  className="d-flex justify-content-center"
+                  style={{
+                    minHeight: "3rem",
+                  }}
                 >
-                  {saving ? "Guardando..." : "Guardar Informe"}
-                </button>
+                  {!showToast && (
+                    <button
+                      type="submit"
+                      className="btn btn-primary"
+                      disabled={saving}
+                    >
+                      {saving ? "Guardando..." : "Guardar Informe"}
+                    </button>
+                  )}
+                </div>
               </Card.Body>
             </Card>
           </form>
