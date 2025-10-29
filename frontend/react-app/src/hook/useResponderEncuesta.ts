@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
-// 👇 1. Importa los tipos para crear la respuesta
 import type { 
     EncuestaBase,
     Asignatura, 
     EncuestaAsignatura,
-    RespuestaCreate, // <--- AÑADE ESTE
-    DetalleRespuestaCreate // <--- AÑADE ESTE
+    RespuestaCreate, 
+    DetalleRespuestaCreate
 } from '../types/Encuesta';
 
-const API_URL = "http://localhost:8000";
 
-type RespuestasState = Map<number, string | number | number[]>;
+import { obtenerNombreCampo } from '../validaciones/Encuesta';
+
+const API_URL = "http://localhost:8000";
 
 export function useResponderEncuesta(idEncuestaAsignatura: number | null) {
 
@@ -18,30 +18,6 @@ export function useResponderEncuesta(idEncuestaAsignatura: number | null) {
   const [asignatura, setAsignatura] = useState<Asignatura | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [respuestas, setRespuestas] = useState<RespuestasState>(new Map());
-
-  
-  const handleRespuestaChange = (
-    preguntaId: number, 
-    valor: string | number,
-    tipo: 'open' | 'single_choice' | 'multiple_choice'
-  ) => {
-    setRespuestas(prevRespuestas => {
-      const nuevasRespuestas = new Map(prevRespuestas);
-      if (tipo === 'multiple_choice') {
-        const valoresActuales = (nuevasRespuestas.get(preguntaId) as number[]) || [];
-        const valorNumero = valor as number;
-        if (valoresActuales.includes(valorNumero)) {
-          nuevasRespuestas.set(preguntaId, valoresActuales.filter(v => v !== valorNumero));
-        } else {
-          nuevasRespuestas.set(preguntaId, [...valoresActuales, valorNumero]);
-        }
-      } else {
-        nuevasRespuestas.set(preguntaId, valor);
-      }
-      return nuevasRespuestas;
-    });
-  };
 
   useEffect(() => {
     if (!idEncuestaAsignatura) {
@@ -53,17 +29,18 @@ export function useResponderEncuesta(idEncuestaAsignatura: number | null) {
       setError(null);
       setEncuesta(null);
       setAsignatura(null);
-      setRespuestas(new Map()); 
       try {
         const resAsignatura = await fetch(`${API_URL}/encuestas-asignaturas/${idEncuestaAsignatura}`);
         if (!resAsignatura.ok) throw new Error(`Error al cargar la asignatura (ID: ${idEncuestaAsignatura})`);
         const dataAsignatura: EncuestaAsignatura = await resAsignatura.json();
         setAsignatura(dataAsignatura.asignatura); 
+        
         const idEncuestaBase = dataAsignatura.id_encuesta_base;
         const resEncuesta = await fetch(`${API_URL}/encuestas-base/${idEncuestaBase}`);
         if (!resEncuesta.ok) throw new Error(`Error al cargar la encuesta base (ID: ${idEncuestaBase})`);
         const dataEncuesta: EncuestaBase = await resEncuesta.json();
         setEncuesta(dataEncuesta);
+        
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -74,7 +51,11 @@ export function useResponderEncuesta(idEncuestaAsignatura: number | null) {
   }, [idEncuestaAsignatura]);
 
   
-  const guardarRespuestas = async (idPersona: number) => {
+  const guardarRespuestas = async (
+    idPersona: number, 
+    formData: Record<string, any> 
+  ) => {
+    
     if (!encuesta || !idEncuestaAsignatura) {
       setError("No se puede guardar: la encuesta o la asignatura no están cargadas.");
       return null;
@@ -88,9 +69,11 @@ export function useResponderEncuesta(idEncuestaAsignatura: number | null) {
       
       encuesta.variables.forEach(variable => {
         variable.preguntas.forEach(pregunta => {
-          const valorRespuesta = respuestas.get(pregunta.id);
+          
+          const fieldName = obtenerNombreCampo(pregunta.id);
+          const valorRespuesta = formData[fieldName];
 
-          if (valorRespuesta === undefined) return; 
+          if (valorRespuesta === undefined || valorRespuesta === null || valorRespuesta === "") return; 
 
           if (pregunta.tipo === 'open') {
             const po = pregunta.pregunta_opcion.find(p => p.id_opcion_respuesta === null);
@@ -101,24 +84,18 @@ export function useResponderEncuesta(idEncuestaAsignatura: number | null) {
               });
             }
           } 
-          
           else if (pregunta.tipo === 'single_choice') {
             const po = pregunta.pregunta_opcion.find(p => p.id_opcion_respuesta === (valorRespuesta as number));
             if (po) {
-              detalles.push({
-                id_pregunta_opcion: po.id,
-              });
+              detalles.push({ id_pregunta_opcion: po.id });
             }
           } 
-          
           else if (pregunta.tipo === 'multiple_choice') {
             const valoresSeleccionados = valorRespuesta as number[];
             valoresSeleccionados.forEach(idOpcion => {
               const po = pregunta.pregunta_opcion.find(p => p.id_opcion_respuesta === idOpcion);
               if (po) {
-                detalles.push({
-                  id_pregunta_opcion: po.id,
-                });
+                detalles.push({ id_pregunta_opcion: po.id });
               }
             });
           }
@@ -144,6 +121,7 @@ export function useResponderEncuesta(idEncuestaAsignatura: number | null) {
 
       const dataGuardada = await response.json();
       return dataGuardada;
+
     } catch (err: any) {
       setError(err.message);
       return null; 
@@ -152,14 +130,11 @@ export function useResponderEncuesta(idEncuestaAsignatura: number | null) {
     }
   };
 
-
   return {
     encuesta,
     asignatura,
     loading,
     error,
-    respuestas,
-    handleRespuestaChange,
     guardarRespuestas 
   };
 }
