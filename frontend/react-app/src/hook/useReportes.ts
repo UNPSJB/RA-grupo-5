@@ -29,7 +29,7 @@ export function useReportes() {
     return await res.json();
   }, []);
 
-  const fetchResumenByReporteId = async (id: number) => {
+  const fetchResumenByReporteId = useCallback(async (id: number) => {
     console.log("Reportes desde el hook:", reportes);
     try {
       setLoading(true);
@@ -43,7 +43,7 @@ export function useReportes() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchReportes();
