@@ -22,6 +22,7 @@ export interface Pregunta {
 export interface Variable {
   id: number;
   nombre: string;
+  codigo: string;
   preguntas: Pregunta[];
 }
 

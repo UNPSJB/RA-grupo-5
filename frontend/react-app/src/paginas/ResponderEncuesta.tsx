@@ -1,70 +1,91 @@
-import React from 'react';
 import { useParams } from 'react-router-dom'; 
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useResponderEncuesta } from '../hook/useResponderEncuesta';
 import Variable from '../componentes/Variable'; 
+import { 
+  construirEsquemaEncuesta, 
+  construirValoresPorDefecto 
+} from '../validaciones/Encuesta';
+
+type SurveyFormData = Record<string, any>;
 
 function ResponderEncuesta() {
   const { id } = useParams<{ id: string }>();
   const idEncuesta = id ? Number(id) : null;
- const { 
+  
+  const { 
     encuesta, 
     asignatura, 
     loading, 
     error,
-    respuestas,
-    handleRespuestaChange,
     guardarRespuestas 
   } = useResponderEncuesta(idEncuesta);
 
-  const getSeleccion = (preguntaId: number) => {
-    return respuestas.get(preguntaId);
-  };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); 
-    const idPersona = 1; 
+  const defaultValues = encuesta ? construirValoresPorDefecto(encuesta) : {};
+  const schema = encuesta ? construirEsquemaEncuesta(encuesta) : undefined;
+  
 
-    const resultado = await guardarRespuestas(idPersona);
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting } 
+  } = useForm<SurveyFormData>({
+    defaultValues: defaultValues,
+    resolver: schema ? zodResolver(schema) : undefined,
+  });
 
+
+
+  const onSubmit = async (data: SurveyFormData) => {
+
+    const idPersona = 1;
+    const resultado = await guardarRespuestas(idPersona, data); 
     if (resultado) {
       alert("¡Encuesta guardada con éxito!");
     }
   };
 
-  if (loading && !encuesta) return <div className="container mt-4">Cargando encuesta... ⏳</div>;
+
+  if (loading || !encuesta) {
+
+    return <div className="container mt-4">Cargando encuesta... ⏳</div>;
+  }
+  
 
   return (
-    <div className="container mt-4"> \
-      <form onSubmit={handleSubmit}>
-  
+    <div className="container mt-4"> 
+      <form onSubmit={handleSubmit(onSubmit)}>
         {error && <div className="alert alert-danger">Error: {error}</div>}
+        
 
-        <h1>{encuesta?.nombre}</h1>
+        <h1>{encuesta.nombre}</h1> 
         <h2>{asignatura?.nombre}</h2>
-        <p>Docente: {asignatura?.nombre_docente}</p>
-        <hr />
 
-        {encuesta?.variables.map(variable => (
+
+        {encuesta.variables.map(variable => (
           <Variable
             key={variable.id}
             variable={variable}
-            getSeleccion={getSeleccion}
-            onSeleccionar={handleRespuestaChange} 
+            control={control}
+            errors={errors}
           />
         ))}
-
+        {Object.keys(errors).length > 0 && (
+        <div className="alert alert-warning mt-4">
+           Debes completar **{Object.keys(errors).length}** preguntas obligatorias.
+        </div>
+)}
         <button 
           type="submit"
           className="btn btn-primary mt-3" 
-          disabled={loading} 
+          disabled={isSubmitting || loading} 
         >
-          {loading ? 'Guardando...' : 'Guardar Respuestas'}
+          {isSubmitting || loading ? 'Guardando...' : 'Guardar Respuestas'}
         </button>
+        
 
-        <pre className="mt-4" style={{backgroundColor: '#f0f0f0', padding: '10px'}}>
-          <strong>Estado de las respuestas:</strong>
-          {JSON.stringify(Array.from(respuestas.entries()), null, 2)}
-        </pre>
       </form>
     </div>
   );
