@@ -156,12 +156,17 @@ def _generar_resumen_por_variable(encuesta_asig: EncuestaAsignatura) -> dict:
 
     for respuesta in encuesta_asig.respuestas:
         for detalle in respuesta.detalles:
-            variable = detalle.pregunta_opcion.pregunta.variable
-            opcion = detalle.pregunta_opcion.opcion_respuesta
+            # Verificamos que el detalle tenga una 'pregunta_opcion' (buena práctica)
+            if detalle.pregunta_opcion:
+                # Obtenemos la variable y la opción
+                variable = detalle.pregunta_opcion.pregunta.variable
+                opcion = detalle.pregunta_opcion.opcion_respuesta # Esto puede ser None
 
-            # Agregamos el conteo usando el ID de la variable y el TEXTO de la opción
-            conteo_por_variable[variable.id][opcion.texto_opcion] += 1
-            total_votos_por_variable[variable.id] += 1
+                # ¡SOLO PROCESAMOS SI LA OPCIÓN EXISTE (NO ES NONE)!
+                if opcion: 
+                    # Agregamos el conteo usando el ID de la variable y el TEXTO de la opción
+                    conteo_por_variable[variable.id][opcion.texto_opcion] += 1
+                    total_votos_por_variable[variable.id] += 1
                 
     # --- Estructura del resumen por VARIABLE ---
     resumen_final_variables = {}
