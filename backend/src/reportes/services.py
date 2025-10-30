@@ -46,30 +46,30 @@ def actualizar_reporte(db: Session, reporte_id: int, reporte: schemas.ReporteUpd
     return db_reporte
 
 def leer_reporte_con_relaciones_completas(db: Session, reporte_id: int):
-    """
-    Lee un reporte y precarga (eager loading) de forma eficiente toda la
-    jerarquía de datos necesaria para el resumen, adaptado al nuevo modelo.
-    """
+
     return db.query(Reporte).options(
         selectinload(Reporte.encuesta_asignatura).options(
-            
-            # 1. Carga la estructura de la encuesta (para la Etapa 2)
             selectinload(EncuestaAsignatura.encuesta_base)
                 .selectinload(EncuestaBase.variables)
                 .selectinload(Variable.preguntas)
-                .selectinload(Pregunta.pregunta_opcion)  # Carga la lista de joins
-                .selectinload(PreguntaOpcion.opcion_respuesta), # Carga el objeto de opción (para el texto)
-
-            # 2. Carga las respuestas de los usuarios (para la Etapa 1)
+                .selectinload(Pregunta.pregunta_opcion)
+                .selectinload(PreguntaOpcion.opcion_respuesta), 
             selectinload(EncuestaAsignatura.respuestas)
-                .selectinload(Respuesta.detalles)  # Asumiendo 'detalles' (basado en tu DetalleRespuesta.respuesta)
-                .selectinload(DetalleRespuesta.pregunta_opcion) # Carga el objeto PreguntaOpcion de la respuesta
+                .selectinload(Respuesta.detalles)
+                .selectinload(DetalleRespuesta.pregunta_opcion).options(
+                    selectinload(PreguntaOpcion.pregunta).selectinload(Pregunta.variable), 
+                    selectinload(PreguntaOpcion.opcion_respuesta) 
+                )
         )
     ).filter(Reporte.id == reporte_id).first()
 
-
-def generar_resumen_variable(db: Session, reporte_id: int) -> dict:    
-    # Obtenemos el reporte con todas las relaciones anidadas ya cargadas
+def generar_resumen_variable(db: Session, reporte_id: int) -> dict:
+    """
+    Se encarga de la generación del reporte completo,
+    incluyendo tanto los resultados por pregunta como el resumen por variable.
+    """
+    
+    # 1. Obtenemos el reporte con TODAS las relaciones anidadas ya cargadas
     db_reporte = leer_reporte_con_relaciones_completas(db, reporte_id)
     
     if not db_reporte:
@@ -77,81 +77,134 @@ def generar_resumen_variable(db: Session, reporte_id: int) -> dict:
 
     encuesta_asig = db_reporte.encuesta_asignatura
     
-    # --- ETAPA 1: RECOPILAR Y CONTAR TODAS LAS RESPUESTAS ---
+    resultados_preguntas = _generar_resultados_preguntas_cerradas(encuesta_asig)
+    resumen_variables = _generar_resumen_por_variable(encuesta_asig)
     
+    return {
+        "message": "Reporte de encuesta asignatura generado",
+        "resultados_por_pregunta": resultados_preguntas,
+        "resumen_por_variable": resumen_variables
+    }
+
+
+
+def _generar_resultados_preguntas_cerradas(encuesta_asig: EncuestaAsignatura) -> dict:
+    
+    # --- Conteo de votos por PREGUNTA ---
     conteo_opciones = defaultdict(lambda: defaultdict(int))
     total_respuestas_por_pregunta = defaultdict(int)
     
-    # Recorremos las respuestas que dieron los usuarios
-    # (Usando 'detalles' como se define en el back_populates de tu modelo DetalleRespuesta)
     for respuesta in encuesta_asig.respuestas:
         for detalle in respuesta.detalles:
-            
-            # CAMBIO: Verificamos 'detalle.pregunta_opcion'
             if detalle.pregunta_opcion:
-                
-                # CAMBIO: Extraemos los IDs desde el objeto 'pregunta_opcion'
-                # (SQLAlchemy los tiene al haber cargado el objeto)
                 pregunta_id = detalle.pregunta_opcion.id_pregunta
                 opcion_id = detalle.pregunta_opcion.id_opcion_respuesta
                 
-                # El resto de la lógica de conteo es idéntica
                 conteo_opciones[pregunta_id][opcion_id] += 1
                 total_respuestas_por_pregunta[pregunta_id] += 1
 
-   # --- ETAPA 2: ESTRUCTURAR EL RESUMEN Y CALCULAR PORCENTAJES ---
+    # --- Estructura del resumen por PREGUNTA ---
+    resultados_por_pregunta = {}
 
-    resumen_por_variable = {}
-
-    # 1. Recorremos las variables directamente desde la encuesta base
     for variable in encuesta_asig.encuesta_base.variables:
-        
         preguntas_de_la_variable = []
         
-        # 2. Recorremos las preguntas que pertenecen a esta variable
         for pregunta in variable.preguntas:
             
-            # --- FIX 1: Corregir el tipeo ("choice" en lugar de "choise") ---
+            # Filtramos solo por preguntas cerradas
             if pregunta.tipo == "single_choice":
                 
                 total_votos = total_respuestas_por_pregunta[pregunta.id]
-                
                 opciones_con_porcentaje = []
                 
-                # CAMBIO: Iteramos sobre 'pregunta.pregunta_opcion' (la lista de joins)
                 for pregunta_opcion_obj in pregunta.pregunta_opcion:
-                    
-                    # Obtenemos el objeto OpcionRespuesta real desde el join
                     opcion = pregunta_opcion_obj.opcion_respuesta
                     
-                    # --- FIX 2: Añadir esta validación para evitar el AttributeError ---
                     if opcion is None:
-                        # Esta opción está rota en la BD (registro huérfano), la saltamos.
                         continue 
-                    # --- Fin del FIX 2 ---
 
-                    # Consultamos los votos usando el ID de la opción
                     votos_opcion = conteo_opciones[pregunta.id][opcion.id]
                     porcentaje = (votos_opcion / total_votos * 100) if total_votos > 0 else 0
                     
                     opciones_con_porcentaje.append({
-                        "opcion_texto": opcion.texto_opcion, # Obtenemos el texto
+                        "opcion_texto": opcion.texto_opcion,
                         "porcentaje": round(porcentaje, 2)
                     })
                 
-                # Solo añadimos la pregunta si realmente tiene opciones calculadas
                 if opciones_con_porcentaje:
                     preguntas_de_la_variable.append({
                         "pregunta_texto": pregunta.texto_pregunta,
                         "opciones": opciones_con_porcentaje
                     })
 
-        # 3. Finalmente, añadimos la variable y su lista de preguntas al resumen
-        # (Mejora: Solo añadir la variable si tiene preguntas procesadas)
         if preguntas_de_la_variable:
-            resumen_por_variable[variable.nombre] = {
+            resultados_por_pregunta[variable.nombre] = {
                 "variable_id": variable.id,
+                "codigo": variable.codigo,
                 "preguntas": preguntas_de_la_variable
             }
+            
+    return resultados_por_pregunta
 
-    return {"message": "Resumen por variable generado", "resumen": resumen_por_variable}
+
+
+def _generar_resumen_por_variable(encuesta_asig: EncuestaAsignatura) -> dict:
+
+    # Conteo de votos por VARIABLE ---
+    conteo_por_variable = defaultdict(lambda: defaultdict(int))
+    total_votos_por_variable = defaultdict(int)
+
+    for respuesta in encuesta_asig.respuestas:
+        for detalle in respuesta.detalles:
+            variable = detalle.pregunta_opcion.pregunta.variable
+            opcion = detalle.pregunta_opcion.opcion_respuesta
+
+            # Agregamos el conteo usando el ID de la variable y el TEXTO de la opción
+            conteo_por_variable[variable.id][opcion.texto_opcion] += 1
+            total_votos_por_variable[variable.id] += 1
+                
+    # --- Estructura del resumen por VARIABLE ---
+    resumen_final_variables = {}
+
+    # Iteramos sobre la estructura de la encuesta para incluir todas las variables
+    for variable in encuesta_asig.encuesta_base.variables:
+        variable_id = variable.id
+        total_votos = total_votos_por_variable[variable_id]
+        conteos_opcion_texto = conteo_por_variable[variable_id]
+        
+        opciones_con_porcentaje = []
+        
+    # 1. Primero, creamos una lista de todos los textos de opción únicos
+        #    que existen para esta variable. Usamos un 'set' para evitar duplicados.
+        textos_de_opcion_unicos = set()
+        for pregunta in variable.preguntas:
+            for po_obj in pregunta.pregunta_opcion:
+                if po_obj.opcion_respuesta:
+                    textos_de_opcion_unicos.add(po_obj.opcion_respuesta.texto_opcion)
+
+        # 2. Ahora, iteramos sobre esa lista estructural (ordenada)
+        #    en lugar de iterar sobre los resultados del conteo.
+        for texto_opcion in sorted(list(textos_de_opcion_unicos)):
+            
+            # 3. Buscamos los votos en nuestro diccionario.
+            #    Usamos .get(texto_opcion, 0) para que devuelva 0 si no
+            #    encuentra votos para esa opción (ej. "mas o menos").
+            votos_opcion = conteos_opcion_texto.get(texto_opcion, 0)
+            
+            porcentaje = (votos_opcion / total_votos * 100) if total_votos > 0 else 0
+            
+            opciones_con_porcentaje.append({
+                "opcion_texto": texto_opcion,
+                "porcentaje": round(porcentaje, 2)
+            })
+        
+
+        if opciones_con_porcentaje:
+            resumen_final_variables[variable.nombre] = {
+                "variable_id": variable.id,
+                "codigo": variable.codigo,
+                "opciones": opciones_con_porcentaje
+            }
+            
+    return resumen_final_variables    
+

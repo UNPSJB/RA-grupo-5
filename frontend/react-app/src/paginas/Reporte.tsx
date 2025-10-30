@@ -5,12 +5,13 @@ import {
   Card,
   ListGroup,
   ProgressBar,
-} from "react-bootstrap";
+  Tabs,
+  Tab,
+} from "react-bootstrap"; // <-- CAMBIO 1
 import { useReportes } from "../hook/useReportes";
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import LayoutReporte from "../componentes/LayoutReporte.tsx";
-import TabComponent from "../componentes/TabsVariables.tsx";
 
 export default function ResumenReporte() {
   const { id } = useParams();
@@ -19,36 +20,63 @@ export default function ResumenReporte() {
     useReportes();
   const [reporte, setReporte] = useState<any>(null);
   const [reporteCompleto, setReporteCompleto] = useState<any>(null);
+  const [activeVariableKey, setActiveVariableKey] = useState<string | null>(
+    null
+  );
 
-  //trae el resumen del reporte desde el back segun el id
+  // Trae el resumen del reporte desde el back segun el id
   useEffect(() => {
     if (!isNaN(idReporte)) {
       const cargarResumen = async () => {
         const data = await fetchResumenByReporteId(idReporte);
         setReporte(data);
+
+        // Establecer la primera variable como activa por defecto
+        if (data && data.resultados_por_pregunta && !activeVariableKey) {
+          const firstKey = Object.keys(data.resultados_por_pregunta)[0];
+          if (firstKey) {
+            setActiveVariableKey(firstKey);
+          }
+        }
       };
       cargarResumen();
     }
-  }, [idReporte]);
+  }, [idReporte, fetchResumenByReporteId, activeVariableKey]);
+
   useEffect(() => {
     const cargarReporte = async () => {
       const data = await fetchReporteById(idReporte);
       if (data) setReporteCompleto(data);
     };
     cargarReporte();
-  }, [idReporte]);
+  }, [idReporte, fetchReporteById]);
+
   if (loading) return <p>Cargando resumen...</p>;
   if (error) return <p>Error: {error}</p>;
-  if (!reporte || !reporteCompleto) return <p>No hay datos disponibles</p>;
 
-  const tabs = Object.entries(reporte.resumen).map(
+  if (
+    !reporte ||
+    !reporteCompleto ||
+    !reporte.resultados_por_pregunta ||
+    !reporte.resumen_por_variable ||
+    !activeVariableKey // <-- Nos aseguramos de que la key activa exista
+  ) {
+    return <p>No hay datos disponibles</p>;
+  }
+
+  // Los tabs ahora son solo los datos, no el componente
+  const tabsData = Object.entries(reporte.resultados_por_pregunta).map(
     ([nombreVariable, variableData]: [string, any]) => ({
       key: nombreVariable,
       title: nombreVariable,
+      cod: variableData.codigo,
+      // Este es el JSX que irá dentro de cada Tab
       content: (
         <Card className="mb-4 border-0">
           <Card.Title className="mb-4 text-center">
-            <h4>{nombreVariable}</h4>
+            <h3>
+              {variableData.codigo}: {nombreVariable}
+            </h3>
           </Card.Title>
           {variableData.preguntas.map((pregunta: any, j: number) => (
             <Card key={j} className="mb-3 border-0">
@@ -60,9 +88,7 @@ export default function ResumenReporte() {
                   <ListGroup.Item key={k}>
                     <div className="d-flex justify-content-between align-items-center mb-1">
                       <span>{opcion.opcion_texto}</span>
-                      <span>
-                        {opcion.cantidad} ({opcion.porcentaje}%)
-                      </span>
+                      <span className="fw-bold">{opcion.porcentaje}%</span>
                     </div>
                     <ProgressBar
                       now={opcion.porcentaje}
@@ -79,6 +105,8 @@ export default function ResumenReporte() {
       ),
     })
   );
+
+  const activeVariableSummary = reporte.resumen_por_variable[activeVariableKey];
 
   const Datosasignatura = reporteCompleto.encuesta_asignatura.asignatura;
 
@@ -137,17 +165,61 @@ export default function ResumenReporte() {
             </Card>
           </Col>
 
-          {/* Columna derecha: Tabs */}
-          <Col md={8}>
-            <Card className="shadow-lg border-0">
-              <Card.Body>
-                <TabComponent
-                  tabs={tabs}
-                  defaultKey={tabs[0]?.key}
-                  className="mb-4"
-                />
-              </Card.Body>
-            </Card>
+          {/* Columna derecha*/}
+          <Col md={9}>
+            <Row>
+              {/* Columna A: Resultados por Pregunta (Tabs) */}
+              <Col md={7}>
+                <Card className="shadow-lg border-0 mb-4">
+                  <Card.Body>
+                    <Tabs
+                      id="variable-tabs"
+                      activeKey={activeVariableKey}
+                      onSelect={(k) => setActiveVariableKey(k || null)}
+                      className="mb-4"
+                    >
+                      {tabsData.map((tab) => (
+                        <Tab key={tab.key} eventKey={tab.key} title={tab.cod}>
+                          {tab.content}
+                        </Tab>
+                      ))}
+                    </Tabs>
+                  </Card.Body>
+                </Card>
+              </Col>
+
+              {/* Columna B: Resumen General (Filtrado) */}
+              <Col md={5}>
+                {activeVariableSummary && (
+                  <Card className="shadow-lg border-0">
+                    <Card.Body>
+                      <Card.Title className="mb-4">
+                        <h3>Resumen de la Variable:</h3>
+                      </Card.Title>
+
+                      <ListGroup variant="flush">
+                        {activeVariableSummary.opciones.map(
+                          (opcion: any, k: number) => (
+                            <ListGroup.Item
+                              key={k}
+                              className="d-flex justify-content-between align-items-center px-2 py-3"
+                            >
+                              <span>{opcion.opcion_texto}</span>
+                              <span
+                                className="fw-bold text-primary"
+                                style={{ fontSize: "1.1rem" }}
+                              >
+                                {opcion.porcentaje}%
+                              </span>
+                            </ListGroup.Item>
+                          )
+                        )}
+                      </ListGroup>
+                    </Card.Body>
+                  </Card>
+                )}
+              </Col>
+            </Row>
           </Col>
         </Row>
       </Container>

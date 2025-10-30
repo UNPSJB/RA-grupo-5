@@ -1,28 +1,20 @@
 import { Button } from "react-bootstrap";
-import type { OpcionRespuesta as ORType } from "../types/models/OpcionRespuesta";
+import type { OpcionRespuesta as ApiOpcionRespuesta } from "../types/Encuesta";
 
 type Props = {
-  opcionRespuesta: ORType | any;
-  seleccionada?: boolean;
-  onSeleccionar?: (id: number | string) => void;
+  opcionRespuesta: ApiOpcionRespuesta;
+  seleccionada: boolean;
+  onSeleccionar: (id: number) => void; 
 };
 
 export default function OpcionRespuesta({
   opcionRespuesta,
   seleccionada = false,
-  onSeleccionar = () => {},
+  onSeleccionar,
 }: Props) {
-  const data = (opcionRespuesta as any)?.opcionRespuesta ?? opcionRespuesta;
-
-  const id =
-    data?.id ?? data?.id_opcion ?? data?.valor ?? data?.codigo ?? String(data);
-
-  const texto =
-    data?.texto_opcion ??
-    data?.texto ??
-    data?.descripcion ??
-    data?.label ??
-    String(data);
+  
+  const id = opcionRespuesta.id;
+  const texto = opcionRespuesta.texto_opcion;
 
   return (
     <Button
