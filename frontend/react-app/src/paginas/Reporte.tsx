@@ -12,6 +12,7 @@ import { useReportes } from "../hook/useReportes";
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import LayoutReporte from "../componentes/LayoutReporte.tsx";
+import ResumenVariable from "../componentes/ResumenVariable";
 
 export default function ResumenReporte() {
   const { id } = useParams();
@@ -190,34 +191,7 @@ export default function ResumenReporte() {
 
               {/* Columna B: Resumen General (Filtrado) */}
               <Col md={5}>
-                {activeVariableSummary && (
-                  <Card className="shadow-lg border-0">
-                    <Card.Body>
-                      <Card.Title className="mb-4">
-                        <h3>Resumen de la Variable:</h3>
-                      </Card.Title>
-
-                      <ListGroup variant="flush">
-                        {activeVariableSummary.opciones.map(
-                          (opcion: any, k: number) => (
-                            <ListGroup.Item
-                              key={k}
-                              className="d-flex justify-content-between align-items-center px-2 py-3"
-                            >
-                              <span>{opcion.opcion_texto}</span>
-                              <span
-                                className="fw-bold text-primary"
-                                style={{ fontSize: "1.1rem" }}
-                              >
-                                {opcion.porcentaje}%
-                              </span>
-                            </ListGroup.Item>
-                          )
-                        )}
-                      </ListGroup>
-                    </Card.Body>
-                  </Card>
-                )}
+                <ResumenVariable resumen={activeVariableSummary} />
               </Col>
             </Row>
           </Col>

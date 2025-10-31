@@ -6,28 +6,33 @@ import { useInformeBase } from "../hook/useInformeBase";
 import { useResponderInforme } from "../hook/useResponderInforme";
 import LayoutReporte from "../componentes/LayoutReporte";
 import { Container, Card, Toast, ToastContainer } from "react-bootstrap";
+import ResumenVariable from "../componentes/ResumenVariable";
 
 export default function InformeCurricular() {
   const { reporteId } = useParams();
   const navigate = useNavigate();
 
-  const { fetchReporteById } = useReportes();
+  const { fetchReporteById, fetchResumenByReporteId } = useReportes();
   const { crearInformeCurricular } = useInformesCurriculares();
   const { fetchInformeBaseActual } = useInformeBase();
+
+  const [reporte, setReporte] = useState<any>(null);
+  const [loadingReporte, setLoadingReporte] = useState(true);
+  const [errorReporte, setErrorReporte] = useState<string | null>(null);
+
+  const [resumenData, setResumenData] = useState<any>(null);
+  const [loadingResumen, setLoadingResumen] = useState(true);
+  const [errorResumen, setErrorResumen] = useState<string | null>(null);
+
+  const [informeBase, setInformeBase] = useState<any>(null);
+  const [loadingBase, setLoadingBase] = useState(true);
+  const [errorBase, setErrorBase] = useState<string | null>(null);
 
   const {
     answersByPreguntaOpcion,
     setTextoRespuesta,
     guardarRespuestasInforme,
   } = useResponderInforme();
-
-  const [reporte, setReporte] = useState<any>(null);
-  const [loadingReporte, setLoadingReporte] = useState(true);
-  const [errorReporte, setErrorReporte] = useState<string | null>(null);
-
-  const [informeBase, setInformeBase] = useState<any>(null);
-  const [loadingBase, setLoadingBase] = useState(true);
-  const [errorBase, setErrorBase] = useState<string | null>(null);
 
   const [sede, setSede] = useState("");
   const [cicloLectivo, setCicloLectivo] = useState<number | "">("");
@@ -52,35 +57,43 @@ export default function InformeCurricular() {
         setLoadingReporte(false);
         return;
       }
-
       try {
         const data = await fetchReporteById(reporteId);
         setReporte(data);
-
         const asignatura = data.encuesta_asignatura?.asignatura;
-
         setSede(asignatura?.sede || "");
         setDocente(asignatura?.nombre_docente || "");
-
-        if (
-          asignatura?.ciclo_lectivo === 0 ||
-          asignatura?.ciclo_lectivo === "" ||
-          asignatura?.ciclo_lectivo === undefined ||
-          asignatura?.ciclo_lectivo === null
-        ) {
-          setCicloLectivo("");
-        } else {
-          setCicloLectivo(Number(asignatura.ciclo_lectivo));
-        }
+        setCicloLectivo(
+          asignatura?.ciclo_lectivo ? Number(asignatura.ciclo_lectivo) : ""
+        );
       } catch (err) {
         setErrorReporte("Error cargando el reporte.");
       } finally {
         setLoadingReporte(false);
       }
     }
-
     cargarReporte();
   }, [reporteId, fetchReporteById]);
+
+  // -------- cargar resumen ----------
+  useEffect(() => {
+    async function cargarResumen() {
+      if (!reporteId) {
+        setErrorResumen("Falta reporteId en la URL (resumen).");
+        setLoadingResumen(false);
+        return;
+      }
+      try {
+        const resum = await fetchResumenByReporteId(Number(reporteId));
+        setResumenData(resum);
+      } catch (err) {
+        setErrorResumen("Error cargando el resumen del reporte.");
+      } finally {
+        setLoadingResumen(false);
+      }
+    }
+    cargarResumen();
+  }, [reporteId, fetchResumenByReporteId]);
 
   // -------- cargar informe base ----------
   useEffect(() => {
@@ -94,7 +107,6 @@ export default function InformeCurricular() {
         setLoadingBase(false);
       }
     }
-
     cargarInformeBase();
   }, [fetchInformeBaseActual]);
 
@@ -103,9 +115,7 @@ export default function InformeCurricular() {
     async (e: React.FormEvent) => {
       e.preventDefault();
       if (!reporte || !informeBase) return;
-
       setSaving(true);
-
       try {
         const asignatura = reporte.encuesta_asignatura?.asignatura;
         const id_asignatura =
@@ -117,22 +127,18 @@ export default function InformeCurricular() {
           fecha_inicio: "2025-03-01",
           fecha_fin: "2025-07-30",
           estado: "abierto",
-          sede: sede,
+          sede,
           ciclo_lectivo: Number(cicloLectivo),
-          docente: docente,
-          cant_alumnos_insc: cantInscriptos === "" ? 0 : Number(cantInscriptos),
-          cant_comisiones_teoricas:
-            cantTeoricas === "" ? 0 : Number(cantTeoricas),
-          cant_comisiones_practicas:
-            cantPracticas === "" ? 0 : Number(cantPracticas),
+          docente,
+          cant_alumnos_insc: Number(cantInscriptos) || 0,
+          cant_comisiones_teoricas: Number(cantTeoricas) || 0,
+          cant_comisiones_practicas: Number(cantPracticas) || 0,
           id_informe_base: informeBase.id,
-          id_asignatura: id_asignatura,
+          id_asignatura,
           id_reporte: Number(reporteId),
         };
 
         const informeCreado = await crearInformeCurricular(payloadCabecera);
-
-        // TODO: usar docente logueado real
         const idDocente = 1;
         await guardarRespuestasInforme(idDocente, informeCreado.id);
 
@@ -164,29 +170,75 @@ export default function InformeCurricular() {
   );
 
   // -------- estados iniciales / errores ----------
-  if (loadingReporte || loadingBase) {
+  if (loadingReporte || loadingBase || loadingResumen)
     return <div className="container mt-4">Cargando...</div>;
-  }
 
-  if (errorReporte) {
+  if (errorReporte)
     return <div className="container mt-4 text-danger">{errorReporte}</div>;
-  }
-  if (errorBase) {
+  if (errorBase)
     return <div className="container mt-4 text-danger">{errorBase}</div>;
-  }
-  if (!reporte) {
+  if (errorResumen)
+    return <div className="container mt-4 text-danger">{errorResumen}</div>;
+
+  if (!reporte)
     return <div className="container mt-4">No hay datos del reporte.</div>;
-  }
-  if (!informeBase) {
+  if (!informeBase)
     return (
       <div className="container mt-4">
         No hay plantilla de Informe Base disponible.
       </div>
     );
+  if (!resumenData)
+    return (
+      <div className="container mt-4">
+        No hay datos de resumen para este reporte.
+      </div>
+    );
+
+  // -------- preparar variables B, C, D, E --------
+  const resultados: Record<string, any> =
+    resumenData?.resultados_por_pregunta ?? {};
+  const resumenes: Record<string, any> =
+    resumenData?.resumen_por_variable ?? {};
+
+  const CODIGOS_OBJETIVO = new Set(["B", "C", "D", "E"]);
+
+  function extraerCodigo(nombreVar: string, variableData: any) {
+    const crudo = (variableData?.codigo ?? "").toString();
+    const desdeNombre = (nombreVar ?? "").split(":")[0];
+    return (crudo || desdeNombre || "").trim().toUpperCase();
   }
+
+  function obtenerResumen(nombreVar: string, codigo: string) {
+    if (resumenes[nombreVar]) return resumenes[nombreVar];
+    if (resumenes[codigo]) return resumenes[codigo];
+    const matchKey = Object.keys(resumenes).find((k) => {
+      const kNorm = k.toString().trim().toUpperCase();
+      return kNorm === codigo || kNorm.startsWith(`${codigo}:`);
+    });
+    return matchKey ? resumenes[matchKey] : null;
+  }
+
+  const resumenVariablesFiltradas = Object.entries(resultados)
+    .map(([nombreVar, variableData]) => {
+      const codigo = extraerCodigo(nombreVar, variableData);
+      return {
+        nombreVar,
+        codigo,
+        resumen: obtenerResumen(nombreVar, codigo),
+      };
+    })
+    .filter(
+      (it) =>
+        CODIGOS_OBJETIVO.has(it.codigo) &&
+        it.resumen &&
+        Array.isArray(it.resumen.opciones) &&
+        it.resumen.opciones.length > 0
+    );
 
   const asignatura = reporte.encuesta_asignatura?.asignatura || {};
 
+  // -------- render --------
   return (
     <div className="container mt-4">
       <h2>Informe de Actividad Curricular</h2>
@@ -198,189 +250,10 @@ export default function InformeCurricular() {
         carrera={asignatura.carrera}
       >
         <Container className="mt-5">
-          {/* Overlay modal centrado cuando showToast = true */}
-          {showToast && (
-            <div
-              style={{
-                position: "fixed",
-                inset: 0,
-                backgroundColor: "rgba(0,0,0,0.4)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                zIndex: 2000,
-              }}
-            >
-              <ToastContainer
-                style={{
-                  position: "static",
-                  zIndex: 2100,
-                  minWidth: "320px",
-                  maxWidth: "90vw",
-                }}
-              >
-                <Toast
-                  bg={toastVariant === "success" ? "success" : "danger"}
-                  onClose={() => {
-                    setShowToast(false);
-                    if (toastVariant === "success") {
-                      navigate("/docente");
-                    }
-                  }}
-                  show={showToast}
-                  delay={5000}
-                  autohide
-                >
-                  <Toast.Header closeButton={true}>
-                    <strong className="me-auto">
-                      {toastVariant === "success" ? "Listo" : "Error"}
-                    </strong>
-                  </Toast.Header>
-                  <Toast.Body className="text-white">{toastMessage}</Toast.Body>
-                </Toast>
-              </ToastContainer>
-            </div>
-          )}
-
           <form onSubmit={handleSubmit}>
-            {/* Card de datos administrativos */}
-            <Card
-              className="shadow-sm p-4 mb-4 border-0"
-              style={{ fontSize: "0.95rem", borderRadius: "0.75rem" }}
-            >
-              <h5 className="mb-3 fw-semibold text-secondary text-center">
-                Informe de Actividad Curricular
-              </h5>
-
-              <div className="border rounded-3 overflow-hidden">
-                <div className="d-flex border-bottom">
-                  <div className="bg-light fw-semibold p-2 col-4">Sede</div>
-                  <div className="flex-grow-1 p-2">
-                    <input
-                      type="text"
-                      className="form-control border-0 shadow-none"
-                      value={sede}
-                      onChange={(e) => setSede(e.target.value)}
-                      placeholder="Ej: Puerto Madryn"
-                      disabled={showToast}
-                    />
-                  </div>
-                </div>
-
-                <div className="d-flex border-bottom">
-                  <div className="bg-light fw-semibold p-2 col-4">
-                    Ciclo Lectivo
-                  </div>
-                  <div className="flex-grow-1 p-2">
-                    <input
-                      type="number"
-                      className="form-control border-0 shadow-none"
-                      value={cicloLectivo}
-                      onChange={(e) =>
-                        setCicloLectivo(
-                          e.target.value === "" ? "" : Number(e.target.value)
-                        )
-                      }
-                      placeholder="2025 (ejemplo)"
-                      min={2000}
-                      disabled={showToast}
-                    />
-                  </div>
-                </div>
-
-                <div className="d-flex border-bottom">
-                  <div className="bg-light fw-semibold p-2 col-4">
-                    Docente/s Responsable/s
-                  </div>
-                  <div className="flex-grow-1 p-2">
-                    <input
-                      type="text"
-                      className="form-control border-0 shadow-none"
-                      value={docente}
-                      onChange={(e) => setDocente(e.target.value)}
-                      placeholder="Nombre del docente"
-                      disabled={showToast}
-                    />
-                  </div>
-                </div>
-
-                <div className="d-flex border-bottom">
-                  <div className="bg-light fw-semibold p-2 col-4">
-                    Cantidad de alumnos inscriptos
-                  </div>
-                  <div className="flex-grow-1 p-2">
-                    <input
-                      type="number"
-                      className="form-control border-0 shadow-none"
-                      value={cantInscriptos}
-                      onChange={(e) =>
-                        setCantInscriptos(
-                          e.target.value === "" ? "" : Number(e.target.value)
-                        )
-                      }
-                      min={1}
-                      placeholder="1"
-                      disabled={showToast}
-                    />
-                  </div>
-                </div>
-
-                <div className="d-flex border-bottom">
-                  <div className="bg-light fw-semibold p-2 col-4">
-                    Cantidad de comisiones clases teóricas
-                  </div>
-                  <div className="flex-grow-1 p-2">
-                    <input
-                      type="number"
-                      className="form-control border-0 shadow-none"
-                      value={cantTeoricas}
-                      onChange={(e) =>
-                        setCantTeoricas(
-                          e.target.value === "" ? "" : Number(e.target.value)
-                        )
-                      }
-                      min={1}
-                      placeholder="1"
-                      disabled={showToast}
-                    />
-                  </div>
-                </div>
-
-                <div className="d-flex">
-                  <div className="bg-light fw-semibold p-2 col-4">
-                    Cantidad de comisiones clases prácticas
-                  </div>
-                  <div className="flex-grow-1 p-2">
-                    <input
-                      type="number"
-                      className="form-control border-0 shadow-none"
-                      value={cantPracticas}
-                      onChange={(e) =>
-                        setCantPracticas(
-                          e.target.value === "" ? "" : Number(e.target.value)
-                        )
-                      }
-                      min={1}
-                      placeholder="1"
-                      disabled={showToast}
-                    />
-                  </div>
-                </div>
-              </div>
-            </Card>
-
             {/* Card de respuestas abiertas */}
             <Card className="shadow-lg border-0">
-              <Card.Body
-                style={
-                  showToast
-                    ? {
-                        filter: "blur(2px) brightness(0.8)",
-                        pointerEvents: "none",
-                      }
-                    : {}
-                }
-              >
+              <Card.Body>
                 <div className="mb-4">
                   <h5>Responda:</h5>
 
@@ -397,6 +270,43 @@ export default function InformeCurricular() {
                           {pregunta.texto_pregunta ??
                             pregunta.texto ??
                             "Pregunta"}
+
+                          {Number(pregunta.id) === 35 && (
+                            <div className="my-3">
+                              {resumenVariablesFiltradas.length > 0 ? (
+                                <div className="d-flex flex-wrap gap-3 mt-2">
+                                  {resumenVariablesFiltradas.map(
+                                    ({ codigo, resumen, nombreVar }) => (
+                                      <Card
+                                        key={nombreVar}
+                                        className="border-0 shadow-sm p-2"
+                                        style={{
+                                          width: "260px",
+                                          flex: "0 0 auto",
+                                          fontSize: "0.9rem",
+                                        }}
+                                      >
+                                        <Card.Body className="p-3">
+                                          <div className="fw-semibold text-center mb-2 text-secondary">
+                                            Variable {codigo}
+                                          </div>
+                                          <ResumenVariable
+                                            resumen={resumen}
+                                            variant="compact"
+                                          />
+                                        </Card.Body>
+                                      </Card>
+                                    )
+                                  )}
+                                </div>
+                              ) : (
+                                <p className="text-muted small">
+                                  No hay variables B, C, D o E para mostrar.
+                                </p>
+                              )}
+                            </div>
+                          )}
+
                           <textarea
                             className="form-control"
                             style={{ minHeight: "80px" }}
@@ -414,7 +324,6 @@ export default function InformeCurricular() {
                                 );
                               }
                             }}
-                            disabled={showToast}
                           />
                         </label>
                       </div>
@@ -422,22 +331,14 @@ export default function InformeCurricular() {
                   })}
                 </div>
 
-                {/* contenedor del botón. lo dejamos centrado y reservamos altura */}
-                <div
-                  className="d-flex justify-content-center"
-                  style={{
-                    minHeight: "3rem",
-                  }}
-                >
-                  {!showToast && (
-                    <button
-                      type="submit"
-                      className="btn btn-primary"
-                      disabled={saving}
-                    >
-                      {saving ? "Guardando..." : "Guardar Informe"}
-                    </button>
-                  )}
+                <div className="d-flex justify-content-center">
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={saving}
+                  >
+                    {saving ? "Guardando..." : "Guardar Informe"}
+                  </button>
                 </div>
               </Card.Body>
             </Card>
