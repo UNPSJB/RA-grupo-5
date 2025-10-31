@@ -8,11 +8,33 @@ from src.pregunta_opcion.models import PreguntaOpcion
 from src.preguntas.models import Pregunta
 from src.detalle_respuesta.models import DetalleRespuesta
 from src.informes_asignaturas.models import InformeAsignatura, EstadoInforme
+from sqlalchemy.exc import IntegrityError
 
+def _respuesta_existente_id(db: Session, informe_id: int) -> Optional[int]:
+    rid = db.execute(
+        select(Respuesta.id).where(Respuesta.id_informe_asignatura == informe_id)
+    ).scalar_one_or_none()
+    return rid
 
 def crear_respuesta(db: Session, respuesta: schemas.RespuestaCreate) -> Respuesta:
     # ¿Esta respuesta es sobre un informe_asignatura (informe curricular) o sobre una encuesta?
     es_informe = respuesta.id_informe_asignatura is not None
+
+    # ⚠️ Si es informe, validamos existencia y estado antes de crear nada
+    if es_informe:
+        informe = db.get(InformeAsignatura, respuesta.id_informe_asignatura)
+        if informe is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Informe curricular no encontrado",
+            )
+        # Si ya está cerrado, devolvemos 409 y, si existe, el id de la respuesta asociada
+        if informe.estado == EstadoInforme.cerrado:
+            rid = _respuesta_existente_id(db, respuesta.id_informe_asignatura)
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={"message": "El informe ya fue respondido", "respuestaId": rid},
+            )
 
     # recolecto todos los id_pregunta_opcion que vienen en los detalles
     po_ids = [detalle.id_pregunta_opcion for detalle in respuesta.detalles]
@@ -38,7 +60,7 @@ def crear_respuesta(db: Session, respuesta: schemas.RespuestaCreate) -> Respuest
         for po_id, tipo, obligatoria, id_informe_base in db.execute(query).all()
     }
 
-    # 1. Creo la respuesta "cabecera"
+    # 1. Creo la respuesta "cabecera" (aún sin commit)
     db_respuesta = Respuesta(
         id_persona=respuesta.id_persona,
         id_encuesta_asignatura=respuesta.id_encuesta_asignatura,
@@ -96,28 +118,36 @@ def crear_respuesta(db: Session, respuesta: schemas.RespuestaCreate) -> Respuest
     db.add_all(lista_detalles)
 
     # 4. Si esta respuesta corresponde a un informe_asignatura,
-    #    cerramos ese informe automáticamente.  ### NUEVO
-    if es_informe and respuesta.id_informe_asignatura is not None:
-        informe = db.get(
-            InformeAsignatura, respuesta.id_informe_asignatura
-        )
+    #    intentamos cerrarlo. (La unicidad la garantiza el índice único)
+    if es_informe:
+        informe = db.get(InformeAsignatura, respuesta.id_informe_asignatura)
+        # si alguien lo cerró entre el pre-check y ahora, no pasa nada: el commit lo validará igual
         if informe is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Informe curricular no encontrado para cerrar",
             )
-
-        # solo si aún está 'abierto', lo pasamos a 'cerrado'
         if informe.estado != EstadoInforme.cerrado:
             informe.estado = EstadoInforme.cerrado
 
-        # no hacemos flush separado porque el commit final ya lo guarda
+    # 5. Confirmo todo, manejando carrera por índice único (solo aplica a informes)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        if es_informe:
+            rid = _respuesta_existente_id(db, respuesta.id_informe_asignatura)
+            # Ya existe una respuesta para este informe → 409 + respuestaId
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={"message": "El informe ya fue respondido", "respuestaId": rid},
+            )
+        # Si fuera encuesta (no debería pegar en el índice), relanzamos
+        raise
 
-    # 5. Confirmo todo
-    db.commit()
     db.refresh(db_respuesta)
-
     return db_respuesta
+
 
 
 

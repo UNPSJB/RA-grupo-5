@@ -4,6 +4,14 @@ from src.informes_base.schemas import InformeBaseBase
 from src.asignaturas.schemas import AsignaturaRead
 from src.respuestas.schemas import RespuestaRead
 from datetime import date
+from typing import Optional
+
+class InformeAsignaturaEstado(BaseModel):
+    id: int
+    estado: EstadoInforme
+    hasRespuesta: bool
+    respuestaId: Optional[int] = None
+    canResponder: bool
 
 class InformeAsignaturaBase(BaseModel):
     fecha_inicio: date

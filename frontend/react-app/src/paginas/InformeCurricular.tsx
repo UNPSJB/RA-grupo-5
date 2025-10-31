@@ -5,7 +5,7 @@ import { useInformesCurriculares } from "../hook/useInformesCurriculares";
 import { useInformeBase } from "../hook/useInformeBase";
 import { useResponderInforme } from "../hook/useResponderInforme";
 import LayoutReporte from "../componentes/LayoutReporte";
-import { Container, Card, Toast, ToastContainer } from "react-bootstrap";
+import { Container, Card } from "react-bootstrap";
 import ResumenVariable from "../componentes/ResumenVariable";
 
 export default function InformeCurricular() {

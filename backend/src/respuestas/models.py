@@ -17,3 +17,7 @@ class Respuesta(ModeloBase):
 
     persona = relationship("Persona", back_populates="respuestas") 
     detalles = relationship("DetalleRespuesta", back_populates="respuesta")
+
+    __table_args__ = ( 
+        UniqueConstraint ('id_informe_asignatura', name='uq_respuestas_informe_doc'),
+    )
