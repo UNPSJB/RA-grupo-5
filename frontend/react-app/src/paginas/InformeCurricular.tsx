@@ -250,8 +250,177 @@ export default function InformeCurricular() {
         carrera={asignatura.carrera}
       >
         <Container className="mt-5">
+          {/* Overlay modal centrado cuando showToast = true */}
+          {showToast && (
+            <div
+              style={{
+                position: "fixed",
+                inset: 0,
+                backgroundColor: "rgba(0,0,0,0.4)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 2000,
+              }}
+            >
+              <ToastContainer
+                style={{
+                  position: "static",
+                  zIndex: 2100,
+                  minWidth: "320px",
+                  maxWidth: "90vw",
+                }}
+              >
+                <Toast
+                  bg={toastVariant === "success" ? "success" : "danger"}
+                  onClose={() => {
+                    setShowToast(false);
+                    if (toastVariant === "success") {
+                      navigate("/docente");
+                    }
+                  }}
+                  show={showToast}
+                  delay={5000}
+                  autohide
+                >
+                  <Toast.Header closeButton={true}>
+                    <strong className="me-auto">
+                      {toastVariant === "success" ? "Listo" : "Error"}
+                    </strong>
+                  </Toast.Header>
+                  <Toast.Body className="text-white">{toastMessage}</Toast.Body>
+                </Toast>
+              </ToastContainer>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit}>
-            {/* Card de respuestas abiertas */}
+            {/* Card de datos administrativos */}
+            <Card
+              className="shadow-sm p-4 mb-4 border-0"
+              style={{ fontSize: "0.95rem", borderRadius: "0.75rem" }}
+            >
+              <h5 className="mb-3 fw-semibold text-secondary text-center">
+                Informe de Actividad Curricular
+              </h5>
+
+              <div className="border rounded-3 overflow-hidden">
+                <div className="d-flex border-bottom">
+                  <div className="bg-light fw-semibold p-2 col-4">Sede</div>
+                  <div className="flex-grow-1 p-2">
+                    <input
+                      type="text"
+                      className="form-control border-0 shadow-none"
+                      value={sede}
+                      onChange={(e) => setSede(e.target.value)}
+                      placeholder="Ej: Puerto Madryn"
+                      disabled={showToast}
+                    />
+                  </div>
+                </div>
+
+                <div className="d-flex border-bottom">
+                  <div className="bg-light fw-semibold p-2 col-4">
+                    Ciclo Lectivo
+                  </div>
+                  <div className="flex-grow-1 p-2">
+                    <input
+                      type="number"
+                      className="form-control border-0 shadow-none"
+                      value={cicloLectivo}
+                      onChange={(e) =>
+                        setCicloLectivo(
+                          e.target.value === "" ? "" : Number(e.target.value)
+                        )
+                      }
+                      placeholder="2025 (ejemplo)"
+                      min={2000}
+                      disabled={showToast}
+                    />
+                  </div>
+                </div>
+
+                <div className="d-flex border-bottom">
+                  <div className="bg-light fw-semibold p-2 col-4">
+                    Docente/s Responsable/s
+                  </div>
+                  <div className="flex-grow-1 p-2">
+                    <input
+                      type="text"
+                      className="form-control border-0 shadow-none"
+                      value={docente}
+                      onChange={(e) => setDocente(e.target.value)}
+                      placeholder="Nombre del docente"
+                      disabled={showToast}
+                    />
+                  </div>
+                </div>
+
+                <div className="d-flex border-bottom">
+                  <div className="bg-light fw-semibold p-2 col-4">
+                    Cantidad de alumnos inscriptos
+                  </div>
+                  <div className="flex-grow-1 p-2">
+                    <input
+                      type="number"
+                      className="form-control border-0 shadow-none"
+                      value={cantInscriptos}
+                      onChange={(e) =>
+                        setCantInscriptos(
+                          e.target.value === "" ? "" : Number(e.target.value)
+                        )
+                      }
+                      min={1}
+                      placeholder="1"
+                      disabled={showToast}
+                    />
+                  </div>
+                </div>
+
+                <div className="d-flex border-bottom">
+                  <div className="bg-light fw-semibold p-2 col-4">
+                    Cantidad de comisiones clases teóricas
+                  </div>
+                  <div className="flex-grow-1 p-2">
+                    <input
+                      type="number"
+                      className="form-control border-0 shadow-none"
+                      value={cantTeoricas}
+                      onChange={(e) =>
+                        setCantTeoricas(
+                          e.target.value === "" ? "" : Number(e.target.value)
+                        )
+                      }
+                      min={1}
+                      placeholder="1"
+                      disabled={showToast}
+                    />
+                  </div>
+                </div>
+
+                <div className="d-flex">
+                  <div className="bg-light fw-semibold p-2 col-4">
+                    Cantidad de comisiones clases prácticas
+                  </div>
+                  <div className="flex-grow-1 p-2">
+                    <input
+                      type="number"
+                      className="form-control border-0 shadow-none"
+                      value={cantPracticas}
+                      onChange={(e) =>
+                        setCantPracticas(
+                          e.target.value === "" ? "" : Number(e.target.value)
+                        )
+                      }
+                      min={1}
+                      placeholder="1"
+                      disabled={showToast}
+                    />
+                  </div>
+                </div>
+              </div>
+            </Card>
+
             <Card className="shadow-lg border-0">
               <Card.Body>
                 <div className="mb-4">
