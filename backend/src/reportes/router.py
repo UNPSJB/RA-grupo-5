@@ -9,6 +9,21 @@ router = APIRouter(prefix="/reportes", tags=["reportes"])
 def read_reportes(db=Depends(get_db)):
     return services.listar_reportes(db)
 
+@router.get("/disponibles", response_model=list[schemas.ReporteListadoItem])
+def read_reportes_disponibles(db=Depends(get_db)):
+    return services.listar_reportes_disponibles(db)
+
+#Endpoint para pedir el informe y usar "Ver Informe" a partir del id del reporte
+@router.get("/{reporte_id}/informe", response_model=dict | None)
+def read_informe_por_reporte(reporte_id: int, db=Depends(get_db)):
+    rep = services.leer_reporte(db, reporte_id)
+    # seleccionar informe más reciente (si hay varios)
+    informes = rep.informes_asignaturas or []
+    informe_sel = max(informes, key=lambda x: x.id) if informes else None
+    if not informe_sel:
+        return None
+    return {"id": informe_sel.id, "estado": informe_sel.estado.name}
+
 @router.get("/{reporte_id}", response_model=schemas.Reporte)
 def read_reporte(reporte_id: int, db=Depends(get_db)):  
     return services.leer_reporte(db, reporte_id)    

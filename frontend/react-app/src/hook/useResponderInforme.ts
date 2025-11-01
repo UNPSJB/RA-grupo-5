@@ -1,4 +1,3 @@
-// hook/useResponderInforme.ts
 import { useState, useCallback } from "react";
 
 const API_URL = "http://localhost:8000"; // ajustá si usás /api
@@ -45,17 +44,28 @@ export function useResponderInforme() {
         detalles,
       };
 
-      const res = await fetch(`${API_URL}/respuestas`, {
+      const res = await fetch(`${API_URL}/respuestas/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
+      if (res.status === 409) {
+        const j = await res.json().catch(() => ({}));
+        // devolvé algo que la vista entienda
+        return {
+          ok: false,
+          conflict: true,
+          detail: j.detail || "El informe ya tiene una respuesta.",
+        };
+      }
+
       if (!res.ok) {
         throw new Error("No se pudieron guardar las respuestas del informe");
       }
 
-      return await res.json();
+      const data = await res.json();
+      return { ok: true, conflict: false, data };
     },
     [answersByPreguntaOpcion]
   );
@@ -63,6 +73,6 @@ export function useResponderInforme() {
   return {
     answersByPreguntaOpcion,
     setTextoRespuesta,
-    guardarRespuestasInforme,
+    guardarRespuestasInforme, // ahora devuelve { ok, conflict, ... }
   };
 }

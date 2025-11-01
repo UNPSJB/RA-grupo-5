@@ -115,6 +115,7 @@ export default function InformeCurricular() {
     async (e: React.FormEvent) => {
       e.preventDefault();
       if (!reporte || !informeBase) return;
+
       setSaving(true);
       try {
         const asignatura = reporte.encuesta_asignatura?.asignatura;
@@ -138,17 +139,46 @@ export default function InformeCurricular() {
           id_reporte: Number(reporteId),
         };
 
+        // 1) Crear la cabecera del informe (estado "abierto")
         const informeCreado = await crearInformeCurricular(payloadCabecera);
-        const idDocente = 1;
-        await guardarRespuestasInforme(idDocente, informeCreado.id);
 
+        // 2) Enviar respuestas -> el backend cerrará el informe al primer guardado
+        const idDocente = 1; // TODO: reemplazar por el id real del usuario
+        const result = await guardarRespuestasInforme(
+          idDocente,
+          informeCreado.id
+        );
+
+        // 3) Manejo de resultado
+        if (!result.ok && result.conflict) {
+          // Ya existe una respuesta para ESTE informe (o el backend lo marcó como cerrado)
+          setToastVariant("danger");
+          setToastMessage(
+            result.detail || "El informe ya tiene una respuesta registrada."
+          );
+          setShowToast(true);
+          // Opcional: redirigir directo a Ver Informe
+          // navigate(`/docente/informes/${informeCreado.id}`, { replace: true });
+          return;
+        }
+
+        if (!result.ok) {
+          throw new Error(
+            result.detail || "No se pudo guardar la respuesta del informe."
+          );
+        }
+
+        // Éxito
         setToastVariant("success");
         setToastMessage("Informe guardado correctamente ✔");
         setShowToast(true);
-      } catch (err) {
+        // Tu overlay ya navega a /docente al cerrar el toast
+      } catch (err: any) {
         console.error(err);
         setToastVariant("danger");
-        setToastMessage("No se pudo guardar el informe curricular.");
+        setToastMessage(
+          err?.message || "No se pudo guardar el informe curricular."
+        );
         setShowToast(true);
       } finally {
         setSaving(false);
