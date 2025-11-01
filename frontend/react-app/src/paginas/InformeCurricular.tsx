@@ -300,10 +300,6 @@ export default function InformeCurricular() {
               className="shadow-sm p-4 mb-4 border-0"
               style={{ fontSize: "0.95rem", borderRadius: "0.75rem" }}
             >
-              <h5 className="mb-3 fw-semibold text-secondary text-center">
-                Informe de Actividad Curricular
-              </h5>
-
               <div className="border rounded-3 overflow-hidden">
                 <div className="d-flex border-bottom">
                   <div className="bg-light fw-semibold p-2 col-4">Sede</div>
