@@ -11,6 +11,8 @@ import InformeCurricular from "./paginas/InformeCurricular.tsx";
 import "bootstrap/dist/css/bootstrap.min.css";
 import ReportesDisponibles from "./paginas/ReportesDisponibles.tsx";
 import EncuestasRespondidas from "./componentes/EncuestasRespondidas.tsx";
+import InformeCurricularPage from "./paginas/InformeCurricularPage.tsx";
+
 
 function App() {
   return (
@@ -44,7 +46,7 @@ function App() {
       <Route path="/departamento" element={<LayoutDepartamento />}>
         <Route index element={<InformesCurricularesDisponibles />} />
         <Route path="informes">
-          <Route path=":id" element={<InformeCurricular />} />
+          <Route path=":id" element={<InformeCurricularPage />} />
           <Route index element={<InformesCurricularesDisponibles />} />
         </Route>
       </Route>
