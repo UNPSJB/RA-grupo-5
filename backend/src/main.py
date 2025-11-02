@@ -19,7 +19,9 @@ from src.respuestas.router import router as respuestas_router
 from src.detalle_respuesta.router import router as detalle_respuesta_router
 from src.pregunta_opcion.router import router as pregunta_opcion_router
 from src.informes_asignaturas.router import router as informes_asignaturas_router
-
+from src.informes_sinteticos_base.router import router as informes_sinteticos_base_router
+from src.carreras.router import router as carreras_router
+from src.informe_sintetico_carrera.router import router as informe_sintetico_carrera_router
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -66,3 +68,6 @@ app.include_router(respuestas_router)
 app.include_router(detalle_respuesta_router)
 app.include_router(pregunta_opcion_router)
 app.include_router(informes_asignaturas_router)
+app.include_router(informes_sinteticos_base_router)
+app.include_router(carreras_router)
+app.include_router(informe_sintetico_carrera_router)
