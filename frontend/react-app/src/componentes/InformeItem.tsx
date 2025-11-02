@@ -1,6 +1,4 @@
 import { Link } from "react-router-dom";
-
-const API_URL = "http://localhost:8000";
 export type Props = {
   id: number;
   asignatura: string;
