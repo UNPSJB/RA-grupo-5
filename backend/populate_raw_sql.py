@@ -173,6 +173,133 @@ cursor.execute("""
     'abierta'     # estado
 ))
 
+# --- 🗣️ SECCIÓN AÑADIDA PARA RESPUESTA ---
+# Asumimos que la Persona 1 (id=1) responde la EncuestaAsignatura 1 (id=1)
+cursor.execute("""
+    INSERT INTO respuestas (id_persona, id_encuesta_asignatura)
+    VALUES (?, ?)
+""", (
+    1, # id_persona
+    1  # id_encuesta_asignatura
+))
+respuesta_id = cursor.lastrowid # Guardamos el ID de la respuesta (será 1)
+
+
+# --- ✍️ SECCIÓN DE DETALLES DE RESPUESTA (COMPLETA) ---
+# (id_pregunta_opcion, id_respuesta, texto_abierto)
+# Respondemos a las 31 preguntas obligatorias
+detalles_a_insertar = [
+    # A (Se elige la primera opción de cada pregunta)
+    (1, respuesta_id, None),  # Q1: Si
+    (3, respuesta_id, None),  # Q2: Una
+    (5, respuesta_id, None),  # Q3: Entre 0 y 50%
+    (7, respuesta_id, None),  # Q4: Entre 0 y 50%
+    (9, respuesta_id, None),  # Q5: Escasos
+    # B
+    (11, respuesta_id, None), # Q6: Si
+    (14, respuesta_id, None), # Q7: Si
+    (17, respuesta_id, None), # Q8: Si
+    # C
+    (20, respuesta_id, None), # Q9: Si
+    (23, respuesta_id, None), # Q10: Si
+    (26, respuesta_id, None), # Q11: Si
+    # D
+    (29, respuesta_id, None), # Q12: Si
+    (32, respuesta_id, None), # Q13: Si
+    (35, respuesta_id, None), # Q14: Si
+    # E
+    (38, respuesta_id, None), # Q15: Si
+    (41, respuesta_id, None), # Q16: Si
+    (44, respuesta_id, None), # Q17: Si
+    (47, respuesta_id, None), # Q18: Si
+    (50, respuesta_id, None), # Q19: Si
+    (53, respuesta_id, None), # Q20: Si
+    # F
+    (56, respuesta_id, None), # Q21: Si
+    (59, respuesta_id, None), # Q22: Si
+    (62, respuesta_id, None), # Q23: Si
+    (65, respuesta_id, None), # Q24: Si
+    (68, respuesta_id, None), # Q25: Si
+    (71, respuesta_id, None), # Q26: Si
+    # G (Cerrada)
+    (74, respuesta_id, None), # Q27: 1
+    # G (Abiertas)
+    (78, respuesta_id, "Muy buenas clases prácticas, excelente predisposición."), # Q28
+    (79, respuesta_id, "La parte teórica podría ser más ágil."), # Q29
+    (80, respuesta_id, "Que repase los temas de la unidad 1 antes de empezar."), # Q30
+    (81, respuesta_id, "Respondí NPO en la biblioteca porque nunca la usé.")  # Q31
+]
+
+for id_po, id_resp, texto in detalles_a_insertar:
+    cursor.execute("""
+        INSERT INTO detalles_respuestas (id_pregunta_opcion, id_respuesta, texto_respuesta_abierta)
+        VALUES (?, ?, ?)
+    """, (id_po, id_resp, texto))
+
+# --- 📊 SECCIÓN AÑADIDA PARA REPORTE ---
+# Creamos un reporte para la EncuestaAsignatura 1 (id=1)
+cursor.execute("""
+    INSERT INTO reportes (id_encuesta_asignatura)
+    VALUES (?)
+""", (1,)) # id_encuesta_asignatura = 1
+
+
+# --- 📜 SECCIÓN AÑADIDA PARA INFORME_BASE Y SUS PREGUNTAS ---
+cursor.execute("""
+    INSERT INTO informes_base (titulo)
+    VALUES (?)
+""", ("Informe Docente Ciclo 2025",))
+informe_base_id = cursor.lastrowid # (ID será 1)
+
+preguntas_informe = [
+    # (texto, tipo, obligatoria, id_informe_base, id_variable)
+    (
+        "Indique en el caso que corresponda, las necesidades de equipamiento y actualización de bibliografía que considere prioritarias para su actuación docente. Asimismo, en caso de corresponder, indique los insumos básicos necesarios para el desarrollo de actividades prácticas, renovación o incorporación de equipamientos informáticos requeridos para el desarrollo de clases.",
+        "open", True, informe_base_id, None
+    ),
+    (
+        "Consigne el porcentaje de horas de clases (teóricas y prácticas) dictadas respecto del total establecido en el plan de estudios y si es necesario justifique.",
+        "open", True, informe_base_id, None
+    ),
+    (
+        "2-A- ¿Se logró desarrollar la totalidad de los contenidos planificados? Consigne el porcentaje de contenidos planificados alcanzados. En caso de ser necesario mencione las estrategias que planificará para el próximo dictado a fin de ajustar el cronograma.",
+        "open", True, informe_base_id, None
+    ),
+    (
+        "2-B- Consigne los valores que figuran en el reporte de la Encuesta a alumnos correspondientes a: B: “Comunicación y desarrollo de la asignatura”, C: “Metodología”, D “ Evaluación”, E “Actuación de los miembros de la Cátedra”. Emita un juicio de valor en el caso que lo considere oportuno.",
+        "open", True, informe_base_id, None
+    ),
+    (
+        "2.C. ¿Cuáles fueron los principales aspectos positivos y los obstáculos que se manifestaron durante el desarrollo del espacio curricular? Centrándose específicamente en los procesos de enseñanza y/o aprendizaje",
+        "open", True, informe_base_id, None
+    )
+]
+
+print("Creando preguntas de Informe Base y sus 'pregunta_opcion' nulas...")
+
+# Insertamos las preguntas del INFORME (IDs 32-36)
+# Y creamos su 'pregunta_opcion' nula
+for texto, tipo, obligatoria, id_ib, id_var in preguntas_informe:
+    # 1. Insertar la pregunta
+    cursor.execute("""
+        INSERT INTO preguntas (texto_pregunta, tipo, obligatoria, id_informe_base, id_variable)
+        VALUES (?, ?, ?, ?, ?)
+    """, (texto, tipo, obligatoria, id_ib, id_var))
+    
+    # 2. Obtener el ID de la pregunta que acabamos de crear (serán 32, 33, 34, 35, 36)
+    pregunta_id_nueva = cursor.lastrowid 
+
+    # 3. Crear su entrada en 'pregunta_opcion' con 'id_opcion_respuesta' = NULL
+    # (Estas serán las 'pregunta_opcion' IDs 82, 83, 84, 85, 86)
+    cursor.execute("""
+        INSERT INTO pregunta_opcion (id_pregunta, id_opcion_respuesta)
+        VALUES (?, ?)
+    """, (pregunta_id_nueva, None))
+        
+print("Preguntas de Informe Base y sus 'pregunta_opcion' creadas.")
+# --- FIN DE LA SECCIÓN MODIFICADA ---
+
+
 # 💾 Guardar cambios
 conn.commit()
 conn.close()

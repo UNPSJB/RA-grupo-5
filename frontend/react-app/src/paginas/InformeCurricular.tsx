@@ -8,6 +8,7 @@ import LayoutReporte from "../componentes/LayoutReporte";
 import { Container, Card, Toast, ToastContainer } from "react-bootstrap";
 import ResumenVariable from "../componentes/ResumenVariable";
 
+import '../styles/informe.css';
 export default function InformeCurricular() {
   const { reporteId } = useParams();
   const navigate = useNavigate();
@@ -340,7 +341,7 @@ export default function InformeCurricular() {
                       value={sede}
                       onChange={(e) => setSede(e.target.value)}
                       placeholder="Ej: Puerto Madryn"
-                      disabled={showToast}
+                      readOnly
                     />
                   </div>
                 </div>
@@ -377,7 +378,7 @@ export default function InformeCurricular() {
                       value={docente}
                       onChange={(e) => setDocente(e.target.value)}
                       placeholder="Nombre del docente"
-                      disabled={showToast}
+                      readOnly
                     />
                   </div>
                 </div>
@@ -461,11 +462,14 @@ export default function InformeCurricular() {
                         className="mb-3"
                         key={idPreguntaOpcion ?? pregunta.id ?? Math.random()}
                       >
-                        <label className="form-label">
+                        <label
+                          htmlFor={`pregunta-${idPreguntaOpcion}`} // <-- AÑADIDO
+                          className="form-label form-label-required"
+                        >
                           {pregunta.texto_pregunta ??
                             pregunta.texto ??
                             "Pregunta"}
-
+                        </label>
                           {Number(pregunta.id) === 35 && (
                             <div className="my-3">
                               {resumenVariablesFiltradas.length > 0 ? (
@@ -503,6 +507,7 @@ export default function InformeCurricular() {
                           )}
 
                           <textarea
+                            id={`pregunta-${idPreguntaOpcion}`}
                             className="form-control"
                             style={{ minHeight: "80px" }}
                             value={
@@ -519,8 +524,9 @@ export default function InformeCurricular() {
                                 );
                               }
                             }}
+                            required={Number(pregunta.id) !== 35}
                           />
-                        </label>
+                        
                       </div>
                     );
                   })}

@@ -1,3 +1,8 @@
 .mi-card{
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
 }
+
+.form-label-required::after {
+  content: " *";
+  color: #d9534f; /* Este es un lindo rojo (el "danger" de Bootstrap) */
+}
