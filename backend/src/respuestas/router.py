@@ -10,6 +10,11 @@ router = APIRouter(prefix="/respuestas", tags=["respuestas"])
 
 @router.post("/", response_model=schemas.RespuestaCreate)
 def create_respuesta(respuesta: schemas.RespuestaCreate, db: Session = Depends(get_db)):
+    """
+    Crea una respuesta (para encuesta o informe curricular).
+    Si la respuesta está asociada a un informe_asignatura,
+    automáticamente marca ese informe como 'cerrado'.
+    """
     return services.crear_respuesta(db, respuesta)
 
 @router.get("/", response_model=List[schemas.RespuestaRead])

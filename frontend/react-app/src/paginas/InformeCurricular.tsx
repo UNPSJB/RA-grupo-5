@@ -1,58 +1,55 @@
-// src/pages/InformeCurricular.tsx
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState, useCallback } from "react";
-
 import { useReportes } from "../hook/useReportes";
 import { useInformesCurriculares } from "../hook/useInformesCurriculares";
 import { useInformeBase } from "../hook/useInformeBase";
 import { useResponderInforme } from "../hook/useResponderInforme";
+import LayoutReporte from "../componentes/LayoutReporte";
+import { Container, Card, Toast, ToastContainer } from "react-bootstrap";
+import ResumenVariable from "../componentes/ResumenVariable";
 
 export default function InformeCurricular() {
-  // 1. ID del reporte que eligió el docente en la pantalla anterior
   const { reporteId } = useParams();
+  const navigate = useNavigate();
 
-  // 2. Hooks para hablar con la API
-  const { fetchReporteById } = useReportes();
+  const { fetchReporteById, fetchResumenByReporteId } = useReportes();
   const { crearInformeCurricular } = useInformesCurriculares();
   const { fetchInformeBaseActual } = useInformeBase();
 
-  // Hook para manejar respuestas libres del docente
+  const [reporte, setReporte] = useState<any>(null);
+  const [loadingReporte, setLoadingReporte] = useState(true);
+  const [errorReporte, setErrorReporte] = useState<string | null>(null);
+
+  const [resumenData, setResumenData] = useState<any>(null);
+  const [loadingResumen, setLoadingResumen] = useState(true);
+  const [errorResumen, setErrorResumen] = useState<string | null>(null);
+
+  const [informeBase, setInformeBase] = useState<any>(null);
+  const [loadingBase, setLoadingBase] = useState(true);
+  const [errorBase, setErrorBase] = useState<string | null>(null);
+
   const {
     answersByPreguntaOpcion,
     setTextoRespuesta,
     guardarRespuestasInforme,
   } = useResponderInforme();
 
-  // 3. Estados para datos precargados
-  const [reporte, setReporte] = useState<any>(null);
-  const [loadingReporte, setLoadingReporte] = useState(true);
-  const [errorReporte, setErrorReporte] = useState<string | null>(null);
-
-  const [informeBase, setInformeBase] = useState<any>(null);
-  const [loadingBase, setLoadingBase] = useState(true);
-  const [errorBase, setErrorBase] = useState<string | null>(null);
-
-  // 4. Estados para los campos administrativos del informe_asignatura
-  const [fechaInicio, setFechaInicio] = useState("");
-  const [fechaFin, setFechaFin] = useState("");
-  const [estado, setEstado] = useState("abierto");
-
   const [sede, setSede] = useState("");
-  const [cicloLectivo, setCicloLectivo] = useState("");
+  const [cicloLectivo, setCicloLectivo] = useState<number | "">("");
   const [docente, setDocente] = useState("");
-
   const [cantInscriptos, setCantInscriptos] = useState<number | "">("");
   const [cantTeoricas, setCantTeoricas] = useState<number | "">("");
   const [cantPracticas, setCantPracticas] = useState<number | "">("");
 
-  // 5. Feedback de guardado
   const [saving, setSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
-  const [saveOk, setSaveOk] = useState(false);
 
-  // ------------------------
-  // Carga inicial: Reporte
-  // ------------------------
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastVariant, setToastVariant] = useState<"success" | "danger">(
+    "success"
+  );
+
+  // -------- cargar reporte ----------
   useEffect(() => {
     async function cargarReporte() {
       if (!reporteId) {
@@ -60,45 +57,49 @@ export default function InformeCurricular() {
         setLoadingReporte(false);
         return;
       }
-
       try {
         const data = await fetchReporteById(reporteId);
         setReporte(data);
-
         const asignatura = data.encuesta_asignatura?.asignatura;
         setSede(asignatura?.sede || "");
         setDocente(asignatura?.nombre_docente || "");
-        setCicloLectivo(asignatura?.ciclo_lectivo || "");
+        setCicloLectivo(
+          asignatura?.ciclo_lectivo ? Number(asignatura.ciclo_lectivo) : ""
+        );
       } catch (err) {
         setErrorReporte("Error cargando el reporte.");
       } finally {
         setLoadingReporte(false);
       }
     }
-
     cargarReporte();
   }, [reporteId, fetchReporteById]);
 
-  // ------------------------
-  // Carga inicial: InformeBase (plantilla vigente)
-  // ------------------------
+  // -------- cargar resumen ----------
+  useEffect(() => {
+    async function cargarResumen() {
+      if (!reporteId) {
+        setErrorResumen("Falta reporteId en la URL (resumen).");
+        setLoadingResumen(false);
+        return;
+      }
+      try {
+        const resum = await fetchResumenByReporteId(Number(reporteId));
+        setResumenData(resum);
+      } catch (err) {
+        setErrorResumen("Error cargando el resumen del reporte.");
+      } finally {
+        setLoadingResumen(false);
+      }
+    }
+    cargarResumen();
+  }, [reporteId, fetchResumenByReporteId]);
+
+  // -------- cargar informe base ----------
   useEffect(() => {
     async function cargarInformeBase() {
       try {
         const base = await fetchInformeBaseActual();
-        // IMPORTANTE:
-        // base.preguntas[i] DEBE traer también las opciones (pregunta_opcion)
-        // para cada pregunta. Al menos una pregunta_opcion por pregunta,
-        // y cada pregunta_opcion debe tener su `id`.
-        //
-        // Ej:
-        // {
-        //   id: 10,
-        //   texto_pregunta: "...",
-        //   pregunta_opcion: [
-        //     { id: 999, id_pregunta: 10, id_opcion_respuesta: null }
-        //   ]
-        // }
         setInformeBase(base);
       } catch (err) {
         setErrorBase("Error cargando la plantilla del informe.");
@@ -106,24 +107,17 @@ export default function InformeCurricular() {
         setLoadingBase(false);
       }
     }
-
     cargarInformeBase();
   }, [fetchInformeBaseActual]);
 
-  // ------------------------
-  // Submit del formulario
-  // ------------------------
+  // -------- submit ----------
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
       if (!reporte || !informeBase) return;
 
       setSaving(true);
-      setSaveError(null);
-      setSaveOk(false);
-
       try {
-        // 1. Armamos la "cabecera" del informe_asignatura
         const asignatura = reporte.encuesta_asignatura?.asignatura;
         const id_asignatura =
           asignatura?.id ||
@@ -131,40 +125,61 @@ export default function InformeCurricular() {
           asignatura?.idAsignatura;
 
         const payloadCabecera = {
-          fecha_inicio: fechaInicio,
-          fecha_fin: fechaFin,
-          estado: estado,
-
-          sede: sede,
-          ciclo_lectivo: cicloLectivo,
-          docente: docente,
-
-          cant_alumnos_insc: cantInscriptos === "" ? 0 : Number(cantInscriptos),
-          cant_comisiones_teoricas:
-            cantTeoricas === "" ? 0 : Number(cantTeoricas),
-          cant_comisiones_practicas:
-            cantPracticas === "" ? 0 : Number(cantPracticas),
-
+          fecha_inicio: "2025-03-01",
+          fecha_fin: "2025-07-30",
+          estado: "abierto",
+          sede,
+          ciclo_lectivo: Number(cicloLectivo),
+          docente,
+          cant_alumnos_insc: Number(cantInscriptos) || 0,
+          cant_comisiones_teoricas: Number(cantTeoricas) || 0,
+          cant_comisiones_practicas: Number(cantPracticas) || 0,
           id_informe_base: informeBase.id,
-          id_asignatura: id_asignatura,
+          id_asignatura,
           id_reporte: Number(reporteId),
         };
 
-        // 2. Creamos el informe_asignatura en backend
+        // 1) Crear la cabecera del informe (estado "abierto")
         const informeCreado = await crearInformeCurricular(payloadCabecera);
-        // informeCreado.id = id_informe_asignatura que vamos a usar abajo
 
-        // 3. Guardamos las respuestas abiertas del docente
-        // Necesitamos el id_persona (docente actual).
-        // Por ahora, hasta que tengas auth, lo dejamos fijo.
-        const idDocente = 1; // TODO: reemplazar con el ID real del docente logueado
+        // 2) Enviar respuestas -> el backend cerrará el informe al primer guardado
+        const idDocente = 1; // TODO: reemplazar por el id real del usuario
+        const result = await guardarRespuestasInforme(
+          idDocente,
+          informeCreado.id
+        );
 
-        await guardarRespuestasInforme(idDocente, informeCreado.id);
+        // 3) Manejo de resultado
+        if (!result.ok && result.conflict) {
+          // Ya existe una respuesta para ESTE informe (o el backend lo marcó como cerrado)
+          setToastVariant("danger");
+          setToastMessage(
+            result.detail || "El informe ya tiene una respuesta registrada."
+          );
+          setShowToast(true);
+          // Opcional: redirigir directo a Ver Informe
+          // navigate(`/docente/informes/${informeCreado.id}`, { replace: true });
+          return;
+        }
 
-        setSaveOk(true);
-      } catch (err) {
+        if (!result.ok) {
+          throw new Error(
+            result.detail || "No se pudo guardar la respuesta del informe."
+          );
+        }
+
+        // Éxito
+        setToastVariant("success");
+        setToastMessage("Informe guardado correctamente ✔");
+        setShowToast(true);
+        // Tu overlay ya navega a /docente al cerrar el toast
+      } catch (err: any) {
         console.error(err);
-        setSaveError("No se pudo guardar el informe curricular.");
+        setToastVariant("danger");
+        setToastMessage(
+          err?.message || "No se pudo guardar el informe curricular."
+        );
+        setShowToast(true);
       } finally {
         setSaving(false);
       }
@@ -172,9 +187,6 @@ export default function InformeCurricular() {
     [
       reporte,
       informeBase,
-      fechaInicio,
-      fechaFin,
-      estado,
       sede,
       cicloLectivo,
       docente,
@@ -187,240 +199,347 @@ export default function InformeCurricular() {
     ]
   );
 
-  // ------------------------
-  // Render
-  // ------------------------
-  if (loadingReporte || loadingBase) {
+  // -------- estados iniciales / errores ----------
+  if (loadingReporte || loadingBase || loadingResumen)
     return <div className="container mt-4">Cargando...</div>;
-  }
 
-  if (errorReporte) {
+  if (errorReporte)
     return <div className="container mt-4 text-danger">{errorReporte}</div>;
-  }
-  if (errorBase) {
+  if (errorBase)
     return <div className="container mt-4 text-danger">{errorBase}</div>;
-  }
-  if (!reporte) {
+  if (errorResumen)
+    return <div className="container mt-4 text-danger">{errorResumen}</div>;
+
+  if (!reporte)
     return <div className="container mt-4">No hay datos del reporte.</div>;
-  }
-  if (!informeBase) {
+  if (!informeBase)
     return (
       <div className="container mt-4">
         No hay plantilla de Informe Base disponible.
       </div>
     );
+  if (!resumenData)
+    return (
+      <div className="container mt-4">
+        No hay datos de resumen para este reporte.
+      </div>
+    );
+
+  // -------- preparar variables B, C, D, E --------
+  const resultados: Record<string, any> =
+    resumenData?.resultados_por_pregunta ?? {};
+  const resumenes: Record<string, any> =
+    resumenData?.resumen_por_variable ?? {};
+
+  const CODIGOS_OBJETIVO = new Set(["B", "C", "D", "E"]);
+
+  function extraerCodigo(nombreVar: string, variableData: any) {
+    const crudo = (variableData?.codigo ?? "").toString();
+    const desdeNombre = (nombreVar ?? "").split(":")[0];
+    return (crudo || desdeNombre || "").trim().toUpperCase();
   }
+
+  function obtenerResumen(nombreVar: string, codigo: string) {
+    if (resumenes[nombreVar]) return resumenes[nombreVar];
+    if (resumenes[codigo]) return resumenes[codigo];
+    const matchKey = Object.keys(resumenes).find((k) => {
+      const kNorm = k.toString().trim().toUpperCase();
+      return kNorm === codigo || kNorm.startsWith(`${codigo}:`);
+    });
+    return matchKey ? resumenes[matchKey] : null;
+  }
+
+  const resumenVariablesFiltradas = Object.entries(resultados)
+    .map(([nombreVar, variableData]) => {
+      const codigo = extraerCodigo(nombreVar, variableData);
+      return {
+        nombreVar,
+        codigo,
+        resumen: obtenerResumen(nombreVar, codigo),
+      };
+    })
+    .filter(
+      (it) =>
+        CODIGOS_OBJETIVO.has(it.codigo) &&
+        it.resumen &&
+        Array.isArray(it.resumen.opciones) &&
+        it.resumen.opciones.length > 0
+    );
 
   const asignatura = reporte.encuesta_asignatura?.asignatura || {};
 
+  // -------- render --------
   return (
     <div className="container mt-4">
-      <h2>Informe Curricular</h2>
+      <h2>Informe de Actividad Curricular</h2>
 
-      {/* CONTEXTO DE LA ASIGNATURA / REPORTE */}
-      <div className="alert alert-secondary">
-        <p>
-          <strong>Asignatura:</strong> {asignatura.nombre}
-        </p>
-        <p>
-          <strong>Carrera:</strong> {asignatura.carrera}
-        </p>
-        <p>
-          <strong>Año:</strong> {asignatura.año}
-        </p>
-        <p>
-          <strong>Cursado:</strong> {asignatura.cursado}
-        </p>
-        <p>
-          <strong>Docente según reporte:</strong> {asignatura.nombre_docente}
-        </p>
-      </div>
-
-      {/* FORMULARIO */}
-      <form onSubmit={handleSubmit}>
-        {/* Datos administrativos que van en InformeAsignatura */}
-        <div className="mb-3">
-          <label className="form-label">
-            Fecha inicio
-            <input
-              type="date"
-              className="form-control"
-              value={fechaInicio}
-              onChange={(e) => setFechaInicio(e.target.value)}
-              required
-            />
-          </label>
-        </div>
-
-        <div className="mb-3">
-          <label className="form-label">
-            Fecha fin
-            <input
-              type="date"
-              className="form-control"
-              value={fechaFin}
-              onChange={(e) => setFechaFin(e.target.value)}
-              required
-            />
-          </label>
-        </div>
-
-        <div className="mb-3">
-          <label className="form-label">
-            Estado
-            <select
-              className="form-select"
-              value={estado}
-              onChange={(e) => setEstado(e.target.value)}
+      <LayoutReporte
+        asignatura={asignatura.nombre}
+        anio={asignatura.año}
+        docente={asignatura.nombre_docente}
+        carrera={asignatura.carrera}
+      >
+        <Container className="mt-5">
+          {/* Overlay modal centrado cuando showToast = true */}
+          {showToast && (
+            <div
+              style={{
+                position: "fixed",
+                inset: 0,
+                backgroundColor: "rgba(0,0,0,0.4)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 2000,
+              }}
             >
-              <option value="abierto">abierto</option>
-              <option value="cerrado">cerrado</option>
-            </select>
-          </label>
-        </div>
-
-        <div className="row">
-          <div className="mb-3 col-md-4">
-            <label className="form-label">
-              Sede
-              <input
-                type="text"
-                className="form-control"
-                value={sede}
-                onChange={(e) => setSede(e.target.value)}
-              />
-            </label>
-          </div>
-
-          <div className="mb-3 col-md-4">
-            <label className="form-label">
-              Ciclo lectivo
-              <input
-                type="text"
-                className="form-control"
-                value={cicloLectivo}
-                onChange={(e) => setCicloLectivo(e.target.value)}
-                placeholder="2025 - 1er cuatrimestre"
-              />
-            </label>
-          </div>
-
-          <div className="mb-3 col-md-4">
-            <label className="form-label">
-              Docente responsable
-              <input
-                type="text"
-                className="form-control"
-                value={docente}
-                onChange={(e) => setDocente(e.target.value)}
-              />
-            </label>
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="mb-3 col-md-4">
-            <label className="form-label">
-              Cant. alumnos inscriptos
-              <input
-                type="number"
-                className="form-control"
-                value={cantInscriptos}
-                onChange={(e) =>
-                  setCantInscriptos(
-                    e.target.value === "" ? "" : Number(e.target.value)
-                  )
-                }
-                min={0}
-              />
-            </label>
-          </div>
-
-          <div className="mb-3 col-md-4">
-            <label className="form-label">
-              Cant. comisiones teóricas
-              <input
-                type="number"
-                className="form-control"
-                value={cantTeoricas}
-                onChange={(e) =>
-                  setCantTeoricas(
-                    e.target.value === "" ? "" : Number(e.target.value)
-                  )
-                }
-                min={0}
-              />
-            </label>
-          </div>
-
-          <div className="mb-3 col-md-4">
-            <label className="form-label">
-              Cant. comisiones prácticas
-              <input
-                type="number"
-                className="form-control"
-                value={cantPracticas}
-                onChange={(e) =>
-                  setCantPracticas(
-                    e.target.value === "" ? "" : Number(e.target.value)
-                  )
-                }
-                min={0}
-              />
-            </label>
-          </div>
-        </div>
-
-        {/* Preguntas dinámicas de la plantilla */}
-        <div className="mb-4">
-          <h5>Desarrollo del cursado</h5>
-
-          {informeBase.preguntas?.map((pregunta: any) => {
-            // IMPORTANTE:
-            // necesitamos el id_pregunta_opcion que corresponde a la respuesta abierta.
-            // asumimos que la primera opción es la abierta.
-            const primeraOpcion = pregunta.pregunta_opcion?.[0];
-            const idPreguntaOpcion = primeraOpcion?.id;
-
-            return (
-              <div
-                className="mb-3"
-                key={idPreguntaOpcion ?? pregunta.id ?? Math.random()}
+              <ToastContainer
+                style={{
+                  position: "static",
+                  zIndex: 2100,
+                  minWidth: "320px",
+                  maxWidth: "90vw",
+                }}
               >
-                <label className="form-label">
-                  {pregunta.texto_pregunta ?? pregunta.texto ?? "Pregunta"}
-                  <textarea
-                    className="form-control"
-                    style={{ minHeight: "80px" }}
-                    value={
-                      idPreguntaOpcion
-                        ? answersByPreguntaOpcion[idPreguntaOpcion] ?? ""
-                        : ""
+                <Toast
+                  bg={toastVariant === "success" ? "success" : "danger"}
+                  onClose={() => {
+                    setShowToast(false);
+                    if (toastVariant === "success") {
+                      navigate("/docente");
                     }
-                    onChange={(e) => {
-                      if (idPreguntaOpcion) {
-                        setTextoRespuesta(idPreguntaOpcion, e.target.value);
+                  }}
+                  show={showToast}
+                  delay={5000}
+                  autohide
+                >
+                  <Toast.Header closeButton={true}>
+                    <strong className="me-auto">
+                      {toastVariant === "success" ? "Listo" : "Error"}
+                    </strong>
+                  </Toast.Header>
+                  <Toast.Body className="text-white">{toastMessage}</Toast.Body>
+                </Toast>
+              </ToastContainer>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            {/* Card de datos administrativos */}
+            <Card
+              className="shadow-sm p-4 mb-4 border-0"
+              style={{ fontSize: "0.95rem", borderRadius: "0.75rem" }}
+            >
+              <div className="border rounded-3 overflow-hidden">
+                <div className="d-flex border-bottom">
+                  <div className="bg-light fw-semibold p-2 col-4">Sede</div>
+                  <div className="flex-grow-1 p-2">
+                    <input
+                      type="text"
+                      className="form-control border-0 shadow-none"
+                      value={sede}
+                      onChange={(e) => setSede(e.target.value)}
+                      placeholder="Ej: Puerto Madryn"
+                      disabled={showToast}
+                    />
+                  </div>
+                </div>
+
+                <div className="d-flex border-bottom">
+                  <div className="bg-light fw-semibold p-2 col-4">
+                    Ciclo Lectivo
+                  </div>
+                  <div className="flex-grow-1 p-2">
+                    <input
+                      type="number"
+                      className="form-control border-0 shadow-none"
+                      value={cicloLectivo}
+                      onChange={(e) =>
+                        setCicloLectivo(
+                          e.target.value === "" ? "" : Number(e.target.value)
+                        )
                       }
-                    }}
-                  />
-                </label>
+                      placeholder="2025 (ejemplo)"
+                      min={2000}
+                      disabled={showToast}
+                    />
+                  </div>
+                </div>
+
+                <div className="d-flex border-bottom">
+                  <div className="bg-light fw-semibold p-2 col-4">
+                    Docente/s Responsable/s
+                  </div>
+                  <div className="flex-grow-1 p-2">
+                    <input
+                      type="text"
+                      className="form-control border-0 shadow-none"
+                      value={docente}
+                      onChange={(e) => setDocente(e.target.value)}
+                      placeholder="Nombre del docente"
+                      disabled={showToast}
+                    />
+                  </div>
+                </div>
+
+                <div className="d-flex border-bottom">
+                  <div className="bg-light fw-semibold p-2 col-4">
+                    Cantidad de alumnos inscriptos
+                  </div>
+                  <div className="flex-grow-1 p-2">
+                    <input
+                      type="number"
+                      className="form-control border-0 shadow-none"
+                      value={cantInscriptos}
+                      onChange={(e) =>
+                        setCantInscriptos(
+                          e.target.value === "" ? "" : Number(e.target.value)
+                        )
+                      }
+                      min={1}
+                      placeholder="1"
+                      disabled={showToast}
+                    />
+                  </div>
+                </div>
+
+                <div className="d-flex border-bottom">
+                  <div className="bg-light fw-semibold p-2 col-4">
+                    Cantidad de comisiones clases teóricas
+                  </div>
+                  <div className="flex-grow-1 p-2">
+                    <input
+                      type="number"
+                      className="form-control border-0 shadow-none"
+                      value={cantTeoricas}
+                      onChange={(e) =>
+                        setCantTeoricas(
+                          e.target.value === "" ? "" : Number(e.target.value)
+                        )
+                      }
+                      min={1}
+                      placeholder="1"
+                      disabled={showToast}
+                    />
+                  </div>
+                </div>
+
+                <div className="d-flex">
+                  <div className="bg-light fw-semibold p-2 col-4">
+                    Cantidad de comisiones clases prácticas
+                  </div>
+                  <div className="flex-grow-1 p-2">
+                    <input
+                      type="number"
+                      className="form-control border-0 shadow-none"
+                      value={cantPracticas}
+                      onChange={(e) =>
+                        setCantPracticas(
+                          e.target.value === "" ? "" : Number(e.target.value)
+                        )
+                      }
+                      min={1}
+                      placeholder="1"
+                      disabled={showToast}
+                    />
+                  </div>
+                </div>
               </div>
-            );
-          })}
-        </div>
+            </Card>
 
-        {saveError && <div className="text-danger mb-3">{saveError}</div>}
+            <Card className="shadow-lg border-0">
+              <Card.Body>
+                <div className="mb-4">
+                  <h5>Responda:</h5>
 
-        {saveOk && (
-          <div className="text-success mb-3">
-            Informe guardado correctamente ✔
-          </div>
-        )}
+                  {informeBase.preguntas?.map((pregunta: any) => {
+                    const primeraOpcion = pregunta.pregunta_opcion?.[0];
+                    const idPreguntaOpcion = primeraOpcion?.id;
 
-        <button type="submit" className="btn btn-primary" disabled={saving}>
-          {saving ? "Guardando..." : "Guardar Informe"}
-        </button>
-      </form>
+                    return (
+                      <div
+                        className="mb-3"
+                        key={idPreguntaOpcion ?? pregunta.id ?? Math.random()}
+                      >
+                        <label className="form-label">
+                          {pregunta.texto_pregunta ??
+                            pregunta.texto ??
+                            "Pregunta"}
+
+                          {Number(pregunta.id) === 35 && (
+                            <div className="my-3">
+                              {resumenVariablesFiltradas.length > 0 ? (
+                                <div className="d-flex flex-wrap gap-3 mt-2">
+                                  {resumenVariablesFiltradas.map(
+                                    ({ codigo, resumen, nombreVar }) => (
+                                      <Card
+                                        key={nombreVar}
+                                        className="border-0 shadow-sm p-2"
+                                        style={{
+                                          width: "260px",
+                                          flex: "0 0 auto",
+                                          fontSize: "0.9rem",
+                                        }}
+                                      >
+                                        <Card.Body className="p-3">
+                                          <div className="fw-semibold text-center mb-2 text-secondary">
+                                            Variable {codigo}
+                                          </div>
+                                          <ResumenVariable
+                                            resumen={resumen}
+                                            variant="compact"
+                                          />
+                                        </Card.Body>
+                                      </Card>
+                                    )
+                                  )}
+                                </div>
+                              ) : (
+                                <p className="text-muted small">
+                                  No hay variables B, C, D o E para mostrar.
+                                </p>
+                              )}
+                            </div>
+                          )}
+
+                          <textarea
+                            className="form-control"
+                            style={{ minHeight: "80px" }}
+                            value={
+                              idPreguntaOpcion
+                                ? answersByPreguntaOpcion[idPreguntaOpcion] ??
+                                  ""
+                                : ""
+                            }
+                            onChange={(e) => {
+                              if (idPreguntaOpcion) {
+                                setTextoRespuesta(
+                                  idPreguntaOpcion,
+                                  e.target.value
+                                );
+                              }
+                            }}
+                          />
+                        </label>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="d-flex justify-content-center">
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={saving}
+                  >
+                    {saving ? "Guardando..." : "Guardar Informe"}
+                  </button>
+                </div>
+              </Card.Body>
+            </Card>
+          </form>
+        </Container>
+      </LayoutReporte>
     </div>
   );
 }
