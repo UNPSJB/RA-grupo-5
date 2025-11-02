@@ -10,7 +10,7 @@ class InformeAsignaturaBase(BaseModel):
     fecha_fin: date
     estado: EstadoInforme
     sede: str
-    ciclo_lectivo: str
+    ciclo_lectivo: int
     docente: str
     cant_alumnos_insc: int
     cant_comisiones_teoricas: int
