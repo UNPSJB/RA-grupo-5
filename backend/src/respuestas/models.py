@@ -1,6 +1,6 @@
-from sqlalchemy import Integer, ForeignKey
+from sqlalchemy import Integer, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from typing import List, Optional
+from typing import Optional
 from src.models import ModeloBase
 
 class Respuesta(ModeloBase):

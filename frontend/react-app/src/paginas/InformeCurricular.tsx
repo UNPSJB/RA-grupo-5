@@ -6,9 +6,11 @@ import { useInformeBase } from "../hook/useInformeBase";
 import { useResponderInforme } from "../hook/useResponderInforme";
 import LayoutReporte from "../componentes/LayoutReporte";
 import { Container, Card } from "react-bootstrap";
+import Alert from "react-bootstrap/Alert"; // <-- NUEVO
 import ResumenVariable from "../componentes/ResumenVariable";
 
-import '../styles/informe.css';
+import "../styles/informe.css";
+
 export default function InformeCurricular() {
   const { reporteId } = useParams();
   const navigate = useNavigate();
@@ -44,11 +46,22 @@ export default function InformeCurricular() {
 
   const [saving, setSaving] = useState(false);
 
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
-  const [toastVariant, setToastVariant] = useState<"success" | "danger">(
-    "success"
-  );
+  // ---- NUEVO: estado para Alert ----
+  const [alert, setAlert] = useState<{
+    show: boolean;
+    variant: "success" | "danger" | "warning" | "info";
+    message: string;
+  }>({ show: false, variant: "success", message: "" });
+
+  // Autocierre del Alert a los 5s. Si es éxito, navega al cerrar.
+  useEffect(() => {
+    if (!alert.show) return;
+    const t = setTimeout(() => {
+      setAlert((a) => ({ ...a, show: false }));
+      if (alert.variant === "success") navigate("/docente");
+    }, 5000);
+    return () => clearTimeout(t);
+  }, [alert.show, alert.variant, navigate]);
 
   // -------- cargar reporte ----------
   useEffect(() => {
@@ -67,7 +80,7 @@ export default function InformeCurricular() {
         setCicloLectivo(
           asignatura?.ciclo_lectivo ? Number(asignatura.ciclo_lectivo) : ""
         );
-      } catch (err) {
+      } catch {
         setErrorReporte("Error cargando el reporte.");
       } finally {
         setLoadingReporte(false);
@@ -87,7 +100,7 @@ export default function InformeCurricular() {
       try {
         const resum = await fetchResumenByReporteId(Number(reporteId));
         setResumenData(resum);
-      } catch (err) {
+      } catch {
         setErrorResumen("Error cargando el resumen del reporte.");
       } finally {
         setLoadingResumen(false);
@@ -102,7 +115,7 @@ export default function InformeCurricular() {
       try {
         const base = await fetchInformeBaseActual();
         setInformeBase(base);
-      } catch (err) {
+      } catch {
         setErrorBase("Error cargando la plantilla del informe.");
       } finally {
         setLoadingBase(false);
@@ -140,11 +153,11 @@ export default function InformeCurricular() {
           id_reporte: Number(reporteId),
         };
 
-        // 1) Crear la cabecera del informe (estado "abierto")
+        // 1) Crear cabecera
         const informeCreado = await crearInformeCurricular(payloadCabecera);
 
-        // 2) Enviar respuestas -> el backend cerrará el informe al primer guardado
-        const idDocente = 1; // TODO: reemplazar por el id real del usuario
+        // 2) Enviar respuestas (el backend cierra al primer guardado)
+        const idDocente = 1; // TODO: id real del usuario
         const result = await guardarRespuestasInforme(
           idDocente,
           informeCreado.id
@@ -152,14 +165,12 @@ export default function InformeCurricular() {
 
         // 3) Manejo de resultado
         if (!result.ok && result.conflict) {
-          // Ya existe una respuesta para ESTE informe (o el backend lo marcó como cerrado)
-          setToastVariant("danger");
-          setToastMessage(
-            result.detail || "El informe ya tiene una respuesta registrada."
-          );
-          setShowToast(true);
-          // Opcional: redirigir directo a Ver Informe
-          // navigate(`/docente/informes/${informeCreado.id}`, { replace: true });
+          setAlert({
+            show: true,
+            variant: "danger",
+            message:
+              result.detail || "El informe ya tiene una respuesta registrada.",
+          });
           return;
         }
 
@@ -170,17 +181,18 @@ export default function InformeCurricular() {
         }
 
         // Éxito
-        setToastVariant("success");
-        setToastMessage("Informe guardado correctamente ✔");
-        setShowToast(true);
-        // Tu overlay ya navega a /docente al cerrar el toast
+        setAlert({
+          show: true,
+          variant: "success",
+          message: "Informe guardado correctamente ✔",
+        });
       } catch (err: any) {
         console.error(err);
-        setToastVariant("danger");
-        setToastMessage(
-          err?.message || "No se pudo guardar el informe curricular."
-        );
-        setShowToast(true);
+        setAlert({
+          show: true,
+          variant: "danger",
+          message: err?.message || "No se pudo guardar el informe curricular.",
+        });
       } finally {
         setSaving(false);
       }
@@ -274,6 +286,25 @@ export default function InformeCurricular() {
     <div className="container mt-4">
       <h2>Informe de Actividad Curricular</h2>
 
+      {/* ALERT GLOBAL (flotante centro-arriba) */}
+      {alert.show && (
+        <div
+          className="position-fixed top-0 start-50 translate-middle-x mt-3"
+          style={{ zIndex: 2000, minWidth: 320, maxWidth: "90vw" }}
+        >
+          <Alert
+            variant={alert.variant}
+            onClose={() => {
+              setAlert((a) => ({ ...a, show: false }));
+              if (alert.variant === "success") navigate("/docente");
+            }}
+            dismissible
+          >
+            {alert.message}
+          </Alert>
+        </div>
+      )}
+
       <LayoutReporte
         asignatura={asignatura.nombre}
         anio={asignatura.año}
@@ -281,50 +312,6 @@ export default function InformeCurricular() {
         carrera={asignatura.carrera}
       >
         <Container className="mt-5">
-          {/* Overlay modal centrado cuando showToast = true */}
-          {showToast && (
-            <div
-              style={{
-                position: "fixed",
-                inset: 0,
-                backgroundColor: "rgba(0,0,0,0.4)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                zIndex: 2000,
-              }}
-            >
-              <ToastContainer
-                style={{
-                  position: "static",
-                  zIndex: 2100,
-                  minWidth: "320px",
-                  maxWidth: "90vw",
-                }}
-              >
-                <Toast
-                  bg={toastVariant === "success" ? "success" : "danger"}
-                  onClose={() => {
-                    setShowToast(false);
-                    if (toastVariant === "success") {
-                      navigate("/docente");
-                    }
-                  }}
-                  show={showToast}
-                  delay={5000}
-                  autohide
-                >
-                  <Toast.Header closeButton={true}>
-                    <strong className="me-auto">
-                      {toastVariant === "success" ? "Listo" : "Error"}
-                    </strong>
-                  </Toast.Header>
-                  <Toast.Body className="text-white">{toastMessage}</Toast.Body>
-                </Toast>
-              </ToastContainer>
-            </div>
-          )}
-
           <form onSubmit={handleSubmit}>
             {/* Card de datos administrativos */}
             <Card
@@ -362,7 +349,7 @@ export default function InformeCurricular() {
                       }
                       placeholder="2025 (ejemplo)"
                       min={2000}
-                      disabled={showToast}
+                      disabled={saving}
                     />
                   </div>
                 </div>
@@ -399,7 +386,7 @@ export default function InformeCurricular() {
                       }
                       min={1}
                       placeholder="1"
-                      disabled={showToast}
+                      disabled={saving}
                     />
                   </div>
                 </div>
@@ -420,7 +407,7 @@ export default function InformeCurricular() {
                       }
                       min={1}
                       placeholder="1"
-                      disabled={showToast}
+                      disabled={saving}
                     />
                   </div>
                 </div>
@@ -441,7 +428,7 @@ export default function InformeCurricular() {
                       }
                       min={1}
                       placeholder="1"
-                      disabled={showToast}
+                      disabled={saving}
                     />
                   </div>
                 </div>
@@ -463,70 +450,70 @@ export default function InformeCurricular() {
                         key={idPreguntaOpcion ?? pregunta.id ?? Math.random()}
                       >
                         <label
-                          htmlFor={`pregunta-${idPreguntaOpcion}`} // <-- AÑADIDO
+                          htmlFor={`pregunta-${idPreguntaOpcion}`}
                           className="form-label form-label-required"
                         >
                           {pregunta.texto_pregunta ??
                             pregunta.texto ??
                             "Pregunta"}
                         </label>
-                          {Number(pregunta.id) === 35 && (
-                            <div className="my-3">
-                              {resumenVariablesFiltradas.length > 0 ? (
-                                <div className="d-flex flex-wrap gap-3 mt-2">
-                                  {resumenVariablesFiltradas.map(
-                                    ({ codigo, resumen, nombreVar }) => (
-                                      <Card
-                                        key={nombreVar}
-                                        className="border-0 shadow-sm p-2"
-                                        style={{
-                                          width: "260px",
-                                          flex: "0 0 auto",
-                                          fontSize: "0.9rem",
-                                        }}
-                                      >
-                                        <Card.Body className="p-3">
-                                          <div className="fw-semibold text-center mb-2 text-secondary">
-                                            Variable {codigo}
-                                          </div>
-                                          <ResumenVariable
-                                            resumen={resumen}
-                                            variant="compact"
-                                          />
-                                        </Card.Body>
-                                      </Card>
-                                    )
-                                  )}
-                                </div>
-                              ) : (
-                                <p className="text-muted small">
-                                  No hay variables B, C, D o E para mostrar.
-                                </p>
-                              )}
-                            </div>
-                          )}
 
-                          <textarea
-                            id={`pregunta-${idPreguntaOpcion}`}
-                            className="form-control"
-                            style={{ minHeight: "80px" }}
-                            value={
-                              idPreguntaOpcion
-                                ? answersByPreguntaOpcion[idPreguntaOpcion] ??
-                                  ""
-                                : ""
+                        {Number(pregunta.id) === 35 && (
+                          <div className="my-3">
+                            {resumenVariablesFiltradas.length > 0 ? (
+                              <div className="d-flex flex-wrap gap-3 mt-2">
+                                {resumenVariablesFiltradas.map(
+                                  ({ codigo, resumen, nombreVar }) => (
+                                    <Card
+                                      key={nombreVar}
+                                      className="border-0 shadow-sm p-2"
+                                      style={{
+                                        width: "260px",
+                                        flex: "0 0 auto",
+                                        fontSize: "0.9rem",
+                                      }}
+                                    >
+                                      <Card.Body className="p-3">
+                                        <div className="fw-semibold text-center mb-2 text-secondary">
+                                          Variable {codigo}
+                                        </div>
+                                        <ResumenVariable
+                                          resumen={resumen}
+                                          variant="compact"
+                                        />
+                                      </Card.Body>
+                                    </Card>
+                                  )
+                                )}
+                              </div>
+                            ) : (
+                              <p className="text-muted small">
+                                No hay variables B, C, D o E para mostrar.
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                        <textarea
+                          id={`pregunta-${idPreguntaOpcion}`}
+                          className="form-control"
+                          style={{ minHeight: "80px" }}
+                          value={
+                            idPreguntaOpcion
+                              ? answersByPreguntaOpcion[idPreguntaOpcion] ?? ""
+                              : ""
+                          }
+                          onChange={(e) => {
+                            if (idPreguntaOpcion) {
+                              setTextoRespuesta(
+                                idPreguntaOpcion,
+                                e.target.value
+                              );
                             }
-                            onChange={(e) => {
-                              if (idPreguntaOpcion) {
-                                setTextoRespuesta(
-                                  idPreguntaOpcion,
-                                  e.target.value
-                                );
-                              }
-                            }}
-                            required={Number(pregunta.id) !== 35}
-                          />
-                        
+                          }}
+                          required={Number(pregunta.id) !== 35}
+                          disabled={saving}
+                        />
                       </div>
                     );
                   })}

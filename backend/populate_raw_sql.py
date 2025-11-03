@@ -1,7 +1,7 @@
 import sqlite3
 
 # Conectar a la base de datos existente
-conn = sqlite3.connect("database.db", timeout=10)
+conn = sqlite3.connect("mi-db-sqlite.db", timeout=10)
 cursor = conn.cursor()
 
 # 👤 Insertar persona de prueba
@@ -12,11 +12,11 @@ cursor.execute("""
 
 # 📘 Insertar asignatura
 cursor.execute("""
-    INSERT INTO asignaturas (nombre, año, nombre_docente, cursado, carrera, sede)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO asignaturas (nombre, año, nombre_docente, cursado, sede)
+    VALUES (?, ?, ?, ?, ?)
 """, (
     "Desarrollo de Software", 3, "Leo Ordoñez y Bruno Pazos",
-    "cuatrimestre2", "Analista Programador / Lic. En Sistemas", "Trelew"
+    "cuatrimestre2", "Trelew"
 ))
 
 # 📋 Insertar encuesta base
