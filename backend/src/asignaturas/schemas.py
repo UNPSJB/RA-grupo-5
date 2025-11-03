@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import List
 from src.asignaturas.models import Cursado
+from src.carreras.schemas import CarreraRead
 #from src.encuestas_asignaturas.schemas import EncuestaAsignaturaRead
 
 class AsignaturaBase(BaseModel):
@@ -8,8 +9,8 @@ class AsignaturaBase(BaseModel):
     año: int
     nombre_docente: str
     cursado: Cursado
-    carrera: str
     sede: str
+    id_carrera: int
 
 
 class AsignaturaCreate(AsignaturaBase):
@@ -22,5 +23,6 @@ class AsignaturaUpdate(AsignaturaBase):
 
 class AsignaturaRead(AsignaturaBase):
     id: int
+    carrera: CarreraRead
     #encuestas_asignaturas: List[EncuestaAsignaturaRead] = []
     model_config = {"from_attributes": True}

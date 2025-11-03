@@ -8,6 +8,7 @@ import LayoutReporte from "../componentes/LayoutReporte";
 import { Container, Card } from "react-bootstrap";
 import ResumenVariable from "../componentes/ResumenVariable";
 
+import '../styles/informe.css';
 export default function InformeCurricular() {
   const { reporteId } = useParams();
   const navigate = useNavigate();
@@ -115,6 +116,7 @@ export default function InformeCurricular() {
     async (e: React.FormEvent) => {
       e.preventDefault();
       if (!reporte || !informeBase) return;
+
       setSaving(true);
       try {
         const asignatura = reporte.encuesta_asignatura?.asignatura;
@@ -138,17 +140,46 @@ export default function InformeCurricular() {
           id_reporte: Number(reporteId),
         };
 
+        // 1) Crear la cabecera del informe (estado "abierto")
         const informeCreado = await crearInformeCurricular(payloadCabecera);
-        const idDocente = 1;
-        await guardarRespuestasInforme(idDocente, informeCreado.id);
 
+        // 2) Enviar respuestas -> el backend cerrará el informe al primer guardado
+        const idDocente = 1; // TODO: reemplazar por el id real del usuario
+        const result = await guardarRespuestasInforme(
+          idDocente,
+          informeCreado.id
+        );
+
+        // 3) Manejo de resultado
+        if (!result.ok && result.conflict) {
+          // Ya existe una respuesta para ESTE informe (o el backend lo marcó como cerrado)
+          setToastVariant("danger");
+          setToastMessage(
+            result.detail || "El informe ya tiene una respuesta registrada."
+          );
+          setShowToast(true);
+          // Opcional: redirigir directo a Ver Informe
+          // navigate(`/docente/informes/${informeCreado.id}`, { replace: true });
+          return;
+        }
+
+        if (!result.ok) {
+          throw new Error(
+            result.detail || "No se pudo guardar la respuesta del informe."
+          );
+        }
+
+        // Éxito
         setToastVariant("success");
         setToastMessage("Informe guardado correctamente ✔");
         setShowToast(true);
-      } catch (err) {
+        // Tu overlay ya navega a /docente al cerrar el toast
+      } catch (err: any) {
         console.error(err);
         setToastVariant("danger");
-        setToastMessage("No se pudo guardar el informe curricular.");
+        setToastMessage(
+          err?.message || "No se pudo guardar el informe curricular."
+        );
         setShowToast(true);
       } finally {
         setSaving(false);
@@ -250,8 +281,173 @@ export default function InformeCurricular() {
         carrera={asignatura.carrera}
       >
         <Container className="mt-5">
+          {/* Overlay modal centrado cuando showToast = true */}
+          {showToast && (
+            <div
+              style={{
+                position: "fixed",
+                inset: 0,
+                backgroundColor: "rgba(0,0,0,0.4)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 2000,
+              }}
+            >
+              <ToastContainer
+                style={{
+                  position: "static",
+                  zIndex: 2100,
+                  minWidth: "320px",
+                  maxWidth: "90vw",
+                }}
+              >
+                <Toast
+                  bg={toastVariant === "success" ? "success" : "danger"}
+                  onClose={() => {
+                    setShowToast(false);
+                    if (toastVariant === "success") {
+                      navigate("/docente");
+                    }
+                  }}
+                  show={showToast}
+                  delay={5000}
+                  autohide
+                >
+                  <Toast.Header closeButton={true}>
+                    <strong className="me-auto">
+                      {toastVariant === "success" ? "Listo" : "Error"}
+                    </strong>
+                  </Toast.Header>
+                  <Toast.Body className="text-white">{toastMessage}</Toast.Body>
+                </Toast>
+              </ToastContainer>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit}>
-            {/* Card de respuestas abiertas */}
+            {/* Card de datos administrativos */}
+            <Card
+              className="shadow-sm p-4 mb-4 border-0"
+              style={{ fontSize: "0.95rem", borderRadius: "0.75rem" }}
+            >
+              <div className="border rounded-3 overflow-hidden">
+                <div className="d-flex border-bottom">
+                  <div className="bg-light fw-semibold p-2 col-4">Sede</div>
+                  <div className="flex-grow-1 p-2">
+                    <input
+                      type="text"
+                      className="form-control border-0 shadow-none"
+                      value={sede}
+                      onChange={(e) => setSede(e.target.value)}
+                      placeholder="Ej: Puerto Madryn"
+                      readOnly
+                    />
+                  </div>
+                </div>
+
+                <div className="d-flex border-bottom">
+                  <div className="bg-light fw-semibold p-2 col-4">
+                    Ciclo Lectivo
+                  </div>
+                  <div className="flex-grow-1 p-2">
+                    <input
+                      type="number"
+                      className="form-control border-0 shadow-none"
+                      value={cicloLectivo}
+                      onChange={(e) =>
+                        setCicloLectivo(
+                          e.target.value === "" ? "" : Number(e.target.value)
+                        )
+                      }
+                      placeholder="2025 (ejemplo)"
+                      min={2000}
+                      disabled={showToast}
+                    />
+                  </div>
+                </div>
+
+                <div className="d-flex border-bottom">
+                  <div className="bg-light fw-semibold p-2 col-4">
+                    Docente/s Responsable/s
+                  </div>
+                  <div className="flex-grow-1 p-2">
+                    <input
+                      type="text"
+                      className="form-control border-0 shadow-none"
+                      value={docente}
+                      onChange={(e) => setDocente(e.target.value)}
+                      placeholder="Nombre del docente"
+                      readOnly
+                    />
+                  </div>
+                </div>
+
+                <div className="d-flex border-bottom">
+                  <div className="bg-light fw-semibold p-2 col-4">
+                    Cantidad de alumnos inscriptos
+                  </div>
+                  <div className="flex-grow-1 p-2">
+                    <input
+                      type="number"
+                      className="form-control border-0 shadow-none"
+                      value={cantInscriptos}
+                      onChange={(e) =>
+                        setCantInscriptos(
+                          e.target.value === "" ? "" : Number(e.target.value)
+                        )
+                      }
+                      min={1}
+                      placeholder="1"
+                      disabled={showToast}
+                    />
+                  </div>
+                </div>
+
+                <div className="d-flex border-bottom">
+                  <div className="bg-light fw-semibold p-2 col-4">
+                    Cantidad de comisiones clases teóricas
+                  </div>
+                  <div className="flex-grow-1 p-2">
+                    <input
+                      type="number"
+                      className="form-control border-0 shadow-none"
+                      value={cantTeoricas}
+                      onChange={(e) =>
+                        setCantTeoricas(
+                          e.target.value === "" ? "" : Number(e.target.value)
+                        )
+                      }
+                      min={1}
+                      placeholder="1"
+                      disabled={showToast}
+                    />
+                  </div>
+                </div>
+
+                <div className="d-flex">
+                  <div className="bg-light fw-semibold p-2 col-4">
+                    Cantidad de comisiones clases prácticas
+                  </div>
+                  <div className="flex-grow-1 p-2">
+                    <input
+                      type="number"
+                      className="form-control border-0 shadow-none"
+                      value={cantPracticas}
+                      onChange={(e) =>
+                        setCantPracticas(
+                          e.target.value === "" ? "" : Number(e.target.value)
+                        )
+                      }
+                      min={1}
+                      placeholder="1"
+                      disabled={showToast}
+                    />
+                  </div>
+                </div>
+              </div>
+            </Card>
+
             <Card className="shadow-lg border-0">
               <Card.Body>
                 <div className="mb-4">
@@ -266,11 +462,14 @@ export default function InformeCurricular() {
                         className="mb-3"
                         key={idPreguntaOpcion ?? pregunta.id ?? Math.random()}
                       >
-                        <label className="form-label">
+                        <label
+                          htmlFor={`pregunta-${idPreguntaOpcion}`} // <-- AÑADIDO
+                          className="form-label form-label-required"
+                        >
                           {pregunta.texto_pregunta ??
                             pregunta.texto ??
                             "Pregunta"}
-
+                        </label>
                           {Number(pregunta.id) === 35 && (
                             <div className="my-3">
                               {resumenVariablesFiltradas.length > 0 ? (
@@ -308,6 +507,7 @@ export default function InformeCurricular() {
                           )}
 
                           <textarea
+                            id={`pregunta-${idPreguntaOpcion}`}
                             className="form-control"
                             style={{ minHeight: "80px" }}
                             value={
@@ -324,8 +524,9 @@ export default function InformeCurricular() {
                                 );
                               }
                             }}
+                            required={Number(pregunta.id) !== 35}
                           />
-                        </label>
+                        
                       </div>
                     );
                   })}

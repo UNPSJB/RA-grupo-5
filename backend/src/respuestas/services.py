@@ -1,6 +1,8 @@
+from genericpath import exists
 from typing import List, Optional
 from fastapi import HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.sql import exists as sa_exists
 from sqlalchemy.orm import Session, joinedload
 from src.respuestas.models import Respuesta
 from src.respuestas import schemas
@@ -19,6 +21,28 @@ def _respuesta_existente_id(db: Session, informe_id: int) -> Optional[int]:
 def crear_respuesta(db: Session, respuesta: schemas.RespuestaCreate) -> Respuesta:
     # ¿Esta respuesta es sobre un informe_asignatura (informe curricular) o sobre una encuesta?
     es_informe = respuesta.id_informe_asignatura is not None
+    
+    if es_informe:
+        # 1) ¿existe ya una respuesta para este informe? ya_existe=true
+        ya_existe = db.scalar(
+            select(sa_exists().where(Respuesta.id_informe_asignatura == respuesta.id_informe_asignatura))
+        )
+        if ya_existe:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Este informe curricular ya tiene una respuesta registrada.",
+            )
+
+        # 2) ¿el informe ya está cerrado?
+        informe = db.get(InformeAsignatura, respuesta.id_informe_asignatura)
+        if informe is None:
+            raise HTTPException(status_code=404, detail="Informe curricular no encontrado para responder")
+
+        if informe.estado == EstadoInforme.cerrado:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="El informe curricular ya fue cerrado; no se admiten nuevas respuestas.",
+            )
 
     # ⚠️ Si es informe, validamos existencia y estado antes de crear nada
     if es_informe:

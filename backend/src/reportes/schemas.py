@@ -21,5 +21,11 @@ class Reporte(ReporteBase):
     encuesta_asignatura: EncuestaAsignaturaRead
     model_config = {"from_attributes": True}
 
+class ReporteListadoItem(BaseModel):
+    id: int
+    has_informe: bool
+    has_respuesta: bool
+    informe_id: int | None
+
 
 
