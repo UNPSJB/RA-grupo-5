@@ -29,7 +29,7 @@ const mapInforme = (i: any) => {
   return (
     
     <div className="container mt-4">
-      <h2 className="mb-4">Gestión de Informes</h2>
+      <h2 className="mb-4">Gestión de Informes Curriculares</h2>
       <Accordion defaultActiveKey={null} flush>
         <InformeGrupo titulo="INFORMES ABIERTOS" eventKey="0" informes={abiertos.map(mapInforme)} />
         <InformeGrupo titulo="INFORMES CERRADOS" eventKey="1" informes={cerrados.map(mapInforme)} />

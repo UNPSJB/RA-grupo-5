@@ -38,6 +38,8 @@ useEffect(() => {
   if (error) return <p style={{ color: "red" }}>{error}</p>;
   if (!informe) return <p>No se encontró el informe solicitado.</p>;
 
+   console.log("Informe recibido:", informe);
+
   return (
     <div style={{ padding: "1rem" }}>
       <h1>{informe.asignatura.nombre}</h1>
@@ -49,7 +51,7 @@ useEffect(() => {
       <p><strong>Alumnos inscriptos:</strong> {informe.cant_alumnos_insc}</p>
       <p><strong>Comisiones teóricas:</strong> {informe.cant_comisiones_teoricas}</p>
       <p><strong>Comisiones prácticas:</strong> {informe.cant_comisiones_practicas}</p>
-      <p><strong>Carrera:</strong> {informe.asignatura.carrera}</p>
+      <p><strong>Carrera:</strong> {informe.asignatura.carrera.nombre}</p>
       <p><strong>Año:</strong> {informe.asignatura.año}</p>
       <p><strong>Cursado:</strong> {informe.asignatura.cursado}</p>
     </div>

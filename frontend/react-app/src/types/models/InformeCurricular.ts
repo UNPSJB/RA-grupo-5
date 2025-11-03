@@ -1,5 +1,6 @@
 import type { Asignatura } from "./Asignatura";
 import type { Reporte } from "./Reporte";
+
 enum EstadoInformeCurricular {
   abierto = "abierto",
   cerrado = "cerrado",

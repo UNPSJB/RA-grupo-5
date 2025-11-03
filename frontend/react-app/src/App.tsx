@@ -12,6 +12,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import ReportesDisponibles from "./paginas/ReportesDisponibles.tsx";
 import EncuestasRespondidas from "./componentes/EncuestasRespondidas.tsx";
 import InformeCurricularPage from "./paginas/InformeCurricularPage.tsx";
+import InformesSinteticosDisponibles from "./paginas/InformesSinteticosDisponibles.tsx";
 
 
 function App() {
@@ -49,6 +50,7 @@ function App() {
           <Route path=":id" element={<InformeCurricularPage />} />
           <Route index element={<InformesCurricularesDisponibles />} />
         </Route>
+        <Route path="informes-sinteticos" element={<InformesSinteticosDisponibles />} />
       </Route>
     </Routes>
   );
