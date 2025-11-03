@@ -13,7 +13,7 @@ export default function InformesCurricularesDisponibles() {
   const abiertos = informesCurriculares.filter((informe) => informe.estado === "abierto");
 
 const mapInforme = (i: any) => {
-  console.log("Informe recibido:", i); // 👈 Esto te muestra el objeto completo en consola
+  console.log("Informe recibido:", i); //  Esto te muestra el objeto completo en consola
 
   return {
     id: i.id,

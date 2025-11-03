@@ -27,19 +27,16 @@ export interface InformeCurricular {
 
 // Payload para crear o actualizar un Informe Curricular
 export interface InformeCurricularPayload {
-    fecha_inicio: string;
-    fecha_fin: string;
-    estado: string;
-
-    sede: string;
-    ciclo_lectivo: string;
-    docente: string;
-
-    cant_alumnos_insc: number;
-    cant_comisiones_teoricas: number;
-    cant_comisiones_practicas: number;
-
-    id_informe_base: number;
-    id_asignatura: number;
-    id_reporte: number;
+  fecha_inicio: string;
+  fecha_fin: string;
+  estado: string;
+  sede: string;
+  ciclo_lectivo: number;
+  docente: string;
+  cant_alumnos_insc: number;
+  cant_comisiones_teoricas: number;
+  cant_comisiones_practicas: number;
+  id_informe_base: number;
+  id_asignatura: number;
+  id_reporte: number;
 }
