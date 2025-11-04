@@ -3,10 +3,10 @@ import os
 from datetime import date # Importamos 'date' para InformeAsignatura
 
 # --- Configuración ---
-DB_NAME = "mi-db-sqlite.db"
+DB_NAME = "database.db"
 
 # Conectarse a la base de datos
-# ASUME QUE database.db YA EXISTE Y TIENE LAS TABLAS CREADAS POR FASTAPI
+# ASUME QUE DB_NAME YA EXISTE Y TIENE LAS TABLAS CREADAS POR FASTAPI
 if not os.path.exists(DB_NAME):
     print(f"Error: El archivo '{DB_NAME}' no existe.")
     print("Por favor, inicia tu aplicación FastAPI (uvicorn src.main:app)")
@@ -27,16 +27,14 @@ try:
     persona_id = 1
     print(f"  [OK] Insertada Persona ID: {persona_id}")
 
-    # --- MODIFICACIÓN 1: Añadir Carrera ---
-    # (Necesario para 'asignaturas')
+    # 1. Añadir Carrera
     cursor.execute("""
         INSERT INTO carreras (id, nombre, sede) VALUES (?, ?, ?)
     """, (1, "Analista Programador / Lic. En Sistemas", "Trelew"))
     carrera_id = 1
     print(f"  [OK] Insertada Carrera ID: {carrera_id}")
 
-    # --- MODIFICACIÓN 2: Corregir Asignatura ---
-    # (Cambiamos 'carrera' string por 'id_carrera' int)
+    # 2. Corregir Asignatura
     cursor.execute("""
         INSERT INTO asignaturas (id, nombre, año, nombre_docente, cursado, sede, id_carrera)
         VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -113,7 +111,8 @@ try:
         ("¿Qué recomendaciones le harías a un compañero...?", "open", True, vars_dict["G"], None),
         ("Si en la pregunta respondiste 'no puedo opinar'...", "open", True, vars_dict["G"], None)
     ]
-    cursor.executemany("INSERT INTO preguntas (texto_pregunta, tipo, obligatoria, id_variable, id_informe_base) VALUES (?, ?, ?, ?, ?)", preguntas)
+    # *** CAMBIO 1: id_informe_base -> id_informe_curricular_base ***
+    cursor.executemany("INSERT INTO preguntas (texto_pregunta, tipo, obligatoria, id_variable, id_informe_curricular_base) VALUES (?, ?, ?, ?, ?)", preguntas)
     print(f"  [OK] Insertadas {len(preguntas)} preguntas de Encuesta Alumno.")
 
     # ✅ Insertar opciones únicas de respuesta
@@ -186,24 +185,27 @@ try:
     reporte_id = 1
     print(f"  [OK] Insertado Reporte ID: {reporte_id}")
 
-    # --- 📜 SECCIÓN INFORME_BASE (Molde Docente) ---
-    cursor.execute("INSERT INTO informes_base (id, titulo) VALUES (?, ?)", (1, "Informe Docente Ciclo 2025"))
-    informe_base_id = 1
-    print(f"  [OK] Insertado InformeBase (Molde Docente) ID: {informe_base_id}")
+    # --- 📜 *** CAMBIO 2: SECCIÓN INFORME_CURRICULARES_BASE (Molde Docente) *** ---
+    # (Tabla 'informes_base' -> 'informes_curriculares_base')
+    cursor.execute("INSERT INTO informes_curriculares_base (id, titulo) VALUES (?, ?)", (1, "Informe Docente Ciclo 2025"))
+    informe_curricular_base_id = 1
+    print(f"  [OK] Insertado InformeCurricularesBase (Molde Docente) ID: {informe_curricular_base_id}")
 
     preguntas_informe = [
-    (32, "Indique en el caso que corresponda, las necesidades de equipamiento...", "open", True, informe_base_id, None),
-    (33, "Consigne el porcentaje de horas de clases...", "open", True, informe_base_id, None),
-    (34, "2-A- ¿Se logró desarrollar la totalidad de los contenidos...", "open", True, informe_base_id, None),
-    (35, "2-B- Consigne los valores que figuran en el reporte de la Encuesta...", "open", True, informe_base_id, None),
-    (36, "2.C. ¿Cuáles fueron los principales aspectos positivos...", "open", True, informe_base_id, None),
+    # (Usamos la variable informe_curricular_base_id)
+    (32, "Indique en el caso que corresponda, las necesidades de equipamiento...", "open", True, informe_curricular_base_id, None),
+    (33, "Consigne el porcentaje de horas de clases...", "open", True, informe_curricular_base_id, None),
+    (34, "2-A- ¿Se logró desarrollar la totalidad de los contenidos...", "open", True, informe_curricular_base_id, None),
+    (35, "2-B- Consigne los valores que figuran en el reporte de la Encuesta...", "open", True, informe_curricular_base_id, None),
+    (36, "2.C. ¿Cuáles fueron los principales aspectos positivos...", "open", True, informe_curricular_base_id, None),
 ]
     
     po_informe_ids_nulas = []
-    for id, texto, tipo, oblig, id_ib, id_var in preguntas_informe:
+    for id, texto, tipo, oblig, id_icb, id_var in preguntas_informe:
+        # *** CAMBIO 3: id_informe_base -> id_informe_curricular_base ***
         cursor.execute(
-            "INSERT INTO preguntas (id, texto_pregunta, tipo, obligatoria, id_informe_base, id_variable) VALUES (?, ?, ?, ?, ?, ?)",
-            (id, texto, tipo, oblig, id_ib, id_var)
+            "INSERT INTO preguntas (id, texto_pregunta, tipo, obligatoria, id_informe_curricular_base, id_variable) VALUES (?, ?, ?, ?, ?, ?)",
+            (id, texto, tipo, oblig, id_icb, id_var)
     )
         cursor.execute("INSERT INTO pregunta_opcion (id_pregunta, id_opcion_respuesta) VALUES (?, ?)", (id, None))
         po_informe_ids_nulas.append(cursor.lastrowid)
@@ -211,39 +213,42 @@ try:
     print(f"  [OK] Insertadas {len(preguntas_informe)} preguntas (Informe Docente) con sus 'pregunta_opcion' nulas.")
     
     # ==========================================================
-    # --- 3. SECCIÓN AÑADIDA: JERARQUÍA DE INFORMES SINTÉTICOS ---
+    # --- 3. SECCIÓN: JERARQUÍA DE INFORMES SINTÉTICOS ---
     # ==========================================================
 
-    # 🗂️ Insertar InformeSinteticoBase (Molde Depto)
+    # 🗂️ *** CAMBIO 4: Insertar InformeSinteticoBase (Molde Depto) ***
+    # (Tabla 'informes_sinteticos_base' actualizada: solo id y titulo)
     cursor.execute("""
-        INSERT INTO informes_sinteticos (id, titulo, comision_asesora, sede, integrantes)
-        VALUES (?, ?, ?, ?, ?)
-    """, (1, "Informe Sintético General 2025", "Comisión Central", "Rectorado", 5))
+        INSERT INTO informes_sinteticos_base (id, titulo)
+        VALUES (?, ?)
+    """, (1, "Informe Sintético General 2025"))
     informe_sintetico_base_id = 1
     print(f"  [OK] Insertado InformeSinteticoBase (Molde Depto) ID: {informe_sintetico_base_id}")
 
-    # 📁 Insertar InformeSinteticoCarrera (el "Padre")
+    # 📁 *** CAMBIO 5: Insertar InformeSinteticoCarrera (el "Padre") ***
+    # (Columna 'id_informe_sintetico' -> 'id_informe_sintetico_base')
     cursor.execute("""
-        INSERT INTO informes_sinteticos_carreras (id, id_carrera, id_informe_sintetico, ciclo_lectivo, comision_asesora, sede, integrantes)
+        INSERT INTO informes_sinteticos_carreras (id, id_carrera, id_informe_sintetico_base, ciclo_lectivo, comision_asesora, sede, integrantes)
         VALUES (?, ?, ?, ?, ?, ?, ?)
     """, (1, carrera_id, informe_sintetico_base_id, "2025", "Comisión APU", "Trelew", "Decano, Secretarios"))
     informe_sintetico_carrera_id = 1
     print(f"  [OK] Insertado InformeSinteticoCarrera (Padre) ID: {informe_sintetico_carrera_id}")
 
-    # 📄 Insertar InformeAsignatura (el "Hijo")
+    # 📄 *** CAMBIO 6: Insertar InformeAsignatura (el "Hijo") ***
+    # (Columna 'id_informe_base' -> 'id_informe_curricular_base')
     cursor.execute("""
         INSERT INTO informes_asignaturas (
             id, sede, ciclo_lectivo, docente, cant_alumnos_insc, cant_comisiones_teoricas, 
             cant_comisiones_practicas, fecha_inicio, fecha_fin, estado, 
-            id_informe_base, id_asignatura, id_reporte, id_informe_sintetico_carrera
+            id_informe_curricular_base, id_asignatura, id_reporte, id_informe_sintetico_carrera
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         1, "tw", 2025, "Leonardo Ordoñez", 50, 1, 2, 
         date(2025, 8, 1), date(2025, 12, 1), 'abierto',
-        informe_base_id,       # Molde docente (ID 1)
-        asignatura_id,         # Asignatura (ID 1)
-        reporte_id,            # Reporte (ID 1)
-        informe_sintetico_carrera_id # Vínculo al Padre (ID 1)
+        informe_curricular_base_id, # Molde docente (ID 1)
+        asignatura_id,                # Asignatura (ID 1)
+        reporte_id,                   # Reporte (ID 1)
+        informe_sintetico_carrera_id  # Vínculo al Padre (ID 1)
     ))
     informe_asignatura_id = 1
     print(f"  [OK] Insertado InformeAsignatura (Hijo) ID: {informe_asignatura_id}")
@@ -271,7 +276,7 @@ try:
 
     # 💾 Guardar cambios
     conn.commit()
-    print("\n✅ Base de datos poblada correctamente.")
+    print("\n✅ Base de datos poblada correctamente con la nueva estructura.")
 
 except sqlite3.Error as e:
     print(f"\n❌ Ocurrió un error de SQLite: {e}")
@@ -280,3 +285,5 @@ except sqlite3.Error as e:
 finally:
     conn.close()
     print("Conexión cerrada.")
+
+
