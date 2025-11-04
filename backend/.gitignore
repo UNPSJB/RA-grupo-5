@@ -23,3 +23,5 @@ __pycache__/
 
 # Scripts temporales de carga
 populate_*.py
+populate_database.py
+populate_raw_sql.py
