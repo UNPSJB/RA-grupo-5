@@ -1,3 +1,5 @@
+# Scripts temporales de carga
+populate_*.py
 
 # Entorno virtual
 venv/
