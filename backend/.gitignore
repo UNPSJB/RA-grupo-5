@@ -1,5 +1,5 @@
-# Script de carga de datos
-populate_raw_sql.py
+# Scripts temporales de carga
+populate_*.py
 
 # Entorno virtual
 venv/
@@ -22,6 +22,3 @@ __pycache__/
 # IDEs y editores
 .vscode/
 .idea/
-
-#generador de db base
-populate_raw_sql.py

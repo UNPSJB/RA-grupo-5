@@ -36,7 +36,7 @@ export default function ReportesDisponibles() {
                   <td>{asignatura.año}</td>
                   <td>{asignatura.cursado}</td>
                   <td>{asignatura.nombre_docente}</td>
-                  <td>{asignatura.carrera}</td>
+                  <td>{asignatura.carrera.nombre}</td>
                   <td>
                     {/* Ver Reporte siempre */}
                     <Link
