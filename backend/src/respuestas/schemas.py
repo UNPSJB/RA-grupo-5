@@ -1,4 +1,4 @@
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, model_validator, ConfigDict
 from typing import Optional, List
 from src.detalle_respuesta.schemas import DetalleRespuestaCreate, DetalleRespuestaRead
 
@@ -20,6 +20,7 @@ class RespuestaCreate(RespuestaBase):
 
 class RespuestaRead(RespuestaBase):
     id: int
-    detalles: List[DetalleRespuestaRead]
+    
+    detalles: List[DetalleRespuestaRead] = []
 
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(from_attributes=True)

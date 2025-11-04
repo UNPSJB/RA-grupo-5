@@ -1,6 +1,7 @@
 import { useInformesCurriculares } from "../hook/useInformesCurriculares";
-import Table from "react-bootstrap/Table";
-import { Link } from "react-router-dom";
+import Accordion from "react-bootstrap/Accordion";
+import { InformeGrupo } from "../componentes/InformeGrupo";
+
 
 export default function InformesCurricularesDisponibles() {
   const { informesCurriculares, loading, error } = useInformesCurriculares();
@@ -8,42 +9,31 @@ export default function InformesCurricularesDisponibles() {
   if (loading) return <p>Cargando informes...</p>;
   if (error) return <p>Error: {error}</p>;
 
-  const Cerrados = informesCurriculares.filter((informe) => informe.estado === "cerrado");
+  const cerrados = informesCurriculares.filter((informe) => informe.estado === "cerrado");
+  const abiertos = informesCurriculares.filter((informe) => informe.estado === "abierto");
+
+const mapInforme = (i: any) => {
+  console.log("Informe recibido:", i); //  Esto te muestra el objeto completo en consola
+
+  return {
+    id: i.id,
+    asignatura: i.asignatura.nombre, // si es un objeto
+    sede: i.sede,
+    fechaFin: i.fecha_fin,
+    docente: i.docente,       // si es un objeto
+    estado: i.estado,
+  };
+};
+
 
   return (
-    <div className="container mt-3 p-4  border">
-      <h2 className="m-3">Informes Disponibles</h2>
-      <Table className="table table-striped border mt-5">
-        <thead>
-          <tr className="border">
-            <th>Cod. Asignatura</th>
-            <th>Docente</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {Cerrados.length === 0 ? (
-            <tr>
-              <td colSpan={2}>No hay informes cerrados disponibles.</td>
-            </tr>
-          ) : (
-            Cerrados.map((informe) => (
-              <tr key={informe.id}>
-                <td>{informe.cod_act_curricular}</td>
-                <td>{informe.doc_responsable}</td>
-                <td>
-                  <Link
-                    to={`/departamento/informes/${informe.id}`}
-                    className="btn btn-primary m-2 sm"
-                  >
-                  Ir a informe
-                  </Link>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </Table>
+    
+    <div className="container mt-4">
+      <h2 className="mb-4">Gestión de Informes Curriculares</h2>
+      <Accordion defaultActiveKey={null} flush>
+        <InformeGrupo titulo="INFORMES ABIERTOS" eventKey="0" informes={abiertos.map(mapInforme)} />
+        <InformeGrupo titulo="INFORMES CERRADOS" eventKey="1" informes={cerrados.map(mapInforme)} />
+      </Accordion>
     </div>
   );
 }

@@ -36,20 +36,38 @@ export default function ReportesDisponibles() {
                   <td>{asignatura.año}</td>
                   <td>{asignatura.cursado}</td>
                   <td>{asignatura.nombre_docente}</td>
-                  <td>{asignatura.carrera}</td>
+                  <td>{asignatura.carrera.nombre}</td>
                   <td>
-                    <Link
-                      to={`/docente/nuevo-informe/${reporte.id}`}
-                      className="btn btn-primary m-2"
-                    >
-                      Responder Informe
-                    </Link>
+                    {/* Ver Reporte siempre */}
                     <Link
                       to={`/docente/reportes/${reporte.id}`}
                       className="btn btn-secondary m-2"
                     >
                       Ver Reporte
                     </Link>
+
+                    {/* Condicional según flags */}
+                    {reporte.has_respuesta ? (
+                      // Si ya fue respondido -> ver informe (necesita informe_id)
+                      <Link
+                        to={
+                          reporte.informe_id
+                            ? `/docente/informes/${reporte.informe_id}`
+                            : `/docente/informes/por-reporte/${reporte.id}` // fallback si implementaste esa ruta
+                        }
+                        className="btn btn-outline-primary m-2"
+                      >
+                        Ver Informe
+                      </Link>
+                    ) : (
+                      // Si no fue respondido -> responder informe (tu ruta actual)
+                      <Link
+                        to={`/docente/nuevo-informe/${reporte.id}`}
+                        className="btn btn-primary m-2"
+                      >
+                        Responder Informe
+                      </Link>
+                    )}
                   </td>
                 </tr>
               );

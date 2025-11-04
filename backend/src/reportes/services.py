@@ -1,5 +1,6 @@
 from typing import List
-from sqlalchemy import delete, select, update
+from src.informes_asignaturas.models import EstadoInforme
+from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 from src.reportes.models import Reporte
 from src.encuestas_asignaturas.models import EncuestaAsignatura
@@ -12,10 +13,34 @@ from src.variables.models import Variable
 from collections import defaultdict
 from src.reportes import schemas, exceptions
 
-
-
 def listar_reportes(db:Session) -> List[schemas.Reporte]:    
     return db.scalars(select(Reporte)).all()
+
+def listar_reportes_disponibles(db: Session) -> list[schemas.ReporteListadoItem]:
+    # Eager load de informes para no hacer N+1
+    reportes = db.scalars(
+        select(Reporte).options(selectinload(Reporte.informes_asignaturas))
+    ).all()
+
+    items: list[schemas.ReporteListadoItem] = []
+    for rep in reportes:
+        informes = rep.informes_asignaturas or []
+        # Si hubiera más de un informe por reporte, tomamos el más reciente (id mayor)
+        informe_sel = max(informes, key=lambda x: x.id) if informes else None
+
+        has_informe = informe_sel is not None
+        has_respuesta = bool(informe_sel and getattr(informe_sel, "estado", None) == EstadoInforme.cerrado)
+        informe_id = informe_sel.id if informe_sel else None
+
+        items.append(
+            schemas.ReporteListadoItem(
+                id=rep.id,
+                has_informe=has_informe,
+                has_respuesta=has_respuesta,
+                informe_id=informe_id,
+            )
+        )
+    return items
 
 def crear_reporte(db: Session, reporte: schemas.ReporteCreate) -> schemas.Reporte:
     _reporte = Reporte(**reporte.model_dump())
@@ -156,12 +181,17 @@ def _generar_resumen_por_variable(encuesta_asig: EncuestaAsignatura) -> dict:
 
     for respuesta in encuesta_asig.respuestas:
         for detalle in respuesta.detalles:
-            variable = detalle.pregunta_opcion.pregunta.variable
-            opcion = detalle.pregunta_opcion.opcion_respuesta
+            # Verificamos que el detalle tenga una 'pregunta_opcion' (buena práctica)
+            if detalle.pregunta_opcion:
+                # Obtenemos la variable y la opción
+                variable = detalle.pregunta_opcion.pregunta.variable
+                opcion = detalle.pregunta_opcion.opcion_respuesta # Esto puede ser None
 
-            # Agregamos el conteo usando el ID de la variable y el TEXTO de la opción
-            conteo_por_variable[variable.id][opcion.texto_opcion] += 1
-            total_votos_por_variable[variable.id] += 1
+                # ¡SOLO PROCESAMOS SI LA OPCIÓN EXISTE (NO ES NONE)!
+                if opcion: 
+                    # Agregamos el conteo usando el ID de la variable y el TEXTO de la opción
+                    conteo_por_variable[variable.id][opcion.texto_opcion] += 1
+                    total_votos_por_variable[variable.id] += 1
                 
     # --- Estructura del resumen por VARIABLE ---
     resumen_final_variables = {}

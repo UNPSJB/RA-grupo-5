@@ -11,20 +11,17 @@ class InformeSinteticoCarreraBase(BaseModel):
     comision_asesora: str
     sede: str
     integrantes: str
-    
     id_carrera: int
     id_informe_sintetico: int
-
 
 class InformeSinteticoCarreraCreate(InformeSinteticoCarreraBase):
     pass
 
-
 class InformeSinteticoCarreraRead(InformeSinteticoCarreraBase):
     id: int
-
     carrera: CarreraRead
     informe_sintetico: InformeSintetico
+    
     informes_asignaturas: List[InformeAsignaturaRead] = []
 
     model_config = ConfigDict(from_attributes=True)
