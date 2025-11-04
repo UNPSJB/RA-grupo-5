@@ -28,13 +28,13 @@ class InformeAsignatura(ModeloBase):
     fecha_fin: Mapped[date] = mapped_column(Date, index=True)
     estado: Mapped[EstadoInforme] = mapped_column(SQLEnum(EstadoInforme), nullable=False, default=EstadoInforme.abierto)
 
-    id_informe_base: Mapped[int] = mapped_column(ForeignKey("informes_base.id"), nullable=False)
+    id_informe_curricular_base: Mapped[int] = mapped_column(ForeignKey("informes_curriculares_base.id"), nullable=False)
     id_asignatura: Mapped[int] = mapped_column(ForeignKey("asignaturas.id"), nullable=False)
     id_reporte: Mapped[int] =  mapped_column(ForeignKey("reportes.id"), nullable=False)
     id_informe_sintetico_carrera: Mapped[Optional[int]] = mapped_column(ForeignKey("informes_sinteticos_carreras.id"), nullable=True)
     
     
-    informe_base = relationship("InformeBase", back_populates="informes_asignaturas")
+    informe_curricular_base = relationship("InformeCurricularBase", back_populates="informes_asignaturas")
     asignatura = relationship("Asignatura", back_populates="informes_asignaturas")
     respuestas = relationship("Respuesta", back_populates="informe_asignatura")
     reporte = relationship("Reporte", back_populates="informes_asignaturas")

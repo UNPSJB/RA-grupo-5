@@ -22,3 +22,8 @@ __pycache__/
 # IDEs y editores
 .vscode/
 .idea/
+
+# Scripts temporales de carga
+populate_*.py
+populate_database.py
+populate_raw_sql.py

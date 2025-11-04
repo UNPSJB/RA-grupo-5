@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from src.informes_asignaturas.models import EstadoInforme
-from src.informes_base.schemas import InformeBaseBase
+from src.informes_curriculares_base.schemas import InformeCurricularBase
 from src.asignaturas.schemas import AsignaturaRead
 from src.respuestas.schemas import RespuestaRead
 from datetime import date
@@ -25,16 +25,16 @@ class InformeAsignaturaBase(BaseModel):
     cant_comisiones_practicas: int
 
 class InformeAsignaturaCreate(InformeAsignaturaBase):
-    id_informe_base: int
+    id_informe_curricular_base: int
     id_asignatura: int
     id_reporte: int
 
 class InformeAsignaturaRead(InformeAsignaturaBase):
     id: int
-    id_informe_base: int
+    id_informe_curricular_base: int
     id_asignatura: int
     id_reporte: int
-    informe_base: "InformeBaseBase"
+    informe_curricular_base: "InformeCurricularBase"
     asignatura: "AsignaturaRead"
     respuestas: list["RespuestaRead"] = []
     
