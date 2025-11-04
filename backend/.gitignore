@@ -5,6 +5,9 @@ venv/
 # Variables de entorno
 .env
 
+# scripts de migración de bases de datos
+.populate_database.py
+
 # Base de datos local (SQLite)
 *.db
 *.sqlite3
