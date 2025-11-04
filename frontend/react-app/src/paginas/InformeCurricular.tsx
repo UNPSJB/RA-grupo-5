@@ -6,9 +6,8 @@ import { useInformeBase } from "../hook/useInformeBase";
 import { useResponderInforme } from "../hook/useResponderInforme";
 import LayoutReporte from "../componentes/LayoutReporte";
 import { Container, Card } from "react-bootstrap";
-import Alert from "react-bootstrap/Alert"; // <-- NUEVO
+import Alert from "react-bootstrap/Alert";
 import ResumenVariable from "../componentes/ResumenVariable";
-
 import "../styles/informe.css";
 
 export default function InformeCurricular() {
@@ -46,22 +45,22 @@ export default function InformeCurricular() {
 
   const [saving, setSaving] = useState(false);
 
-  // ---- NUEVO: estado para Alert ----
+  // ---- estado para Alert ----
   const [alert, setAlert] = useState<{
     show: boolean;
+    exiting: boolean;
     variant: "success" | "danger" | "warning" | "info";
     message: string;
-  }>({ show: false, variant: "success", message: "" });
+  }>({ show: false, exiting: false, variant: "success", message: "" });
 
-  // Autocierre del Alert a los 5s. Si es éxito, navega al cerrar.
+  // Autocierre -> pone "exiting" para disparar la animación de salida
   useEffect(() => {
-    if (!alert.show) return;
+    if (!alert.show || alert.exiting) return;
     const t = setTimeout(() => {
-      setAlert((a) => ({ ...a, show: false }));
-      if (alert.variant === "success") navigate("/docente");
+      setAlert((a) => ({ ...a, exiting: true, show: false }));
     }, 5000);
     return () => clearTimeout(t);
-  }, [alert.show, alert.variant, navigate]);
+  }, [alert.show, alert.exiting]);
 
   // -------- cargar reporte ----------
   useEffect(() => {
@@ -167,6 +166,7 @@ export default function InformeCurricular() {
         if (!result.ok && result.conflict) {
           setAlert({
             show: true,
+            exiting: false,
             variant: "danger",
             message:
               result.detail || "El informe ya tiene una respuesta registrada.",
@@ -183,6 +183,7 @@ export default function InformeCurricular() {
         // Éxito
         setAlert({
           show: true,
+          exiting: false,
           variant: "success",
           message: "Informe guardado correctamente ✔",
         });
@@ -190,6 +191,7 @@ export default function InformeCurricular() {
         console.error(err);
         setAlert({
           show: true,
+          exiting: false,
           variant: "danger",
           message: err?.message || "No se pudo guardar el informe curricular.",
         });
@@ -287,18 +289,33 @@ export default function InformeCurricular() {
       <h2>Informe de Actividad Curricular</h2>
 
       {/* ALERT GLOBAL (flotante centro-arriba) */}
-      {alert.show && (
+      {(alert.show || alert.exiting) && (
         <div
-          className="position-fixed top-0 start-50 translate-middle-x mt-3"
-          style={{ zIndex: 2000, minWidth: 320, maxWidth: "90vw" }}
+          className={`alert-float ${
+            alert.exiting ? "alert-float-hide" : "alert-float-show"
+          }`}
+          onAnimationEnd={() => {
+            // Cuando termina la animación de salida:
+            if (alert.exiting) {
+              const go = alert.variant === "success";
+              // Resetea estado y recién ahí navega
+              setAlert({
+                show: false,
+                exiting: false,
+                variant: "success",
+                message: "",
+              });
+              if (go) navigate("/docente");
+            }
+          }}
         >
           <Alert
             variant={alert.variant}
-            onClose={() => {
-              setAlert((a) => ({ ...a, show: false }));
-              if (alert.variant === "success") navigate("/docente");
-            }}
             dismissible
+            onClose={() =>
+              setAlert((a) => ({ ...a, exiting: true, show: false }))
+            }
+            className="shadow-lg"
           >
             {alert.message}
           </Alert>
@@ -311,7 +328,7 @@ export default function InformeCurricular() {
         docente={asignatura.nombre_docente}
         carrera={asignatura.carrera}
       >
-        <Container className="mt-5">
+        <Container className="mt-5 text-start">
           <form onSubmit={handleSubmit}>
             {/* Card de datos administrativos */}
             <Card
@@ -320,7 +337,9 @@ export default function InformeCurricular() {
             >
               <div className="border rounded-3 overflow-hidden">
                 <div className="d-flex border-bottom">
-                  <div className="bg-light fw-semibold p-2 col-4">Sede</div>
+                  <div className="bg-light fw-semibold p-2 col-4 text-start">
+                    Sede
+                  </div>
                   <div className="flex-grow-1 p-2">
                     <input
                       type="text"
@@ -451,7 +470,7 @@ export default function InformeCurricular() {
                       >
                         <label
                           htmlFor={`pregunta-${idPreguntaOpcion}`}
-                          className="form-label form-label-required"
+                          className="form-label form-label-required d-block text-start"
                         >
                           {pregunta.texto_pregunta ??
                             pregunta.texto ??
