@@ -9,7 +9,7 @@ def listar_informes_sinteticos_carrera(db:Session):
         db.query(InformeSinteticoCarrera)
         .options(
             joinedload(InformeSinteticoCarrera.carrera),
-            joinedload(InformeSinteticoCarrera.informe_sintetico)
+            joinedload(InformeSinteticoCarrera.informe_sintetico_base)
         )
         .all()
     )

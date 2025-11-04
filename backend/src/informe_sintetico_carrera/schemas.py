@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from src.carreras.schemas import CarreraRead
 from src.informes_asignaturas.schemas import InformeAsignaturaRead
-from src.informes_sinteticos_base.schemas import InformeSintetico
+from src.informes_sinteticos_base.schemas import InformeSinteticoBase
 
 
 class InformeSinteticoCarreraBase(BaseModel):
@@ -13,7 +13,7 @@ class InformeSinteticoCarreraBase(BaseModel):
     integrantes: str
     
     id_carrera: int
-    id_informe_sintetico: int
+    id_informe_sintetico_base: int
 
 
 class InformeSinteticoCarreraCreate(InformeSinteticoCarreraBase):
@@ -24,7 +24,7 @@ class InformeSinteticoCarreraRead(InformeSinteticoCarreraBase):
     id: int
 
     carrera: CarreraRead
-    informe_sintetico: InformeSintetico
+    informe_sintetico_base: InformeSinteticoBase
     informes_asignaturas: List[InformeAsignaturaRead] = []
 
     model_config = ConfigDict(from_attributes=True)

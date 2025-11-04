@@ -19,9 +19,9 @@ class Pregunta(ModeloBase):
     tipo: Mapped[TipoPreguntaEnum] = mapped_column(Enum(TipoPreguntaEnum), nullable=False)
     obligatoria: Mapped[bool] = mapped_column(Boolean, default=False)
 
-    #SI PERTENECE A UN INFORME
-    id_informe_base: Mapped[Optional[int]] = mapped_column(ForeignKey("informes_base.id"), nullable=True)
-    informe_base = relationship("InformeBase", back_populates="preguntas")
+    #SI PERTENECE A UN INFORME CURRICULAR
+    id_informe_curricular_base: Mapped[Optional[int]] = mapped_column(ForeignKey("informes_curriculares_base.id"), nullable=True)
+    informe_curricular_base = relationship("InformeCurricularBase", back_populates="preguntas")
 
     #SI PERTENECE A UNA VARIABLE
     id_variable: Mapped[Optional[int]] = mapped_column(ForeignKey("variables.id"), nullable=True)
