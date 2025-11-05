@@ -58,9 +58,25 @@ export default function InformeCurricular() {
     if (!alert.show || alert.exiting) return;
     const t = setTimeout(() => {
       setAlert((a) => ({ ...a, exiting: true, show: false }));
-    }, 5000);
+    }, 2500);
     return () => clearTimeout(t);
   }, [alert.show, alert.exiting]);
+
+  useEffect(() => {
+    if (!alert.exiting) return;
+    const t = setTimeout(() => {
+      const go = alert.variant === "success";
+      setAlert({
+        show: false,
+        exiting: false,
+        variant: "success",
+        message: "",
+      });
+      if (go) navigate("/docente");
+    }, 300);
+
+    return () => clearTimeout(t);
+  }, [alert.exiting, alert.variant, navigate]);
 
   // -------- cargar reporte ----------
   useEffect(() => {
@@ -147,7 +163,7 @@ export default function InformeCurricular() {
           cant_alumnos_insc: Number(cantInscriptos) || 0,
           cant_comisiones_teoricas: Number(cantTeoricas) || 0,
           cant_comisiones_practicas: Number(cantPracticas) || 0,
-          id_informe_base: informeBase.id,
+          id_informe_curricular_base: informeBase.id,
           id_asignatura,
           id_reporte: Number(reporteId),
         };
@@ -294,26 +310,18 @@ export default function InformeCurricular() {
           className={`alert-float ${
             alert.exiting ? "alert-float-hide" : "alert-float-show"
           }`}
-          onAnimationEnd={() => {
-            // Cuando termina la animación de salida:
-            if (alert.exiting) {
-              const go = alert.variant === "success";
-              // Resetea estado y recién ahí navega
-              setAlert({
-                show: false,
-                exiting: false,
-                variant: "success",
-                message: "",
-              });
-              if (go) navigate("/docente");
-            }
-          }}
         >
           <Alert
+            show={alert.show}
             variant={alert.variant}
             dismissible
+            transition={false}
             onClose={() =>
-              setAlert((a) => ({ ...a, exiting: true, show: false }))
+              setAlert((a) => ({
+                ...a,
+                exiting: true,
+                show: false,
+              }))
             }
             className="shadow-lg"
           >
