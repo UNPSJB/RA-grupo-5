@@ -65,7 +65,7 @@ export default function ReportesDisponibles() {
                         to={`/docente/nuevo-informe/${reporte.id}`}
                         className="btn btn-primary m-2"
                       >
-                        Responder Informe
+                        Nuevo Informe de Act.Curricular
                       </Link>
                     )}
                   </td>
