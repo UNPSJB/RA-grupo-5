@@ -5,7 +5,7 @@ from fastapi import HTTPException
 
 from src.informes_sinteticos_base import models, schemas 
 
-def crear_informe_sintetico(db: Session, informe: schemas.InformeSinteticoCreate) -> models.InformeSinteticoBase:
+def crear_informe_sintetico(db: Session, informe: schemas.InformeSinteticoBaseCreate) -> models.InformeSinteticoBase:
     _informe = models.InformeSinteticoBase(**informe.model_dump())
     db.add(_informe)
     db.commit()
@@ -17,7 +17,7 @@ def listar_informes_sinteticos(db: Session) -> List[models.InformeSinteticoBase]
 
 def leer_informe_sintetico(db: Session, informe_id: int) -> models.InformeSinteticoBase:
     db_informe = db.scalar(
-        select(models.InformeSintetico).where(models.InformeSinteticoBase.id == informe_id)
+        select(models.InformeSinteticoBase).where(models.InformeSinteticoBase.id == informe_id)
     )
     if db_informe is None:
         raise HTTPException(status_code=404, detail="Informe sintético no encontrado")

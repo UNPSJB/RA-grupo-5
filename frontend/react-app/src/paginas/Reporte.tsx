@@ -155,12 +155,29 @@ export default function ResumenReporte() {
                 </div>
 
                 <div className="d-grid">
-                  <Link
-                    to={`/docente/nuevo-informe/${reporteCompleto.id}`}
-                    className="btn btn-primary m-2"
-                  >
-                    Crear informe curricular
-                  </Link>
+                  {/* --- LÓGICA CONDICIONAL APLICADA --- */}
+                  {reporteCompleto.has_respuesta ? (
+                    // Opción A: Si YA tiene respuesta
+                    <Link
+                      to={
+                        reporteCompleto.informe_id
+                          ? `/docente/informes/${reporteCompleto.informe_id}`
+                          : `/docente/informes/por-reporte/${reporteCompleto.id}`
+                      }
+                      className="btn btn-outline-primary m-2"
+                    >
+                      Ver Informe Creado
+                    </Link>
+                  ) : (
+                    // Opción B: Si AÚN NO tiene respuesta (tu botón original)
+                    <Link
+                      to={`/docente/nuevo-informe/${reporteCompleto.id}`}
+                      className="btn btn-primary m-2"
+                    >
+                      Crear informe curricular
+                    </Link>
+                  )}
+                  {/* --- FIN DE LA LÓGICA --- */}
                 </div>
               </Card.Body>
             </Card>

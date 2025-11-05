@@ -2,7 +2,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState, useCallback } from "react";
 import { useReportes } from "../hook/useReportes";
 import { useInformesCurriculares } from "../hook/useInformesCurriculares";
-import { useInformeBase } from "../hook/useInformeBase";
+import { useInformeCurricularBase } from "../hook/useInformeCurricularBase";
 import { useResponderInforme } from "../hook/useResponderInforme";
 import LayoutReporte from "../componentes/LayoutReporte";
 import { Container, Card } from "react-bootstrap";
@@ -16,7 +16,7 @@ export default function InformeCurricular() {
 
   const { fetchReporteById, fetchResumenByReporteId } = useReportes();
   const { crearInformeCurricular } = useInformesCurriculares();
-  const { fetchInformeBaseActual } = useInformeBase();
+  const { fetchInformeBaseActual } = useInformeCurricularBase();
 
   const [reporte, setReporte] = useState<any>(null);
   const [loadingReporte, setLoadingReporte] = useState(true);

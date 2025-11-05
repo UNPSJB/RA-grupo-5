@@ -69,7 +69,7 @@ def crear_respuesta(db: Session, respuesta: schemas.RespuestaCreate) -> Respuest
             PreguntaOpcion.id,
             Pregunta.tipo,
             Pregunta.obligatoria,
-            Pregunta.id_informe_base,
+            Pregunta.id_informe_curricular_base,
         )
         .join(Pregunta, PreguntaOpcion.id_pregunta == Pregunta.id)
         .where(PreguntaOpcion.id.in_(po_ids))
@@ -79,9 +79,9 @@ def crear_respuesta(db: Session, respuesta: schemas.RespuestaCreate) -> Respuest
         po_id: {
             "tipo": tipo,
             "obligatoria": obligatoria,
-            "es_de_informe": id_informe_base is not None,
+            "es_de_informe": id_informe_curricular_base is not None,
         }
-        for po_id, tipo, obligatoria, id_informe_base in db.execute(query).all()
+        for po_id, tipo, obligatoria, id_informe_curricular_base in db.execute(query).all()
     }
 
     # 1. Creo la respuesta "cabecera" (aún sin commit)
