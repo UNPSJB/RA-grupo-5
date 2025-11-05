@@ -13,7 +13,7 @@ import ReportesDisponibles from "./paginas/ReportesDisponibles.tsx";
 import EncuestasRespondidas from "./componentes/EncuestasRespondidas.tsx";
 import InformeCurricularPage from "./paginas/InformeCurricularPage.tsx";
 import InformesSinteticosDisponibles from "./paginas/InformesSinteticosDisponibles.tsx";
-
+import {DetalleInformeCarrera} from "./paginas/InformeSintetico.tsx";
 
 function App() {
   return (
@@ -44,12 +44,22 @@ function App() {
         </Route>
       </Route>
 
-      <Route path="/departamento" element={<LayoutDepartamento />}>
+<Route path="/departamento" element={<LayoutDepartamento />}>
+        
+        {/* '/departamento' (index) -> Muestra la lista (Esto está bien) */}
         <Route index element={<InformesCurricularesDisponibles />} />
+        
         <Route path="informes">
-          <Route path=":id" element={<InformeCurricularPage />} />
+
+          {/* --- ¡LA CORRECCIÓN ESTÁ AQUÍ! --- */}
+          {/* '/departamento/informes/:id' -> Debe mostrar el Detalle (Padre) */}
+          <Route path=":id" element={<DetalleInformeCarrera />} />
+          
+          {/* '/departamento/informes' -> Muestra la lista (Esto está bien) */}
           <Route index element={<InformesCurricularesDisponibles />} />
         </Route>
+
+        {/* (Esta ruta parece redundante, pero la dejo como la tenías) */}
         <Route path="informes-sinteticos" element={<InformesSinteticosDisponibles />} />
       </Route>
     </Routes>
