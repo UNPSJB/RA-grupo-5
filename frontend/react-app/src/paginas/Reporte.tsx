@@ -160,21 +160,14 @@ export default function ResumenReporte() {
 
               {/* Botón en el borde derecho (sticky en desktop, abajo en mobile) */}
               <div className="right-cta">
-                {/* Misma lógica que en ReportesDisponibles.tsx */}
-                {reporteCompleto.has_respuesta ? (
-                  // Si ya fue respondido → Ver Informe
+                {reporteCompleto?.has_respuesta ? (
                   <Link
-                    to={
-                      reporteCompleto.informe_id
-                        ? `/docente/informes/${reporteCompleto.informe_id}`
-                        : `/docente/informes/por-reporte/${reporteCompleto.id}` // fallback
-                    }
+                    to={`/docente/informes/${reporteCompleto.informe_id}`}
                     className="btn btn-outline-primary btn-lg w-100"
                   >
                     Ver Informe
                   </Link>
                 ) : (
-                  // Si no fue respondido → Crear nuevo informe
                   <Link
                     to={`/docente/nuevo-informe/${reporteCompleto.id}`}
                     className="btn btn-primary btn-lg w-100"
