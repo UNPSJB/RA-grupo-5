@@ -57,9 +57,33 @@ export function useReportes() {
   }, []);
 
   const fetchReporteById = useCallback(async (id: string | number) => {
-    const res = await fetch(`${API_URL}/reportes/${id}`);
-    if (!res.ok) throw new Error("No se pudo obtener el reporte");
-    return await res.json();
+    const rid = Number(id);
+
+    try {
+      const [resFull, resFlags] = await Promise.all([
+        fetch(`${API_URL}/reportes/${rid}`),
+        fetch(`${API_URL}/reportes/disponibles`),
+      ]);
+
+      if (!resFull.ok) throw new Error("No se pudo obtener el reporte");
+      if (!resFlags.ok)
+        throw new Error("No se pudieron obtener los flags de reportes");
+
+      const full = await resFull.json();
+      const flagsList = (await resFlags.json()) as Flags[];
+
+      const flags = flagsList.find((f) => f.id === rid) ?? {
+        id: rid,
+        has_informe: false,
+        has_respuesta: false,
+        informe_id: null,
+      };
+
+      return { ...full, ...flags };
+    } catch (error) {
+      console.error("Error en fetchReporteById:", error);
+      throw error;
+    }
   }, []);
 
   // Nota: este setLoading afecta al estado global del hook; si querés un loading independiente para el resumen,

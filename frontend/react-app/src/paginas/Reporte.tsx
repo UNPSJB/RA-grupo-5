@@ -160,18 +160,21 @@ export default function ResumenReporte() {
 
               {/* Botón en el borde derecho (sticky en desktop, abajo en mobile) */}
               <div className="right-cta">
+                {/* Misma lógica que en ReportesDisponibles.tsx */}
                 {reporteCompleto.has_respuesta ? (
+                  // Si ya fue respondido → Ver Informe
                   <Link
                     to={
                       reporteCompleto.informe_id
                         ? `/docente/informes/${reporteCompleto.informe_id}`
-                        : `/docente/informes/por-reporte/${reporteCompleto.id}`
+                        : `/docente/informes/por-reporte/${reporteCompleto.id}` // fallback
                     }
                     className="btn btn-outline-primary btn-lg w-100"
                   >
-                    Ver informe
+                    Ver Informe
                   </Link>
                 ) : (
+                  // Si no fue respondido → Crear nuevo informe
                   <Link
                     to={`/docente/nuevo-informe/${reporteCompleto.id}`}
                     className="btn btn-primary btn-lg w-100"
@@ -180,7 +183,6 @@ export default function ResumenReporte() {
                   </Link>
                 )}
               </div>
-
               {/* Métricas secundarias (opcional) */}
               <Card className="lite-card mt-3" style={{ fontSize: "0.9rem" }}>
                 <Card.Body className="p-3">
