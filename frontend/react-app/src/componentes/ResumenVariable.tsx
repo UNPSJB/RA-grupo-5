@@ -1,4 +1,3 @@
-// src/componentes/ResumenVariable.tsx
 import { Card, ListGroup } from "react-bootstrap";
 
 type Opcion = { opcion_texto: string; porcentaje: number };
@@ -6,15 +5,25 @@ export type ResumenVariableData = { opciones: Opcion[] };
 
 type Props = {
   resumen: ResumenVariableData | null;
-  /** "default" (por defecto) | "compact" para mini-tarjeta */
+  /** "default" | "compact" para mini-tarjeta */
   variant?: "default" | "compact";
+  /** Control de sombra/borde */
+  elevation?: "flat" | "soft" | "lifted";
 };
 
 export default function ResumenVariable({
   resumen,
   variant = "default",
+  elevation = "flat",
 }: Props) {
   const isCompact = variant === "compact";
+
+  const elevationClass =
+    elevation === "flat"
+      ? "flat-card border" // sin sombra, borde sutil
+      : elevation === "soft"
+      ? "shadow-sm border-0" // sombra leve
+      : "shadow border-0"; // sombra media (no lg)
 
   // Estado vacío
   if (
@@ -23,7 +32,7 @@ export default function ResumenVariable({
     resumen.opciones.length === 0
   ) {
     return (
-      <Card className={isCompact ? "shadow-sm border-0" : "shadow-lg border-0"}>
+      <Card className={elevationClass}>
         <Card.Body className={isCompact ? "p-3" : "p-4"}>
           <Card.Title className={isCompact ? "mb-2 fs-6" : "mb-4"}>
             <h6 className={isCompact ? "m-0 fw-semibold" : "m-0 fs-4"}>
@@ -38,7 +47,7 @@ export default function ResumenVariable({
 
   return (
     <Card
-      className={isCompact ? "shadow-sm border-0" : "shadow-lg border-0"}
+      className={elevationClass}
       style={isCompact ? { fontSize: "0.9rem" } : undefined}
     >
       <Card.Body className={isCompact ? "p-3" : "p-4"}>

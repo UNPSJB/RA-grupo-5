@@ -1,6 +1,6 @@
-from sqlalchemy import Integer, ForeignKey
+from sqlalchemy import Integer, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from typing import List, Optional
+from typing import Optional
 from src.models import ModeloBase
 
 class Respuesta(ModeloBase):
@@ -17,3 +17,7 @@ class Respuesta(ModeloBase):
 
     persona = relationship("Persona", back_populates="respuestas") 
     detalles = relationship("DetalleRespuesta", back_populates="respuesta")
+
+    __table_args__ = ( 
+        UniqueConstraint ('id_informe_asignatura', name='uq_respuestas_informe_doc'),
+    )

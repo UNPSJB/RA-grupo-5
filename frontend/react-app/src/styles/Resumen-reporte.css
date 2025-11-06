@@ -1,0 +1,43 @@
+/* contenedor visual más limpio */
+.flat-card {
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  border-radius: 0.75rem;
+  background: #fff;
+}
+
+/* tarjeta leve (métricas) */
+.lite-card {
+  box-shadow: var(--bs-box-shadow-sm) !important;
+  border-radius: 0.75rem;
+}
+
+/* rail derecho: que no quede "literalmente" columna rígida y que sea útil */
+.right-rail {
+  position: relative;
+}
+
+@media (min-width: 992px) {
+  /* lg+ */
+  .right-rail {
+    position: sticky;
+    top: 1rem; /* que acompañe el scroll */
+    align-self: start;
+  }
+}
+
+/* botón con presencia, sin flotar encima del contenido */
+.right-cta {
+  position: sticky;
+  top: 1rem; /* queda visible; el resumen queda arriba y el botón debajo */
+  z-index: 1;
+}
+
+/* ajustes de barras y separadores si aún no los tenés */
+.progress-compact {
+  height: 12px;
+  font-size: 0.7rem;
+}
+.pregunta-block + .pregunta-block {
+  padding-top: 0.5rem;
+  border-top: 1px dashed rgba(0, 0, 0, 0.06);
+}
