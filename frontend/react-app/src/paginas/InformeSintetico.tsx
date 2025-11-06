@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'; 
 import { useParams } from 'react-router-dom';
 import { useInformeSinteticoCarrera } from '../hook/useInformeSinteticoCarrera';
 
@@ -12,7 +12,7 @@ import { Container, Row, Col, Card, Tabs, Tab } from 'react-bootstrap';
  * Busca la respuesta correcta para una pregunta específica.
  */
 const findRespuestaPorPreguntaId = (
-  preguntaId: number,
+  preguntaId: number, 
   respuestas: Respuesta[]
 ): React.ReactNode => {
   for (const respuesta of respuestas) {
@@ -28,12 +28,15 @@ const findRespuestaPorPreguntaId = (
   return <em className="text-muted">Sin Respuesta</em>;
 };
 
+
 export const DetalleInformeCarrera: React.FC = () => {
+  
   const { id } = useParams<{ id: string }>();
   const informeId = id ? parseInt(id, 10) : null;
-
+  
   const { informe, loading, error } = useInformeSinteticoCarrera(informeId);
 
+  // (Manejo de estados - Sin cambios)
   if (loading || !informe) {
     return <Container className="mt-4">Cargando informe...</Container>;
   }
@@ -42,107 +45,79 @@ export const DetalleInformeCarrera: React.FC = () => {
   }
 
   return (
-    <Container className="mt-4">
-      {/* =========================================== */}
-      {/* 1. Fila de Resumen (Arriba) */}
-      {/* =========================================== */}
-      <Card className="shadow-sm mb-4">
-        <Card.Header as="h1" className="h4 bg-light">
-          {informe.carrera.nombre}
-        </Card.Header>
-        <Card.Body>
-          <Row>
-            {/* Columna de Detalles */}
-            <Col md={9}>
-              <Card.Title as="h5" className="h6 text-muted">
+    <Container>
+      <Col md={8} className="mx-auto mt-4 shadow">
+          {/* --- Card del "Padre" (Sin cambios) --- */}
+          <Card className="mb-4 ">
+            <Card.Header as="h4">
+              Informe Sintético - {informe.carrera.nombre}
+            </Card.Header>
+            <Card.Body className=''>
+              <Card.Title as="h4" className='m-2'>
                 {informe.informe_sintetico.titulo}
               </Card.Title>
-              <Card.Text as="div" className="mt-3">
-                <p className="mb-1">
+              <Card.Text as="div" className='text-start'>
+                <p>
                   <strong>Ciclo Lectivo:</strong> {informe.ciclo_lectivo}
                 </p>
-                <p className="mb-1">
+                <p>
                   <strong>Comisión Asesora:</strong> {informe.comision_asesora}
                 </p>
-                <p className="mb-0">
+                <p>
+                  <strong>Sede:</strong> {informe.sede}
+                </p>
+                <p>
                   <strong>Integrantes:</strong> {informe.integrantes}
                 </p>
               </Card.Text>
-            </Col>
-            
-            {/* Columna de Stats */}
-            <Col md={3} className="d-flex align-items-center justify-content-center mt-3 mt-md-0">
-              <div className="text-center p-3 bg-light rounded w-100">
-                <span className="text-muted fw-semibold" style={{ fontSize: "0.9rem" }}>
-                  Informes de Asignatura
-                </span>
-                <span className="text-primary fw-bold d-block" style={{ fontSize: "2.5rem" }}>
-                  {informe.informes_asignaturas.length}
-                </span>
-              </div>
-            </Col>
-          </Row>
-        </Card.Body>
-      </Card>
+            </Card.Body>
+          </Card>
 
-      {/* =========================================== */}
-      {/* 2. Card de Contenido Principal (Tabs) */}
-      {/* =========================================== */}
-      <Card className="shadow-sm">
-        <Card.Body>
-          <h2 className="h4">Informes Curriculares (Anexo I)</h2>
-          <p className="text-muted">
-            Respuestas de los docentes para cada asignatura vinculada.
-          </p>
-          
-          {informe.informes_asignaturas.length > 0 ? (
-            <Tabs
-              defaultActiveKey={informe.informes_asignaturas[0].id.toString()}
-              id="informes-tabs"
-              className="mb-3"
-              justify
-            >
-              {/* Iteramos sobre los "Hijos" para crear Pestañas */}
-              {informe.informes_asignaturas.map((informeAsig) => {
-                const preguntas = informeAsig.informe_base?.preguntas || [];
-                
-                return (
-                  <Tab
-                    key={informeAsig.id}
-                    eventKey={informeAsig.id.toString()}
-                    title={informeAsig.asignatura?.nombre || "Asignatura"}
-                  >
-                    {/* Contenido de la pestaña */}
-                    <div className="p-2">
-                      <h5 className="text-muted">Docente: {informeAsig.docente}</h5>
-                      <hr />
-                      
-                      {preguntas.length > 0 ? (
-                        preguntas.map((pregunta) => (
-                          <div className="mb-3 pt-2 border-bottom" key={pregunta.id}>
-                            <p className="fw-bold">{pregunta.texto_pregunta}</p>
-                            
-                            {/* --- 3. Borde Azul Eliminado --- */}
-                            <div className="ps-3 mb-2">
-                              {findRespuestaPorPreguntaId(pregunta.id, informeAsig.respuestas)}
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <p className="text-muted">Este informe no tiene preguntas definidas.</p>
-                      )}
-                    </div>
-                  </Tab>
-                );
-              })}
-            </Tabs>
-          ) : (
-            <div className="alert alert-info">
-              No hay informes de asignatura vinculados a este informe sintético.
-            </div>
-          )}
-        </Card.Body>
-      </Card>
+        {/* --- CORRECCIÓN: Contenedor <Tabs> --- */}
+        {/* 1. Añadimos el componente <Tabs> para envolver los <Tab> */}
+        <Tabs
+          defaultActiveKey={informe.informes_asignaturas[0]?.id.toString()}
+          id="informes-tabs"
+          className="mb-3"
+          justify
+        >
+          {informe.informes_asignaturas.map((informeAsignatura) => {
+            const preguntas = informeAsignatura.informe_base?.preguntas || [];
+            
+            return (
+              // 2. Quitamos el <Row> y usamos <Tab> como elemento principal del map
+              <Tab
+                key={informeAsignatura.id}
+                eventKey={informeAsignatura.id.toString()}
+                title={informeAsignatura.asignatura?.nombre || "Asignatura"}
+              >
+                <Card className='mb-4'>
+                  <Card.Header as="h5">
+                    Docente: {informeAsignatura.docente} | Año: {informeAsignatura.asignatura?.año} | Alumnos Inscritos: {informeAsignatura.cant_alumnos_insc}
+                  </Card.Header>
+
+                  {/* 3. Lógica corregida: (preguntas.length > 0) */}
+                  {preguntas.length > 0 ? (
+                    preguntas.map((pregunta) => (
+                      <Card.Body key={pregunta.id} className="border-bottom">
+                        <Card.Title as="h6">{pregunta.texto_pregunta}</Card.Title>
+                        <Card.Text as="div" className="ps-3">
+                          {findRespuestaPorPreguntaId(pregunta.id, informeAsignatura.respuestas)}
+                        </Card.Text>
+                      </Card.Body>
+                    ))
+                  ) : (
+                    <Card.Body>
+                      <p className="text-muted">No hay preguntas definidas para este informe.</p>
+                    </Card.Body>
+                  )}
+                    
+                </Card>
+              </Tab>
+            );
+          })}
+        </Tabs>
+      </Col>
     </Container>
   );
 };
