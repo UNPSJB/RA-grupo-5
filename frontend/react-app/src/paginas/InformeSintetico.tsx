@@ -1,11 +1,11 @@
 import React from 'react'; 
 import { useParams } from 'react-router-dom';
 import { useInformeSinteticoCarrera } from '../hook/useInformeSinteticoCarrera';
-
+import { Link } from 'react-router-dom';
 import type { Respuesta } from '../types/InformeSintetico';
 
 // Importamos los componentes de layout de React Bootstrap
-import { Container, Row, Col, Card, Tabs, Tab } from 'react-bootstrap';
+import { Container, Form, Col, Card, Tabs, Tab } from 'react-bootstrap';
 
 /**
  * Función Helper (Sin cambios)
@@ -45,8 +45,8 @@ export const DetalleInformeCarrera: React.FC = () => {
   }
 
   return (
-    <Container>
-      <Col md={8} className="mx-auto mt-4 shadow">
+    <Container className=''>
+      <Col md={8} className="mx-auto mt-4 p-4 mb-4 shadow">
           {/* --- Card del "Padre" (Sin cambios) --- */}
           <Card className="mb-4 ">
             <Card.Header as="h4">
@@ -117,6 +117,19 @@ export const DetalleInformeCarrera: React.FC = () => {
             );
           })}
         </Tabs>
+
+        <Form className='mb-3 '>
+            <Form.Label><strong>Aca va la pregunta:</strong></Form.Label>
+             <Form.Control as="textarea" rows={3} placeholder="Comentarios generales sobre el informe...">
+            </Form.Control>
+            {/* Aca hay que poner el endpoint para el guardado de el informe */}
+            <Link
+                to={`/departamento/generar-informe/${informe.id}`}
+                className="btn btn-primary mt-4"
+                >
+                Guarda informe sintetico
+            </Link>
+        </Form>
       </Col>
     </Container>
   );
