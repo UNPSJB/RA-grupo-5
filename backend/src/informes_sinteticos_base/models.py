@@ -9,6 +9,7 @@ class InformeSinteticoBase(ModeloBase):
     
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     titulo: Mapped[str] = mapped_column(String, index=True)
-  
+    
+    preguntas = relationship("Pregunta", back_populates="informe_sintetico_base")
     informes_sinteticos_carreras = relationship("InformeSinteticoCarrera", back_populates="informe_sintetico_base")
 

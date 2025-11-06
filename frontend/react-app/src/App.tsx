@@ -48,7 +48,7 @@ function App() {
       </Route>
 
       <Route path="/departamento" element={<LayoutDepartamento />}>
-        <Route index element={<InformesCurricularesDisponibles />} />
+        <Route index element={<InformesSinteticosDisponibles />} />
         <Route path="informes">
           <Route path=":id" element={<InformeCurricularPage />} />
           <Route index element={<InformesCurricularesDisponibles />} />

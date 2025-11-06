@@ -361,7 +361,7 @@ export default function InformeCurricular() {
                 </div>
 
                 <div className="d-flex border-bottom">
-                  <div className="bg-light fw-semibold p-2 col-4">
+                  <div className="form-label-required bg-light fw-semibold p-2 col-4">
                     Ciclo Lectivo
                   </div>
                   <div className="flex-grow-1 p-2">
@@ -376,6 +376,7 @@ export default function InformeCurricular() {
                       }
                       placeholder="2025 (ejemplo)"
                       min={2000}
+                      required
                       disabled={saving}
                     />
                   </div>
@@ -398,7 +399,7 @@ export default function InformeCurricular() {
                 </div>
 
                 <div className="d-flex border-bottom">
-                  <div className="bg-light fw-semibold p-2 col-4">
+                  <div className="form-label-required bg-light fw-semibold p-2 col-4">
                     Cantidad de alumnos inscriptos
                   </div>
                   <div className="flex-grow-1 p-2">
@@ -413,13 +414,14 @@ export default function InformeCurricular() {
                       }
                       min={1}
                       placeholder="1"
+                      required
                       disabled={saving}
                     />
                   </div>
                 </div>
 
                 <div className="d-flex border-bottom">
-                  <div className="bg-light fw-semibold p-2 col-4">
+                  <div className="form-label-required bg-light fw-semibold p-2 col-4">
                     Cantidad de comisiones clases teóricas
                   </div>
                   <div className="flex-grow-1 p-2">
@@ -434,13 +436,14 @@ export default function InformeCurricular() {
                       }
                       min={1}
                       placeholder="1"
+                      required
                       disabled={saving}
                     />
                   </div>
                 </div>
 
                 <div className="d-flex">
-                  <div className="bg-light fw-semibold p-2 col-4">
+                  <div className="form-label-required bg-light fw-semibold p-2 col-4">
                     Cantidad de comisiones clases prácticas
                   </div>
                   <div className="flex-grow-1 p-2">
@@ -455,6 +458,7 @@ export default function InformeCurricular() {
                       }
                       min={1}
                       placeholder="1"
+                      required
                       disabled={saving}
                     />
                   </div>
