@@ -470,6 +470,7 @@ export default function InformeCurricular() {
                   {informeBase.preguntas?.map((pregunta: any) => {
                     const primeraOpcion = pregunta.pregunta_opcion?.[0];
                     const idPreguntaOpcion = primeraOpcion?.id;
+                    const esObligatoria = pregunta.obligatoria === true;
 
                     return (
                       <div
@@ -478,7 +479,13 @@ export default function InformeCurricular() {
                       >
                         <label
                           htmlFor={`pregunta-${idPreguntaOpcion}`}
-                          className="form-label form-label-required d-block text-start"
+                          // 👇 CAMBIO 1: El asterisco solo aparece si esObligatoria es true
+                          className={`
+                            form-label 
+                            d-block 
+                            text-start 
+                            ${esObligatoria ? 'form-label-required' : ''}
+                          `}
                         >
                           {pregunta.texto_pregunta ??
                             pregunta.texto ??
@@ -538,8 +545,10 @@ export default function InformeCurricular() {
                               );
                             }
                           }}
-                          required={Number(pregunta.id) !== 35}
+                          // 👇 CAMBIO 2: El 'required' depende del flag
+                          required={esObligatoria}
                           disabled={saving}
+
                         />
                       </div>
                     );
