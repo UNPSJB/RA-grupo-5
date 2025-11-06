@@ -31,6 +31,6 @@ class PreguntaRead(PreguntaBase):
     id: int
     id_variable: Optional[int] = None
     id_informe_curricular_base: Optional[int] = None
-    if_informe_sintetico_base: Optional[int] = None
+    id_informe_sintetico_base: Optional[int] = None
     pregunta_opcion: List[PreguntaOpcionRead] = []
     model_config = {"from_attributes": True}
