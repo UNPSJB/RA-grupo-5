@@ -22,15 +22,18 @@ def read_respuestas(
     persona_id: Optional[int] = None,
     encuesta_asignatura_id: Optional[int] = None,
     informe_asignatura_id: Optional[int] = None,
+    informe_sintetico_carerra_id: Optional[int] = None,
     db: Session = Depends(get_db)
 ):
     respuestas = services.listar_respuestas(
         db, 
         persona_id=persona_id, 
         encuesta_asignatura_id=encuesta_asignatura_id,
-        informe_asignatura_id=informe_asignatura_id
+        informe_asignatura_id=informe_asignatura_id,
+        informe_sintetico_carerra_id=informe_sintetico_carerra_id
     )
     return respuestas
+
 @router.get("/{respuesta_id}", response_model=schemas.RespuestaRead)
 def get_respuesta(respuesta_id: int, db: Session = Depends(get_db)):
     return services.leer_respuesta(db, respuesta_id)

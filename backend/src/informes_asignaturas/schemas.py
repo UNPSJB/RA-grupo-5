@@ -36,7 +36,7 @@ class InformeAsignaturaRead(InformeAsignaturaBase):
     id_reporte: int
     informe_curricular_base: "InformeCurricularBase"
     asignatura: "AsignaturaRead"
-    respuestas: list["RespuestaRead"] = []
+    respuesta: Optional[RespuestaRead] = None
     
     #Podríamos agregar datos del reporte para mostrarlos también
 
