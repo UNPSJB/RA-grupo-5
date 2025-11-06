@@ -2,17 +2,17 @@ from pydantic import BaseModel
 from typing import List
 from src.preguntas.schemas import PreguntaRead
 
-class InformeBaseBase(BaseModel):
+class InformeCurricularBase(BaseModel):
     titulo: str
     
 
-class InformeBaseCreate(InformeBaseBase):
+class InformeCurricularBaseCreate(InformeCurricularBase):
     pass
 
-class InformeBaseUpdate(InformeBaseBase):
+class InformeCurricularBaseUpdate(InformeCurricularBase):
     pass
 
-class InformeBaseRead(InformeBaseBase):
+class InformeCurricularBaseRead(InformeCurricularBase):
     id: int
     preguntas: List[PreguntaRead] = []
     model_config = {"from_attributes": True}

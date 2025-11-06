@@ -8,7 +8,7 @@ from src import models
 
 from src.personas.router import router as personas_router 
 from src.encuestas_base.router import router as encuestas_base_router
-from src.informes_base.router import router as informes_base_router
+from src.informes_curriculares_base.router import router as informes_curriculares_base_router
 from src.reportes.router import router as reportes_router
 from src.variables.router import router as variables_router
 from src.preguntas.router import router as preguntas_router
@@ -62,7 +62,7 @@ app.include_router(preguntas_router)
 app.include_router(opciones_respuestas_router)
 app.include_router(asignaturas_router)
 app.include_router(encuestas_asignaturas_router)
-app.include_router(informes_base_router)
+app.include_router(informes_curriculares_base_router)
 app.include_router(reportes_router)
 app.include_router(respuestas_router)
 app.include_router(detalle_respuesta_router)

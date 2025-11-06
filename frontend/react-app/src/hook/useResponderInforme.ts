@@ -1,14 +1,12 @@
 import { useState, useCallback } from "react";
 
-const API_URL = "http://localhost:8000"; // ajustá si usás /api
+const API_URL = "http://localhost:8000";
 
 export function useResponderInforme() {
-  // answersByPreguntaOpcion[id_pregunta_opcion] = "texto que escribió el docente"
   const [answersByPreguntaOpcion, setAnswersByPreguntaOpcion] = useState<
     Record<number, string>
   >({});
 
-  // cuando el docente escribe en un textarea:
   const setTextoRespuesta = useCallback(
     (id_pregunta_opcion: number, texto: string) => {
       setAnswersByPreguntaOpcion((prev) => ({
@@ -19,18 +17,8 @@ export function useResponderInforme() {
     []
   );
 
-  // guardar TODO en backend:
-  // idPersona: el docente actual (tarde o temprano vas a tenerlo)
-  // idInformeAsignatura: el informe que acabamos de crear con crearInformeCurricular
   const guardarRespuestasInforme = useCallback(
     async (idPersona: number, idInformeAsignatura: number) => {
-      // transformamos nuestro estado a la forma que tu backend espera:
-      // {
-      //   id_persona,
-      //   id_informe_asignatura,
-      //   detalles: [{ id_pregunta_opcion, texto_respuesta_abierta }, ...]
-      // }
-
       const detalles = Object.entries(answersByPreguntaOpcion).map(
         ([id_pregunta_opcion_str, texto_respuesta_abierta]) => ({
           id_pregunta_opcion: Number(id_pregunta_opcion_str),
@@ -52,7 +40,6 @@ export function useResponderInforme() {
 
       if (res.status === 409) {
         const j = await res.json().catch(() => ({}));
-        // devolvé algo que la vista entienda
         return {
           ok: false,
           conflict: true,
@@ -73,6 +60,6 @@ export function useResponderInforme() {
   return {
     answersByPreguntaOpcion,
     setTextoRespuesta,
-    guardarRespuestasInforme, // ahora devuelve { ok, conflict, ... }
+    guardarRespuestasInforme,
   };
 }

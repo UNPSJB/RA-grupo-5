@@ -12,7 +12,6 @@ from src.pregunta_opcion.models import PreguntaOpcion
 from src.preguntas.models import Pregunta
 from src.carreras.models import Carrera
 from src.informes_sinteticos_base.models import InformeSinteticoBase
-from src.informes_base.models import InformeBase 
 
 from . import schemas
 
@@ -26,7 +25,7 @@ def _get_query_con_joins():
         
         # --- Relaciones del Padre ---
         joinedload(InformeSinteticoCarrera.carrera),
-        joinedload(InformeSinteticoCarrera.informe_sintetico),
+        joinedload(InformeSinteticoCarrera.informe_sintetico_base),
         
         # --- Cadena A: Cargar el nombre de la Asignatura ---
         joinedload(InformeSinteticoCarrera.informes_asignaturas)
@@ -34,15 +33,15 @@ def _get_query_con_joins():
         
         # --- Cadena B: Cargar las Respuestas y sus detalles ---
         joinedload(InformeSinteticoCarrera.informes_asignaturas)
-            .joinedload(InformeAsignatura.respuestas)
+            .joinedload(InformeAsignatura.respuesta)
                 .joinedload(Respuesta.detalles)
                     .joinedload(DetalleRespuesta.pregunta_opcion)
                         .joinedload(PreguntaOpcion.pregunta),
         
         # --- Cadena C: Cargar el "molde" y sus preguntas ---
         joinedload(InformeSinteticoCarrera.informes_asignaturas)
-            .joinedload(InformeAsignatura.informe_base) 
-                .joinedload(InformeBase.preguntas)
+            .joinedload(InformeAsignatura.informe_sintetico_carrera) 
+                .joinedload(InformeSinteticoBase.preguntas)
     )
 
 def listar_informes_sinteticos_carrera(db: Session) -> List[InformeSinteticoCarrera]:

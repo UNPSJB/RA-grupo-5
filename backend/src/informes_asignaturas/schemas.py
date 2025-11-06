@@ -1,10 +1,17 @@
 from pydantic import BaseModel, ConfigDict
 from src.informes_asignaturas.models import EstadoInforme, Sede
-from src.informes_base.schemas import InformeBaseRead
+from src.informes_curriculares_base.schemas import InformeCurricularBase
 from src.asignaturas.schemas import AsignaturaRead
 from src.respuestas.schemas import RespuestaRead
 from datetime import date
-from typing import List, Optional
+from typing import Optional, List
+
+class InformeAsignaturaEstado(BaseModel):
+    id: int
+    estado: EstadoInforme
+    hasRespuesta: bool
+    respuestaId: Optional[int] = None
+    canResponder: bool
 
 class InformeAsignaturaBase(BaseModel):
     fecha_inicio: date
@@ -20,20 +27,20 @@ class InformeAsignaturaBase(BaseModel):
     cant_comisiones_practicas: int
 
 class InformeAsignaturaCreate(InformeAsignaturaBase):
-    id_informe_base: int
+    id_informe_curricular_base: int
     id_asignatura: int
     id_reporte: int
     id_informe_sintetico_carrera: Optional[int] = None
 
 class InformeAsignaturaRead(InformeAsignaturaBase):
     id: int
-    id_informe_base: int
+    id_informe_curricular_base: int
     id_asignatura: int
     id_reporte: int
     id_informe_sintetico_carrera: Optional[int] = None
     
-    informe_base: InformeBaseRead 
+    informe_curricular_base: InformeCurricularBase 
     asignatura: AsignaturaRead
-    respuestas: List[RespuestaRead] = []
+    respuesta: List[RespuestaRead] = []
     
     model_config = ConfigDict(from_attributes=True)
