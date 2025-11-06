@@ -3,6 +3,8 @@ from sqlalchemy import select
 from fastapi import HTTPException
 from typing import List
 
+from . import schemas
+# (Asegúrate de importar todos los modelos necesarios)
 from src.informe_sintetico_carrera.models import InformeSinteticoCarrera
 from src.informes_asignaturas.models import InformeAsignatura
 from src.asignaturas.models import Asignatura
@@ -12,36 +14,32 @@ from src.pregunta_opcion.models import PreguntaOpcion
 from src.preguntas.models import Pregunta
 from src.carreras.models import Carrera
 from src.informes_sinteticos_base.models import InformeSinteticoBase
-
-from . import schemas
-
+# ¡Importante! El "molde" del docente (Anexo I)
+from src.informes_curriculares_base.models import InformeCurricularBase 
 
 def _get_query_con_joins():
     """
-    Helper para cargar TODA la jerarquía de datos.
-    ESTA ES LA VERSIÓN COMPLETA Y CORRECTA.
+    Helper para cargar TODA la jerarquía de datos,
+    corregido con los nuevos nombres de modelos.
     """
     return select(InformeSinteticoCarrera).options(
         
-        # --- Relaciones del Padre ---
         joinedload(InformeSinteticoCarrera.carrera),
+        
         joinedload(InformeSinteticoCarrera.informe_sintetico_base),
         
-        # --- Cadena A: Cargar el nombre de la Asignatura ---
         joinedload(InformeSinteticoCarrera.informes_asignaturas)
             .joinedload(InformeAsignatura.asignatura),
         
-        # --- Cadena B: Cargar las Respuestas y sus detalles ---
         joinedload(InformeSinteticoCarrera.informes_asignaturas)
-            .joinedload(InformeAsignatura.respuesta)
+            .joinedload(InformeAsignatura.respuesta) 
                 .joinedload(Respuesta.detalles)
                     .joinedload(DetalleRespuesta.pregunta_opcion)
                         .joinedload(PreguntaOpcion.pregunta),
         
-        # --- Cadena C: Cargar el "molde" y sus preguntas ---
         joinedload(InformeSinteticoCarrera.informes_asignaturas)
-            .joinedload(InformeAsignatura.informe_sintetico_carrera) 
-                .joinedload(InformeSinteticoBase.preguntas)
+            .joinedload(InformeAsignatura.informe_curricular_base) 
+            .joinedload(InformeCurricularBase.preguntas) 
     )
 
 def listar_informes_sinteticos_carrera(db: Session) -> List[InformeSinteticoCarrera]:
