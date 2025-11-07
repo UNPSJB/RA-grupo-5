@@ -1,30 +1,38 @@
 import React from 'react'; 
-import { useParams } from 'react-router-dom';
+// Importamos 'Link' que se usa en el formulario
+import { useParams, Link } from 'react-router-dom';
 import { useInformeSinteticoCarrera } from '../hook/useInformeSinteticoCarrera';
-import { Link } from 'react-router-dom';
 import type { Respuesta } from '../types/InformeSintetico';
 
 // Importamos los componentes de layout de React Bootstrap
 import { Container, Form, Col, Card, Tabs, Tab } from 'react-bootstrap';
 
 /**
- * Función Helper (Sin cambios)
- * Busca la respuesta correcta para una pregunta específica.
+ * --- FUNCIÓN HELPER CORREGIDA ---
+ * Acepta un solo objeto 'Respuesta' (o null) en lugar de un array.
  */
 const findRespuestaPorPreguntaId = (
   preguntaId: number, 
-  respuestas: Respuesta[]
+  respuesta: Respuesta | null // ✅ Es singular y opcional
 ): React.ReactNode => {
-  for (const respuesta of respuestas) {
-    for (const detalle of respuesta.detalles) {
-      if (detalle.pregunta_opcion?.pregunta?.id === preguntaId) {
-        if (detalle.texto_respuesta_abierta) {
-          return detalle.texto_respuesta_abierta;
-        }
-        return <em className="text-muted">N/A (Sin texto)</em>;
-      }
-    }
+
+  // Si no hay respuesta (es null) o no hay detalles, retornar "Sin Respuesta"
+  if (!respuesta || !respuesta.detalles) {
+    return <em className="text-muted">Sin Respuesta</em>;
   }
+
+  // Buscar el detalle en el único objeto de respuesta
+  const detalle = respuesta.detalles.find(
+    (d) => d.pregunta_opcion?.pregunta?.id === preguntaId
+  );
+
+  if (detalle) {
+    if (detalle.texto_respuesta_abierta) {
+      return detalle.texto_respuesta_abierta;
+    }
+    return <em className="text-muted">N/A (Sin texto)</em>;
+  }
+
   return <em className="text-muted">Sin Respuesta</em>;
 };
 
@@ -36,7 +44,7 @@ export const DetalleInformeCarrera: React.FC = () => {
   
   const { informe, loading, error } = useInformeSinteticoCarrera(informeId);
 
-  // (Manejo de estados - Sin cambios)
+  // Guardia de carga
   if (loading || !informe) {
     return <Container className="mt-4">Cargando informe...</Container>;
   }
@@ -45,47 +53,49 @@ export const DetalleInformeCarrera: React.FC = () => {
   }
 
   return (
-    <Container className=''>
+    <Container>
+      {/* (Le quité el p-4 y mb-4 al Col para dárselo al Form) */}
       <Col md={8} className="mx-auto mt-4 p-4 mb-4 shadow">
-          {/* --- Card del "Padre" (Sin cambios) --- */}
-          <Card className="mb-4 ">
-            <Card.Header as="h4">
-              Informe Sintético - {informe.carrera.nombre}
-            </Card.Header>
-            <Card.Body className=''>
-              <Card.Title as="h4" className='m-2'>
-                {informe.informe_sintetico.titulo}
-              </Card.Title>
-              <Card.Text as="div" className='text-start'>
-                <p>
-                  <strong>Ciclo Lectivo:</strong> {informe.ciclo_lectivo}
-                </p>
-                <p>
-                  <strong>Comisión Asesora:</strong> {informe.comision_asesora}
-                </p>
-                <p>
-                  <strong>Sede:</strong> {informe.sede}
-                </p>
-                <p>
-                  <strong>Integrantes:</strong> {informe.integrantes}
-                </p>
-              </Card.Text>
-            </Card.Body>
-          </Card>
+        {/* --- Card del "Padre" --- */}
+        <Card className="mb-4 ">
+          <Card.Header as="h4">
+            Informe Sintético - {informe.carrera.nombre}
+          </Card.Header>
+          <Card.Body className=''>
+            <Card.Title as="h4" className='m-2'>
+              {/* ✅ CORRECCIÓN 1: Usar 'informe_sintetico_base' */}
+              {informe?.informe_sintetico_base?.titulo}
+            </Card.Title>
+            <Card.Text as="div" className='text-start'>
+              <p>
+                <strong>Ciclo Lectivo:</strong> {informe.ciclo_lectivo}
+              </p>
+              <p>
+                <strong>Comisión Asesora:</strong> {informe.comision_asesora}
+              </p>
+              <p>
+                <strong>Sede:</strong> {informe.sede}
+              </p>
+              <p>
+                <strong>Integrantes:</strong> {informe.integrantes}
+              </p>
+            </Card.Text>
+          </Card.Body>
+        </Card>
 
-        {/* --- CORRECCIÓN: Contenedor <Tabs> --- */}
-        {/* 1. Añadimos el componente <Tabs> para envolver los <Tab> */}
+        {/* --- Contenedor <Tabs> --- */}
         <Tabs
-          defaultActiveKey={informe.informes_asignaturas[0]?.id.toString()}
+          /* ✅ CORRECCIÓN 2: Añadir '?' antes de .toString() */
+          defaultActiveKey={informe.informes_asignaturas[0]?.id?.toString()}
           id="informes-tabs"
           className="mb-3"
           justify
         >
           {informe.informes_asignaturas.map((informeAsignatura) => {
-            const preguntas = informeAsignatura.informe_base?.preguntas || [];
+            {/* ✅ CORRECCIÓN 3: Usar 'informe_curricular_base' */}
+            const preguntas = informeAsignatura.informe_curricular_base?.preguntas || [];
             
             return (
-              // 2. Quitamos el <Row> y usamos <Tab> como elemento principal del map
               <Tab
                 key={informeAsignatura.id}
                 eventKey={informeAsignatura.id.toString()}
@@ -96,13 +106,13 @@ export const DetalleInformeCarrera: React.FC = () => {
                     Docente: {informeAsignatura.docente} | Año: {informeAsignatura.asignatura?.año} | Alumnos Inscritos: {informeAsignatura.cant_alumnos_insc}
                   </Card.Header>
 
-                  {/* 3. Lógica corregida: (preguntas.length > 0) */}
                   {preguntas.length > 0 ? (
                     preguntas.map((pregunta) => (
                       <Card.Body key={pregunta.id} className="border-bottom">
                         <Card.Title as="h6">{pregunta.texto_pregunta}</Card.Title>
                         <Card.Text as="div" className="ps-3">
-                          {findRespuestaPorPreguntaId(pregunta.id, informeAsignatura.respuestas)}
+                          {/* ✅ CORRECCIÓN 4: Pasar 'respuesta' (singular) */}
+                          {findRespuestaPorPreguntaId(pregunta.id, informeAsignatura.respuesta)}
                         </Card.Text>
                       </Card.Body>
                     ))
@@ -118,17 +128,19 @@ export const DetalleInformeCarrera: React.FC = () => {
           })}
         </Tabs>
 
-        <Form className='mb-3 '>
-            <Form.Label><strong>Aca va la pregunta:</strong></Form.Label>
-             <Form.Control as="textarea" rows={3} placeholder="Comentarios generales sobre el informe...">
-            </Form.Control>
-            {/* Aca hay que poner el endpoint para el guardado de el informe */}
-            <Link
-                to={`/departamento/generar-informe/${informe.id}`}
-                className="btn btn-primary mt-4"
-                >
-                Guarda informe sintetico
-            </Link>
+        {/* (Le agregué un padding 'p-4' al formulario para que respire) */}
+        <Form className='mb-4 p-4'> 
+          <Form.Label><strong>Aca va la pregunta:</strong></Form.Label>
+            <Form.Control as="textarea" rows={3} placeholder="Comentarios generales sobre el informe...">
+          </Form.Control>
+
+          {/* --- BOTÓN RESTAURADO --- */}
+          <Link
+            to={`/departamento/generar-informe/${informe.id}`}
+            className="btn btn-primary mt-4"
+          >
+            Guarda informe sintetico
+          </Link>
         </Form>
       </Col>
     </Container>

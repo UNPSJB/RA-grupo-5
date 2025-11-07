@@ -49,20 +49,19 @@ function App() {
 
       <Route path="/departamento" element={<LayoutDepartamento />}>
         <Route index element={<InformesSinteticosDisponibles />} />
-        <Route path="informes">
 
-          {/* --- ¡LA CORRECCIÓN ESTÁ AQUÍ! --- */}
-          {/* '/departamento/informes/:id' -> Debe mostrar el Detalle (Padre) */}
-          <Route path=":id" element={<DetalleInformeCarrera />} />
-          
-          {/* '/departamento/informes' -> Muestra la lista (Esto está bien) */}
-          <Route index element={<InformesCurricularesDisponibles />} />
+        
+        <Route path="informe-sintetico">
+        <Route path=":id" element={<DetalleInformeCarrera />} />
         </Route>
+
+        <Route path="informes" element={<InformesCurricularesDisponibles />} />
+
         <Route
           path="informes-sinteticos"
           element={<InformesSinteticosDisponibles />}
-        />
-      </Route>
+       />
+       </Route>
     </Routes>
   );
 }
