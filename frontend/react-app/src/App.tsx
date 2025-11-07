@@ -11,9 +11,9 @@ import InformeCurricular from "./paginas/InformeCurricular.tsx";
 import "bootstrap/dist/css/bootstrap.min.css";
 import ReportesDisponibles from "./paginas/ReportesDisponibles.tsx";
 import EncuestasRespondidas from "./componentes/EncuestasRespondidas.tsx";
-import InformeCurricularPage from "./paginas/InformeCurricularPage.tsx";
 import InformesSinteticosDisponibles from "./paginas/InformesSinteticosDisponibles.tsx";
 import VerInformeCurricular from "./paginas/VerInformeCurricular.tsx";
+import { DetalleInformeCarrera } from "./paginas/InformeSintetico.tsx";
 
 function App() {
   return (
@@ -49,15 +49,19 @@ function App() {
 
       <Route path="/departamento" element={<LayoutDepartamento />}>
         <Route index element={<InformesSinteticosDisponibles />} />
-        <Route path="informes">
-          <Route path=":id" element={<InformeCurricularPage />} />
-          <Route index element={<InformesCurricularesDisponibles />} />
+
+        
+        <Route path="informe-sintetico">
+        <Route path=":id" element={<DetalleInformeCarrera />} />
         </Route>
+
+        <Route path="informes" element={<InformesCurricularesDisponibles />} />
+
         <Route
           path="informes-sinteticos"
           element={<InformesSinteticosDisponibles />}
-        />
-      </Route>
+       />
+       </Route>
     </Routes>
   );
 }
