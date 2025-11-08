@@ -13,6 +13,7 @@ import ReportesDisponibles from "./paginas/ReportesDisponibles.tsx";
 import EncuestasRespondidas from "./componentes/EncuestasRespondidas.tsx";
 import InformesSinteticosDisponibles from "./paginas/InformesSinteticosDisponibles.tsx";
 import VerInformeCurricular from "./paginas/VerInformeCurricular.tsx";
+import EstadisticasDepartamentoPage from "./paginas/EstadisticasDepartamentoPage.tsx";
 import { DetalleInformeCarrera } from "./paginas/InformeSintetico.tsx";
 
 function App() {
@@ -50,9 +51,8 @@ function App() {
       <Route path="/departamento" element={<LayoutDepartamento />}>
         <Route index element={<InformesSinteticosDisponibles />} />
 
-        
         <Route path="informe-sintetico">
-        <Route path=":id" element={<DetalleInformeCarrera />} />
+          <Route path=":id" element={<DetalleInformeCarrera />} />
         </Route>
 
         <Route path="informes" element={<InformesCurricularesDisponibles />} />
@@ -60,8 +60,9 @@ function App() {
         <Route
           path="informes-sinteticos"
           element={<InformesSinteticosDisponibles />}
-       />
-       </Route>
+        />
+        <Route path="estadisticas" element={<EstadisticasDepartamentoPage />} />
+      </Route>
     </Routes>
   );
 }
