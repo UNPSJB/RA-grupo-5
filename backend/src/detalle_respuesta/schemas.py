@@ -15,8 +15,6 @@ class DetalleRespuestaRead(DetalleRespuestaBase):
     id: int
     id_respuesta: int
     
-    # --- ¡CAMPO ANIDADO AÑADIDO! ---
-    # Esto anida la pregunta_opcion (que contiene la pregunta)
     pregunta_opcion: PreguntaOpcionRead
     
     model_config = ConfigDict(from_attributes=True)

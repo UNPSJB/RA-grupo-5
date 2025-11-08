@@ -1,27 +1,38 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
+import React from 'react'; 
+// Importamos 'Link' que se usa en el formulario
+import { useParams, Link } from 'react-router-dom';
 import { useInformeSinteticoCarrera } from '../hook/useInformeSinteticoCarrera';
-
 import type { Respuesta } from '../types/InformeSintetico';
 
 // Importamos los componentes de layout de React Bootstrap
-import { Container, Col, Card, Tabs, Tab } from 'react-bootstrap';
+import { Container, Form, Col, Card, Tabs, Tab } from 'react-bootstrap';
 
-// Esta función auxiliar se queda igual, ya que solo se usa en este archivo
+/**
+ * --- FUNCIÓN HELPER CORREGIDA ---
+ * Acepta un solo objeto 'Respuesta' (o null) en lugar de un array.
+ */
 const findRespuestaPorPreguntaId = (
-  preguntaId: number,
-  respuestas: Respuesta[]
+  preguntaId: number, 
+  respuesta: Respuesta | null // ✅ Es singular y opcional
 ): React.ReactNode => {
-  for (const respuesta of respuestas) {
-    for (const detalle of respuesta.detalles) {
-      if (detalle.pregunta_opcion?.pregunta?.id === preguntaId) {
-        if (detalle.texto_respuesta_abierta) {
-          return detalle.texto_respuesta_abierta;
-        }
-        return <em className="text-muted">N/A (Sin texto)</em>;
-      }
-    }
+
+  // Si no hay respuesta (es null) o no hay detalles, retornar "Sin Respuesta"
+  if (!respuesta || !respuesta.detalles) {
+    return <em className="text-muted">Sin Respuesta</em>;
   }
+
+  // Buscar el detalle en el único objeto de respuesta
+  const detalle = respuesta.detalles.find(
+    (d) => d.pregunta_opcion?.pregunta?.id === preguntaId
+  );
+
+  if (detalle) {
+    if (detalle.texto_respuesta_abierta) {
+      return detalle.texto_respuesta_abierta;
+    }
+    return <em className="text-muted">N/A (Sin texto)</em>;
+  }
+
   return <em className="text-muted">Sin Respuesta</em>;
 };
 
@@ -35,7 +46,7 @@ export default function InformeSintetico() {
 
   const { informe, loading, error } = useInformeSinteticoCarrera(informeId);
 
-  // (Manejo de estados - Sin cambios)
+  // Guardia de carga
   if (loading || !informe) {
     return <Container className="mt-4">Cargando informe...</Container>;
   }
@@ -74,13 +85,15 @@ export default function InformeSintetico() {
         </Card>
 
         <Tabs
-          defaultActiveKey={informe.informes_asignaturas[0]?.id.toString()}
+          /* ✅ CORRECCIÓN 2: Añadir '?' antes de .toString() */
+          defaultActiveKey={informe.informes_asignaturas[0]?.id?.toString()}
           id="informes-tabs"
           className="mb-3"
           justify
         >
           {informe.informes_asignaturas.map((informeAsignatura) => {
-            const preguntas = informeAsignatura.informe_base?.preguntas || [];
+            {/* ✅ CORRECCIÓN 3: Usar 'informe_curricular_base' */}
+            const preguntas = informeAsignatura.informe_curricular_base?.preguntas || [];
             
             return (
               <Tab
@@ -98,7 +111,8 @@ export default function InformeSintetico() {
                       <Card.Body key={pregunta.id} className="border-bottom">
                         <Card.Title as="h6">{pregunta.texto_pregunta}</Card.Title>
                         <Card.Text as="div" className="ps-3">
-                          {findRespuestaPorPreguntaId(pregunta.id, informeAsignatura.respuestas)}
+                          {/* ✅ CORRECCIÓN 4: Pasar 'respuesta' (singular) */}
+                          {findRespuestaPorPreguntaId(pregunta.id, informeAsignatura.respuesta)}
                         </Card.Text>
                       </Card.Body>
                     ))
@@ -113,6 +127,21 @@ export default function InformeSintetico() {
             );
           })}
         </Tabs>
+
+        {/* (Le agregué un padding 'p-4' al formulario para que respire) */}
+        <Form className='mb-4 p-4'> 
+          <Form.Label><strong>Aca va la pregunta:</strong></Form.Label>
+            <Form.Control as="textarea" rows={3} placeholder="Comentarios generales sobre el informe...">
+          </Form.Control>
+
+          {/* --- BOTÓN RESTAURADO --- */}
+          <Link
+            to={`/departamento/generar-informe/${informe.id}`}
+            className="btn btn-primary mt-4"
+          >
+            Guarda informe sintetico
+          </Link>
+        </Form>
       </Col>
     </Container>
   );

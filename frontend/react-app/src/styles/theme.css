@@ -1,0 +1,35 @@
+:root {
+  --ra-dark-blue: #03045e;
+  --ra-medium-blue: #0077b6;
+  --ra-cyan-blue: #00b4d8;
+  --ra-light-cyan: #90e0ef;
+  --ra-very-light-blue: #caf0f8;
+  --ra-white: #FFFFFF;
+  --ra-light-text: #f8f9fa;
+}
+
+/* Sobreescribir Bootstrap */
+
+/* Navbar */
+.bg-dark {
+  background-color: var(--ra-dark-blue) !important;
+}
+
+/* Botones */
+.btn-secondary {
+  background-color: var(--ra-cyan-blue);
+  border-color: var(--ra-cyan-blue);
+  color: var(--ra-dark-blue);
+}
+
+.btn-secondary:hover {
+  background-color: var(--ra-light-cyan);
+  border-color: var(--ra-light-cyan);
+  color: var(--ra-dark-blue);
+}
+
+/* Footer */
+.footer {
+  background-color: var(--ra-dark-blue) !important;
+  color: var(--ra-light-text);
+}
