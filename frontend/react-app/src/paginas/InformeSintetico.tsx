@@ -65,7 +65,7 @@ export default function InformeSintetico() {
           </Card.Header>
           <Card.Body className=''>
             <Card.Title as="h4" className='m-2'>
-              {informe.informe_sintetico.titulo}
+              {informe.informe_sintetico_base.titulo}
             </Card.Title>
             <Card.Text as="div" className='text-start'>
               <p>
