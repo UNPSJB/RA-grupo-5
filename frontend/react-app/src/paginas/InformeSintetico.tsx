@@ -1,18 +1,15 @@
-import React from 'react'; 
+import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useInformeSinteticoCarrera } from '../hook/useInformeSinteticoCarrera';
 
 import type { Respuesta } from '../types/InformeSintetico';
 
 // Importamos los componentes de layout de React Bootstrap
-import { Container, Row, Col, Card, Tabs, Tab } from 'react-bootstrap';
+import { Container, Col, Card, Tabs, Tab } from 'react-bootstrap';
 
-/**
- * Función Helper (Sin cambios)
- * Busca la respuesta correcta para una pregunta específica.
- */
+// Esta función auxiliar se queda igual, ya que solo se usa en este archivo
 const findRespuestaPorPreguntaId = (
-  preguntaId: number, 
+  preguntaId: number,
   respuestas: Respuesta[]
 ): React.ReactNode => {
   for (const respuesta of respuestas) {
@@ -28,12 +25,14 @@ const findRespuestaPorPreguntaId = (
   return <em className="text-muted">Sin Respuesta</em>;
 };
 
-
-export const DetalleInformeCarrera: React.FC = () => {
+// --- CAMBIO 1 ---
+// Quitamos "export const" y la anotación de tipo ": React.FC"
+// y lo reemplazamos por "export default function"
+export default function InformeSintetico() {
   
   const { id } = useParams<{ id: string }>();
   const informeId = id ? parseInt(id, 10) : null;
-  
+
   const { informe, loading, error } = useInformeSinteticoCarrera(informeId);
 
   // (Manejo de estados - Sin cambios)
@@ -44,37 +43,36 @@ export const DetalleInformeCarrera: React.FC = () => {
     return <Container className="mt-4 alert alert-danger">Error: {error.message}</Container>;
   }
 
+
   return (
     <Container>
       <Col md={8} className="mx-auto mt-4 shadow">
-          {/* --- Card del "Padre" (Sin cambios) --- */}
-          <Card className="mb-4 ">
-            <Card.Header as="h4">
-              Informe Sintético - {informe.carrera.nombre}
-            </Card.Header>
-            <Card.Body className=''>
-              <Card.Title as="h4" className='m-2'>
-                {informe.informe_sintetico.titulo}
-              </Card.Title>
-              <Card.Text as="div" className='text-start'>
-                <p>
-                  <strong>Ciclo Lectivo:</strong> {informe.ciclo_lectivo}
-                </p>
-                <p>
-                  <strong>Comisión Asesora:</strong> {informe.comision_asesora}
-                </p>
-                <p>
-                  <strong>Sede:</strong> {informe.sede}
-                </p>
-                <p>
-                  <strong>Integrantes:</strong> {informe.integrantes}
-                </p>
-              </Card.Text>
-            </Card.Body>
-          </Card>
+        {/* --- Card del "Padre" (Sin cambios) --- */}
+        <Card className="mb-4 ">
+          <Card.Header as="h4">
+            Informe Sintético - {informe.carrera.nombre}
+          </Card.Header>
+          <Card.Body className=''>
+            <Card.Title as="h4" className='m-2'>
+              {informe.informe_sintetico.titulo}
+            </Card.Title>
+            <Card.Text as="div" className='text-start'>
+              <p>
+                <strong>Ciclo Lectivo:</strong> {informe.ciclo_lectivo}
+              </p>
+              <p>
+                <strong>Comisión Asesora:</strong> {informe.comision_asesora}
+              </p>
+              <p>
+                <strong>Sede:</strong> {informe.sede}
+              </p>
+              <p>
+                <strong>Integrantes:</strong> {informe.integrantes}
+              </p>
+            </Card.Text>
+          </Card.Body>
+        </Card>
 
-        {/* --- CORRECCIÓN: Contenedor <Tabs> --- */}
-        {/* 1. Añadimos el componente <Tabs> para envolver los <Tab> */}
         <Tabs
           defaultActiveKey={informe.informes_asignaturas[0]?.id.toString()}
           id="informes-tabs"
@@ -85,7 +83,6 @@ export const DetalleInformeCarrera: React.FC = () => {
             const preguntas = informeAsignatura.informe_base?.preguntas || [];
             
             return (
-              // 2. Quitamos el <Row> y usamos <Tab> como elemento principal del map
               <Tab
                 key={informeAsignatura.id}
                 eventKey={informeAsignatura.id.toString()}
@@ -96,7 +93,6 @@ export const DetalleInformeCarrera: React.FC = () => {
                     Docente: {informeAsignatura.docente} | Año: {informeAsignatura.asignatura?.año} | Alumnos Inscritos: {informeAsignatura.cant_alumnos_insc}
                   </Card.Header>
 
-                  {/* 3. Lógica corregida: (preguntas.length > 0) */}
                   {preguntas.length > 0 ? (
                     preguntas.map((pregunta) => (
                       <Card.Body key={pregunta.id} className="border-bottom">
