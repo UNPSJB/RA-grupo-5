@@ -1,5 +1,8 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
+
+# Importamos el schema que necesitamos anidar
+from src.pregunta_opcion.schemas import PreguntaOpcionRead
 
 class DetalleRespuestaBase(BaseModel):
     id_pregunta_opcion: int
@@ -11,4 +14,7 @@ class DetalleRespuestaCreate(DetalleRespuestaBase):
 class DetalleRespuestaRead(DetalleRespuestaBase):
     id: int
     id_respuesta: int
-    model_config = {"from_attributes": True}
+    
+    pregunta_opcion: PreguntaOpcionRead
+    
+    model_config = ConfigDict(from_attributes=True)

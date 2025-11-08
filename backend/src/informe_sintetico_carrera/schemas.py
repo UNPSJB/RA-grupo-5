@@ -19,12 +19,13 @@ class InformeSinteticoCarreraBase(BaseModel):
     comision_asesora: str
     sede: str
     integrantes: str
+    id_carrera: int
+    id_informe_sintetico: int
     estado: EstadoInforme
 
 class InformeSinteticoCarreraCreate(InformeSinteticoCarreraBase):
     id_carrera: int
     id_informe_sintetico_base: int
-
 
 class InformeSinteticoCarreraRead(InformeSinteticoCarreraBase):
     id: int
