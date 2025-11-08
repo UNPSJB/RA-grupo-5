@@ -7,21 +7,18 @@ import type { Respuesta } from '../types/InformeSintetico';
 // Importamos los componentes de layout de React Bootstrap
 import { Container, Form, Col, Card, Tabs, Tab } from 'react-bootstrap';
 
-/**
- * --- FUNCIÓN HELPER CORREGIDA ---
- * Acepta un solo objeto 'Respuesta' (o null) en lugar de un array.
- */
+
+
 const findRespuestaPorPreguntaId = (
   preguntaId: number, 
-  respuesta: Respuesta | null // ✅ Es singular y opcional
+  respuesta: Respuesta | null 
 ): React.ReactNode => {
 
-  // Si no hay respuesta (es null) o no hay detalles, retornar "Sin Respuesta"
+
   if (!respuesta || !respuesta.detalles) {
     return <em className="text-muted">Sin Respuesta</em>;
   }
 
-  // Buscar el detalle en el único objeto de respuesta
   const detalle = respuesta.detalles.find(
     (d) => d.pregunta_opcion?.pregunta?.id === preguntaId
   );
@@ -36,9 +33,6 @@ const findRespuestaPorPreguntaId = (
   return <em className="text-muted">Sin Respuesta</em>;
 };
 
-// --- CAMBIO 1 ---
-// Quitamos "export const" y la anotación de tipo ": React.FC"
-// y lo reemplazamos por "export default function"
 export default function InformeSintetico() {
   
   const { id } = useParams<{ id: string }>();
@@ -46,7 +40,6 @@ export default function InformeSintetico() {
 
   const { informe, loading, error } = useInformeSinteticoCarrera(informeId);
 
-  // Guardia de carga
   if (loading || !informe) {
     return <Container className="mt-4">Cargando informe...</Container>;
   }
@@ -58,7 +51,6 @@ export default function InformeSintetico() {
   return (
     <Container>
       <Col md={8} className="mx-auto mt-4 shadow">
-        {/* --- Card del "Padre" (Sin cambios) --- */}
         <Card className="mb-4 ">
           <Card.Header as="h4">
             Informe Sintético - {informe.carrera.nombre}
@@ -85,14 +77,12 @@ export default function InformeSintetico() {
         </Card>
 
         <Tabs
-          /* ✅ CORRECCIÓN 2: Añadir '?' antes de .toString() */
           defaultActiveKey={informe.informes_asignaturas[0]?.id?.toString()}
           id="informes-tabs"
           className="mb-3"
           justify
         >
           {informe.informes_asignaturas.map((informeAsignatura) => {
-            {/* ✅ CORRECCIÓN 3: Usar 'informe_curricular_base' */}
             const preguntas = informeAsignatura.informe_curricular_base?.preguntas || [];
             
             return (
@@ -111,7 +101,6 @@ export default function InformeSintetico() {
                       <Card.Body key={pregunta.id} className="border-bottom">
                         <Card.Title as="h6">{pregunta.texto_pregunta}</Card.Title>
                         <Card.Text as="div" className="ps-3">
-                          {/* ✅ CORRECCIÓN 4: Pasar 'respuesta' (singular) */}
                           {findRespuestaPorPreguntaId(pregunta.id, informeAsignatura.respuesta)}
                         </Card.Text>
                       </Card.Body>
@@ -128,13 +117,11 @@ export default function InformeSintetico() {
           })}
         </Tabs>
 
-        {/* (Le agregué un padding 'p-4' al formulario para que respire) */}
         <Form className='mb-4 p-4'> 
           <Form.Label><strong>Aca va la pregunta:</strong></Form.Label>
             <Form.Control as="textarea" rows={3} placeholder="Comentarios generales sobre el informe...">
           </Form.Control>
 
-          {/* --- BOTÓN RESTAURADO --- */}
           <Link
             to={`/departamento/generar-informe/${informe.id}`}
             className="btn btn-primary mt-4"

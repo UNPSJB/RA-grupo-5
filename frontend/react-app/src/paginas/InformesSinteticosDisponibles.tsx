@@ -36,7 +36,7 @@ export default function TablaInformeSintetico() {
                   </Link>
                 ) : (
                   <Link
-                    to={`/departamento/generar-informe/${r.carrera.id}`}
+                    to={`/departamento/generar-informe-sintetico/${r.carrera.id}`}
                     className="btn btn-primary"
                   >
                     Generar informe sintético

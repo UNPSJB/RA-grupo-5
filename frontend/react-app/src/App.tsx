@@ -12,7 +12,6 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import ReportesDisponibles from "./paginas/ReportesDisponibles.tsx";
 import EncuestasRespondidas from "./componentes/EncuestasRespondidas.tsx";
 import InformesSinteticosDisponibles from "./paginas/InformesSinteticosDisponibles.tsx";
-import VerInformeCurricular from "./paginas/VerInformeCurricular.tsx";
 import EstadisticasDepartamentoPage from "./paginas/EstadisticasDepartamentoPage.tsx";
 import InformeSintetico from "./paginas/InformeSintetico.tsx";
 
