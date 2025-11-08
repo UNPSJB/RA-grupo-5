@@ -12,6 +12,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import ReportesDisponibles from "./paginas/ReportesDisponibles.tsx";
 import EncuestasRespondidas from "./componentes/EncuestasRespondidas.tsx";
 import InformesSinteticosDisponibles from "./paginas/InformesSinteticosDisponibles.tsx";
+import VerInformeCurricular from "./paginas/VerInformeCurricular.tsx";
+import EstadisticasDepartamentoPage from "./paginas/EstadisticasDepartamentoPage.tsx";
 import InformeSintetico from "./paginas/InformeSintetico.tsx";
 
 function App() {
@@ -46,15 +48,20 @@ function App() {
         </Route>
       </Route>
 
-<Route path="/departamento" element={<LayoutDepartamento />}>
-        
-        <Route index element={<InformesCurricularesDisponibles />} />
-        
-        <Route path="informes">
+      <Route path="/departamento" element={<LayoutDepartamento />}>
+        <Route index element={<InformesSinteticosDisponibles />} />
+
+        <Route path="informe-sintetico">
           <Route path=":id" element={<InformeSintetico />} />
-          <Route index element={<InformesCurricularesDisponibles />} />
         </Route>
-        <Route path="informes-sinteticos" element={<InformesSinteticosDisponibles />} />
+
+        <Route path="informes" element={<InformesCurricularesDisponibles />} />
+
+        <Route
+          path="informes-sinteticos"
+          element={<InformesSinteticosDisponibles />}
+        />
+        <Route path="estadisticas" element={<EstadisticasDepartamentoPage />} />
       </Route>
     </Routes>
   );
