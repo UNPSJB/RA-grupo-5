@@ -14,6 +14,7 @@ import EncuestasRespondidas from "./componentes/EncuestasRespondidas.tsx";
 import InformeCurricularPage from "./paginas/InformeCurricularPage.tsx";
 import InformesSinteticosDisponibles from "./paginas/InformesSinteticosDisponibles.tsx";
 import VerInformeCurricular from "./paginas/VerInformeCurricular.tsx";
+import EstadisticasDepartamentoPage from "./paginas/EstadisticasDepartamentoPage.tsx";
 
 function App() {
   return (
@@ -57,6 +58,7 @@ function App() {
           path="informes-sinteticos"
           element={<InformesSinteticosDisponibles />}
         />
+        <Route path="estadisticas" element={<EstadisticasDepartamentoPage />} />
       </Route>
     </Routes>
   );
