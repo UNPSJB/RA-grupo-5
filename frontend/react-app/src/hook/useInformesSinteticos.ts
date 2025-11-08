@@ -24,11 +24,6 @@ export function useInformesSinteticos() {
         const carreras = await resCarreras.json();
         const curriculares = await resCurriculares.json();
         const sinteticos = await resSinteticos.json();
-
-        console.log("Carreras:", carreras);
-        console.log("Sintéticos:", sinteticos);
-
-
         const resumenes = carreras.map((carrera: any) => {
           const informesPorCarrera = curriculares.filter(
             (informe: any) => informe.asignatura?.carrera?.id === carrera.id
@@ -38,10 +33,8 @@ export function useInformesSinteticos() {
             (informe: any) => informe.estado === "cerrado"
           );
         const sintetico = sinteticos.find(
-              (s: any) => s.id_carrera === carrera.id
+              (s: any) => Number(s.carrera?.id) === Number(carrera.id)
         );
-
-          console.log(`Carrera: ${carrera.nombre}`, "→ Informe Sintético:", sintetico);
 
           return {
             

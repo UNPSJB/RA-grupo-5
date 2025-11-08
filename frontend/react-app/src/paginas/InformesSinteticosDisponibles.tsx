@@ -7,6 +7,7 @@ export default function TablaInformeSintetico() {
 
   if (loading) return <p>Cargando...</p>;
   if (error) return <p>Error: {error}</p>;
+    console.log("Resumenes:", resumenes);
 
   return (
     <div className="container mt-4 p-4 border">
@@ -27,14 +28,14 @@ export default function TablaInformeSintetico() {
               <td>{r.totalInformes}</td>
               <td>{r.publicados}</td>
               <td>
-                {r.sinteticoId ? (
+                {r.sinteticoId ? (               //si tiene un informe sintetico asociado muestra el boton para verlo
                   <Link
                     to={`/departamento/informe-sintetico/${r.sinteticoId}`}
                     className="btn btn-outline-primary"
                   >
                     Ver informe sintético
                   </Link>
-                ) : (
+                ) : (           //si no tiene un informe sintetico asociado muestra el boton para generarlo
                   <Link
                     to={`/departamento/generar-informe/${r.carrera.id}`}
                     className="btn btn-primary"
