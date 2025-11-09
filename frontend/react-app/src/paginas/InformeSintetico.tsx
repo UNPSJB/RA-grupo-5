@@ -32,7 +32,10 @@ const findRespuestaPorPreguntaId = (
   return <em className="text-muted">Sin Respuesta</em>;
 };
 
-export const DetalleInformeCarrera: React.FC = () => {
+// --- CAMBIO 1 ---
+// Quitamos "export const" y la anotación de tipo ": React.FC"
+// y lo reemplazamos por "export default function"
+export default function InformeSintetico() {
   const { id } = useParams<{ id: string }>();
   const informeId = id ? parseInt(id, 10) : null;
 
@@ -52,15 +55,15 @@ export const DetalleInformeCarrera: React.FC = () => {
 
   return (
     <Container>
-      <Col md={8} className="mx-auto mt-4 p-4 mb-4 shadow">
-        {/* --- Card del "Padre" --- */}
+      <Col md={8} className="mx-auto mt-4 shadow">
+        {/* --- Card del "Padre" (Sin cambios) --- */}
         <Card className="mb-4 ">
           <Card.Header as="h4">
             Informe Sintético - {informe.carrera.nombre}
           </Card.Header>
           <Card.Body className="">
             <Card.Title as="h4" className="m-2">
-              {informe?.informe_sintetico_base?.titulo}
+              {informe.informe_sintetico_base.titulo}
             </Card.Title>
             <Card.Text as="div" className="text-start">
               <p>
@@ -149,4 +152,4 @@ export const DetalleInformeCarrera: React.FC = () => {
       </Col>
     </Container>
   );
-};
+}
