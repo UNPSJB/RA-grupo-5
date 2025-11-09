@@ -36,12 +36,14 @@ const findRespuestaPorPreguntaId = (
   return <em className="text-muted">Sin Respuesta</em>;
 };
 
-
-export const DetalleInformeCarrera: React.FC = () => {
+// --- CAMBIO 1 ---
+// Quitamos "export const" y la anotación de tipo ": React.FC"
+// y lo reemplazamos por "export default function"
+export default function InformeSintetico() {
   
   const { id } = useParams<{ id: string }>();
   const informeId = id ? parseInt(id, 10) : null;
-  
+
   const { informe, loading, error } = useInformeSinteticoCarrera(informeId);
 
   // Guardia de carga
@@ -52,19 +54,18 @@ export const DetalleInformeCarrera: React.FC = () => {
     return <Container className="mt-4 alert alert-danger">Error: {error.message}</Container>;
   }
 
+
   return (
     <Container>
-      {/* (Le quité el p-4 y mb-4 al Col para dárselo al Form) */}
-      <Col md={8} className="mx-auto mt-4 p-4 mb-4 shadow">
-        {/* --- Card del "Padre" --- */}
+      <Col md={8} className="mx-auto mt-4 shadow">
+        {/* --- Card del "Padre" (Sin cambios) --- */}
         <Card className="mb-4 ">
           <Card.Header as="h4">
             Informe Sintético - {informe.carrera.nombre}
           </Card.Header>
           <Card.Body className=''>
             <Card.Title as="h4" className='m-2'>
-              {/* ✅ CORRECCIÓN 1: Usar 'informe_sintetico_base' */}
-              {informe?.informe_sintetico_base?.titulo}
+              {informe.informe_sintetico_base.titulo}
             </Card.Title>
             <Card.Text as="div" className='text-start'>
               <p>
@@ -83,7 +84,6 @@ export const DetalleInformeCarrera: React.FC = () => {
           </Card.Body>
         </Card>
 
-        {/* --- Contenedor <Tabs> --- */}
         <Tabs
           /* ✅ CORRECCIÓN 2: Añadir '?' antes de .toString() */
           defaultActiveKey={informe.informes_asignaturas[0]?.id?.toString()}
