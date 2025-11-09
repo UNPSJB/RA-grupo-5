@@ -1,21 +1,17 @@
-import React from 'react'; 
-// Importamos 'Link' que se usa en el formulario
-import { useParams, Link } from 'react-router-dom';
-import { useInformeSinteticoCarrera } from '../hook/useInformeSinteticoCarrera';
-import type { Respuesta } from '../types/InformeSintetico';
-
-// Importamos los componentes de layout de React Bootstrap
-import { Container, Form, Col, Card, Tabs, Tab } from 'react-bootstrap';
+import React from "react";
+import { useParams, Link } from "react-router-dom";
+import { useInformeSinteticoCarrera } from "../hook/useInformeSinteticoCarrera";
+import type { Respuesta } from "../types/InformeSintetico";
+import { Container, Form, Col, Card, Tabs, Tab } from "react-bootstrap";
 
 /**
  * --- FUNCIÓN HELPER CORREGIDA ---
  * Acepta un solo objeto 'Respuesta' (o null) en lugar de un array.
  */
 const findRespuestaPorPreguntaId = (
-  preguntaId: number, 
+  preguntaId: number,
   respuesta: Respuesta | null // ✅ Es singular y opcional
 ): React.ReactNode => {
-
   // Si no hay respuesta (es null) o no hay detalles, retornar "Sin Respuesta"
   if (!respuesta || !respuesta.detalles) {
     return <em className="text-muted">Sin Respuesta</em>;
@@ -36,12 +32,13 @@ const findRespuestaPorPreguntaId = (
   return <em className="text-muted">Sin Respuesta</em>;
 };
 
-
-export const DetalleInformeCarrera: React.FC = () => {
-  
+// --- CAMBIO 1 ---
+// Quitamos "export const" y la anotación de tipo ": React.FC"
+// y lo reemplazamos por "export default function"
+export default function InformeSintetico() {
   const { id } = useParams<{ id: string }>();
   const informeId = id ? parseInt(id, 10) : null;
-  
+
   const { informe, loading, error } = useInformeSinteticoCarrera(informeId);
 
   // Guardia de carga
@@ -49,24 +46,26 @@ export const DetalleInformeCarrera: React.FC = () => {
     return <Container className="mt-4">Cargando informe...</Container>;
   }
   if (error) {
-    return <Container className="mt-4 alert alert-danger">Error: {error.message}</Container>;
+    return (
+      <Container className="mt-4 alert alert-danger">
+        Error: {error.message}
+      </Container>
+    );
   }
 
   return (
     <Container>
-      {/* (Le quité el p-4 y mb-4 al Col para dárselo al Form) */}
-      <Col md={8} className="mx-auto mt-4 p-4 mb-4 shadow">
-        {/* --- Card del "Padre" --- */}
+      <Col md={8} className="mx-auto mt-4 shadow">
+        {/* --- Card del "Padre" (Sin cambios) --- */}
         <Card className="mb-4 ">
           <Card.Header as="h4">
             Informe Sintético - {informe.carrera.nombre}
           </Card.Header>
-          <Card.Body className=''>
-            <Card.Title as="h4" className='m-2'>
-              {/* ✅ CORRECCIÓN 1: Usar 'informe_sintetico_base' */}
-              {informe?.informe_sintetico_base?.titulo}
+          <Card.Body className="">
+            <Card.Title as="h4" className="m-2">
+              {informe.informe_sintetico_base.titulo}
             </Card.Title>
-            <Card.Text as="div" className='text-start'>
+            <Card.Text as="div" className="text-start">
               <p>
                 <strong>Ciclo Lectivo:</strong> {informe.ciclo_lectivo}
               </p>
@@ -83,58 +82,66 @@ export const DetalleInformeCarrera: React.FC = () => {
           </Card.Body>
         </Card>
 
-        {/* --- Contenedor <Tabs> --- */}
         <Tabs
-          /* ✅ CORRECCIÓN 2: Añadir '?' antes de .toString() */
           defaultActiveKey={informe.informes_asignaturas[0]?.id?.toString()}
           id="informes-tabs"
           className="mb-3"
           justify
         >
           {informe.informes_asignaturas.map((informeAsignatura) => {
-            {/* ✅ CORRECCIÓN 3: Usar 'informe_curricular_base' */}
-            const preguntas = informeAsignatura.informe_curricular_base?.preguntas || [];
-            
+            const preguntas =
+              informeAsignatura.informe_curricular_base?.preguntas || [];
+
             return (
               <Tab
                 key={informeAsignatura.id}
                 eventKey={informeAsignatura.id.toString()}
                 title={informeAsignatura.asignatura?.nombre || "Asignatura"}
               >
-                <Card className='mb-4'>
+                <Card className="mb-4">
                   <Card.Header as="h5">
-                    Docente: {informeAsignatura.docente} | Año: {informeAsignatura.asignatura?.año} | Alumnos Inscritos: {informeAsignatura.cant_alumnos_insc}
+                    Docente: {informeAsignatura.docente} | Año:{" "}
+                    {informeAsignatura.asignatura?.año} | Alumnos Inscritos:{" "}
+                    {informeAsignatura.cant_alumnos_insc}
                   </Card.Header>
 
                   {preguntas.length > 0 ? (
                     preguntas.map((pregunta) => (
                       <Card.Body key={pregunta.id} className="border-bottom">
-                        <Card.Title as="h6">{pregunta.texto_pregunta}</Card.Title>
+                        <Card.Title as="h6">
+                          {pregunta.texto_pregunta}
+                        </Card.Title>
                         <Card.Text as="div" className="ps-3">
-                          {/* ✅ CORRECCIÓN 4: Pasar 'respuesta' (singular) */}
-                          {findRespuestaPorPreguntaId(pregunta.id, informeAsignatura.respuesta)}
+                          {findRespuestaPorPreguntaId(
+                            pregunta.id,
+                            informeAsignatura.respuesta
+                          )}
                         </Card.Text>
                       </Card.Body>
                     ))
                   ) : (
                     <Card.Body>
-                      <p className="text-muted">No hay preguntas definidas para este informe.</p>
+                      <p className="text-muted">
+                        No hay preguntas definidas para este informe.
+                      </p>
                     </Card.Body>
                   )}
-                    
                 </Card>
               </Tab>
             );
           })}
         </Tabs>
 
-        {/* (Le agregué un padding 'p-4' al formulario para que respire) */}
-        <Form className='mb-4 p-4'> 
-          <Form.Label><strong>Aca va la pregunta:</strong></Form.Label>
-            <Form.Control as="textarea" rows={3} placeholder="Comentarios generales sobre el informe...">
-          </Form.Control>
+        <Form className="mb-4 p-4">
+          <Form.Label>
+            <strong>Aca va la pregunta:</strong>
+          </Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={3}
+            placeholder="Comentarios generales sobre el informe..."
+          ></Form.Control>
 
-          {/* --- BOTÓN RESTAURADO --- */}
           <Link
             to={`/departamento/generar-informe/${informe.id}`}
             className="btn btn-primary mt-4"
@@ -145,4 +152,4 @@ export const DetalleInformeCarrera: React.FC = () => {
       </Col>
     </Container>
   );
-};
+}
