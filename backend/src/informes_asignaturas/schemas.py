@@ -41,6 +41,6 @@ class InformeAsignaturaRead(InformeAsignaturaBase):
     
     informe_curricular_base: InformeCurricularBase 
     asignatura: AsignaturaRead
-    respuesta: List[RespuestaRead] = []
+    respuesta: Optional[RespuestaRead] = None
     
     model_config = ConfigDict(from_attributes=True)

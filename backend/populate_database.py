@@ -1,9 +1,11 @@
 import sqlite3 #mio (kuky)
 import os
-from datetime import date #para InformeAsignatura
+from datetime import date # Importamos 'date' para InformeAsignatura
 
 DB_NAME = "mi-db-sqlite.db"
 
+# Conectarse a la base de datos
+# ASUME QUE DB_NAME YA EXISTE Y TIENE LAS TABLAS CREADAS POR FASTAPI
 if not os.path.exists(DB_NAME):
     print(f"Error: El archivo '{DB_NAME}' no existe.")
     print("Por favor, inicia tu aplicación FastAPI (uvicorn src.main:app)")
@@ -29,13 +31,7 @@ try:
         ("Analista Ingeniería Civil", "Trelew"),
     ]
 
-    for nombre, sede in carreras:
-        cursor.execute("""
-            INSERT INTO carreras (nombre, sede)
-            VALUES (?, ?)
-        """, (nombre, sede))
-
-    # 📘 Insertar asignatura
+    # 2. Corregir Asignatura
     cursor.execute("""
         INSERT INTO asignaturas (nombre, año, nombre_docente, cursado, sede, id_carrera)
         VALUES (?, ?, ?, ?, ?, ?)
@@ -43,6 +39,9 @@ try:
         "Desarrollo de Software", 3, "Leo Ordinez y Bruno Pazos",
         "cuatrimestre2", "Trelew", 1
     ))
+    asignatura_id = 1
+    print(f"  [OK] Insertada Asignatura ID: {asignatura_id}")
+
 
     # 📋 Insertar encuesta base
     cursor.execute("""
@@ -71,57 +70,52 @@ try:
             VALUES (?, ?, ?)
         """, (nombre, codigo, encuesta_id))
 
-    # Obtener IDs de variables para asociar preguntas
-    cursor.execute("SELECT id, codigo FROM variables WHERE id_encuesta_base = ?", (encuesta_id,))
-    vars_dict = {codigo: var_id for var_id, codigo in cursor.fetchall()}
-
-    # ❓ Preguntas de todas las variables
+    # ❓ Preguntas de todas las variables (Encuesta Alumno)
+    # (Se insertarán con IDs 1 a 31)
     preguntas = [
-        # A
-        ("¿Asiste a clase?", "single_choice", True, vars_dict["A"]),
-        ("¿Cuántas veces te has inscripto para cursar esta asignatura?", "single_choice", True, vars_dict["A"]),
-        ("¿Cuál ha sido aproximadamente tu porcentaje de asistencia a clases teóricas?", "single_choice", True, vars_dict["A"]),
-        ("¿Cuál ha sido aproximadamente tu porcentaje de asistencia a clases prácticas?", "single_choice", True, vars_dict["A"]),
-        ("Los conocimientos previos para comprender los contenidos de la asignatura fueron", "single_choice", True, vars_dict["A"]),
-
-        # B
-        ("¿El profesor brindó al inicio del curso información referida al desarrollo de la asignatura (programa, cronograma, régimen de cursada y criterios de evaluación)?", "single_choice", True, vars_dict["B"]),
-        ("¿La bibliografía propuesta por la cátedra estuvo disponible en la biblioteca o centros de documentación?", "single_choice", True, vars_dict["B"]),
-        ("¿El profesor ofreció la posibilidad de establecer una buena comunicación en diferentes aspectos de la vida universitaria?", "single_choice", True, vars_dict["B"]),
-
-        # C
-        ("¿Se propusieron clases de apoyo y consulta?", "single_choice", True, vars_dict["C"]),
-        ("¿Los contenidos desarrollados en las clases teóricas se correspondieron con los trabajos prácticos?", "single_choice", True, vars_dict["C"]),
-        ("¿Las clases prácticas de laboratorio te resultaron de utilidad?", "single_choice", True, vars_dict["C"]),
-
-        # D
-        ("¿Hubo relación entre el desarrollo de las clases teóricas y prácticas?", "single_choice", True, vars_dict["D"]),
-        ("¿Existió relación entre los temas desarrollados en clase y los temas evaluados?", "single_choice", True, vars_dict["D"]),
-        ("¿Te brindaron posibilidades para comentar y revisar los resultados de los exámenes parciales?", "single_choice", True, vars_dict["D"]),
-
-        # E
-        ("¿Se respetó la planificación de actividades programadas?", "single_choice", True, vars_dict["E"]),
-        ("¿Los profesores asisten con puntualidad en el horario establecido?", "single_choice", True, vars_dict["E"]),
-        ("¿Da a la asignatura un enfoque aplicado ofreciendo ejemplos, demostraciones, formas de transferencias a la vida cotidiana y profesional?", "single_choice", True, vars_dict["E"]),
-        ("¿Los recursos didácticos utilizados te facilitaron el aprendizaje?", "single_choice", True, vars_dict["E"]),
-        ("¿Los profesores te ofrecen la posibilidad de plantear tus dudas y dificultades en clase?", "single_choice", True, vars_dict["E"]),
-        ("¿Los docentes explican con claridad los temas desarrollados?", "single_choice", True, vars_dict["E"]),
-
-        # F
-        ("¿El personal administrativo de la Facultad respondió a tus requerimientos?", "single_choice", True, vars_dict["F"]),
-        ("¿El personal administrativo respondió cordialmente las consultas que realizaste?", "single_choice", True, vars_dict["F"]),
-        ("¿El servicio de Biblioteca de la sede es adecuado a tus necesidades?", "single_choice", True, vars_dict["F"]),
-        ("¿El Sistema Sui Guaraní te facilitó la realización de trámites administrativos?", "single_choice", True, vars_dict["F"]),
-        ("¿Considerás que son adecuadas las aulas y el equipamiento de los laboratorios?", "single_choice", True, vars_dict["F"]),
-        ("¿Te parecen suficientes los recursos informáticos que te ofrece la institución (pc, pe con internet, wifi, etc.)?", "single_choice", True, vars_dict["F"]),
-
-        # G
-        ("En general ¿cómo evaluás tu experiencia en esta asignatura?", "single_choice", True, vars_dict["G"]),
-        ("¿Qué aspectos valorás como positivos del cursado de la asignatura? Menciona los que consideres más importantes", "open", True, vars_dict["G"]),
-        ("¿Qué aspectos considerás que se pueden mejorar? Menciona los que consideres más importantes", "open", True, vars_dict["G"]),
-        ("¿Qué recomendaciones le harías a un compañero que cursará el año que viene la asignatura?", "open", True, vars_dict["G"]),
-        ("Si en la pregunta respondiste 'no puedo opinar' ¿Querés aclarar por qué?", "open", True, vars_dict["G"])
+        # (texto, tipo, obligatoria, id_variable, id_informe_curricular_base, id_informe_sintetico_base)
+        # A (IDs 1-5)
+        ("¿Asiste a clase?", "single_choice", True, vars_dict["A"], None, None),
+        ("¿Cuántas veces te has inscripto...?", "single_choice", True, vars_dict["A"], None, None),
+        ("¿Cuál ha sido... porcentaje de asistencia a teóricas?", "single_choice", True, vars_dict["A"], None, None),
+        ("¿Cuál ha sido... porcentaje de asistencia a prácticas?", "single_choice", True, vars_dict["A"], None, None),
+        ("Los conocimientos previos... fueron", "single_choice", True, vars_dict["A"], None, None),
+        # B (IDs 6-8)
+        ("¿El profesor brindó al inicio del curso información...?", "single_choice", True, vars_dict["B"], None, None),
+        ("¿La bibliografía propuesta... estuvo disponible...?", "single_choice", True, vars_dict["B"], None, None),
+        ("¿El profesor ofreció la posibilidad de establecer una buena comunicación...?", "single_choice", True, vars_dict["B"], None, None),
+        # C (IDs 9-11)
+        ("¿Se propusieron clases de apoyo y consulta?", "single_choice", True, vars_dict["C"], None, None),
+        ("¿Los contenidos desarrollados en... teóricas se correspondieron con... prácticos?", "single_choice", True, vars_dict["C"], None, None),
+        ("¿Las clases prácticas de laboratorio te resultaron de utilidad?", "single_choice", True, vars_dict["C"], None, None),
+        # D (IDs 12-14)
+        ("¿Hubo relación entre... teóricas y prácticas?", "single_choice", True, vars_dict["D"], None, None),
+        ("¿Existió relación entre los temas desarrollados... y los temas evaluados?", "single_choice", True, vars_dict["D"], None, None),
+        ("¿Te brindaron posibilidades para comentar y revisar los resultados...?", "single_choice", True, vars_dict["D"], None, None),
+        # E (IDs 15-20)
+        ("¿Se respetó la planificación de actividades programadas?", "single_choice", True, vars_dict["E"], None, None),
+        ("¿Los profesores asisten con puntualidad...?", "single_choice", True, vars_dict["E"], None, None),
+        ("¿Da a la asignatura un enfoque aplicado...?", "single_choice", True, vars_dict["E"], None, None),
+        ("¿Los recursos didácticos utilizados te facilitaron el aprendizaje?", "single_choice", True, vars_dict["E"], None, None),
+        ("¿Los profesores te ofrecen la posibilidad de plantear tus dudas...?", "single_choice", True, vars_dict["E"], None, None),
+        ("¿Los docentes explican con claridad los temas...?", "single_choice", True, vars_dict["E"], None, None),
+        # F (IDs 21-26)
+        ("¿El personal administrativo... respondió a tus requerimientos?", "single_choice", True, vars_dict["F"], None, None),
+        ("¿El personal administrativo... respondió cordialmente...?", "single_choice", True, vars_dict["F"], None, None),
+        ("¿El servicio de Biblioteca... es adecuado...?", "single_choice", True, vars_dict["F"], None, None),
+        ("¿El Sistema Sui Guaraní te facilitó...?", "single_choice", True, vars_dict["F"], None, None),
+        ("¿Considerás que son adecuadas las aulas...?", "single_choice", True, vars_dict["F"], None, None),
+        ("¿Te parecen suficientes los recursos informáticos...?", "single_choice", True, vars_dict["F"], None, None),
+        # G (IDs 27-31)
+        ("En general ¿cómo evaluás tu experiencia en esta asignatura?", "single_choice", True, vars_dict["G"], None, None),
+        ("¿Qué aspectos valorás como positivos...?", "open", True, vars_dict["G"], None, None),
+        ("¿Qué aspectos considerás que se pueden mejorar...?", "open", True, vars_dict["G"], None, None),
+        ("¿Qué recomendaciones le harías a un compañero...?", "open", True, vars_dict["G"], None, None),
+        ("Si en la pregunta respondiste 'no puedo opinar'...", "open", True, vars_dict["G"], None, None)
     ]
+    # *** CAMBIO 1: Añadida 'id_informe_sintetico_base' a la consulta ***
+    cursor.executemany("INSERT INTO preguntas (texto_pregunta, tipo, obligatoria, id_variable, id_informe_curricular_base, id_informe_sintetico_base) VALUES (?, ?, ?, ?, ?, ?)", preguntas)
+    print(f"  [OK] Insertadas {len(preguntas)} preguntas de Encuesta Alumno.")
 
     for texto, tipo, obligatoria, id_var in preguntas:
         cursor.execute("""
@@ -179,213 +173,166 @@ try:
         (31, None)
     ]
 
-    for id_pregunta, id_opcion_respuesta in pregunta_opcion:
-        cursor.execute("""
-            INSERT INTO pregunta_opcion (id_pregunta, id_opcion_respuesta)
-            VALUES (?, ?)
-        """, (id_pregunta, id_opcion_respuesta))
-
-
-    #añado encuesta_asignatura:
+    # (El resto de tu script original)
     cursor.execute("""
-        INSERT INTO encuestas_asignaturas (id_encuesta_base, id_asignatura, fecha_inicio, fecha_fin, estado)
+        INSERT INTO encuestas_asignaturas (id, id_encuesta_base, id_asignatura, fecha_inicio, fecha_fin, estado)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (1, encuesta_id, asignatura_id, '2025-11-01', '2025-11-30', 'abierta'))
+    encuesta_asignatura_id = 1
+    print(f"  [OK] Insertada EncuestaAsignatura ID: {encuesta_asignatura_id}")
+
+    # --- 🗣️ SECCIÓN RESPUESTA (Alumno) ---
+    # *** CAMBIO 2: Añadida 'id_informe_sintetico_carrera' (NULL) ***
+    cursor.execute("""
+        INSERT INTO respuestas (id, id_persona, id_encuesta_asignatura, id_informe_asignatura, id_informe_sintetico_carrera)
         VALUES (?, ?, ?, ?, ?)
-    """, (
-        1,             # id_encuesta_base
-        1,             # id_asignatura
-        '2025-11-01',  # fecha_inicio (1/11)
-        '2025-11-30',  # fecha_fin (30/11)
-        'abierta'     # estado
-    ))
+    """, (1, persona_id, encuesta_asignatura_id, None, None))
+    respuesta_alumno_id = 1
+    print(f"  [OK] Insertada Respuesta (Alumno) ID: {respuesta_alumno_id}")
 
-    # --- 🗣️ SECCIÓN AÑADIDA PARA RESPUESTA ---
-    # Asumimos que la Persona 1 (id=1) responde la EncuestaAsignatura 1 (id=1)
-    cursor.execute("""
-        INSERT INTO respuestas (id_persona, id_encuesta_asignatura)
-        VALUES (?, ?)
-    """, (
-        1, # id_persona
-        1  # id_encuesta_asignatura
-    ))
-    respuesta_id = cursor.lastrowid # Guardamos el ID de la respuesta (será 1)
-
-
-    # --- ✍️ SECCIÓN DE DETALLES DE RESPUESTA (COMPLETA) ---
-    # (id_pregunta_opcion, id_respuesta, texto_abierto)
-    # Respondemos a las 31 preguntas obligatorias
+    # --- ✍️ SECCIÓN DE DETALLES DE RESPUESTA (Alumno) ---
     detalles_a_insertar = [
-        # A (Se elige la primera opción de cada pregunta)
-        (1, respuesta_id, None),  # Q1: Si
-        (3, respuesta_id, None),  # Q2: Una
-        (5, respuesta_id, None),  # Q3: Entre 0 y 50%
-        (7, respuesta_id, None),  # Q4: Entre 0 y 50%
-        (9, respuesta_id, None),  # Q5: Escasos
-        # B
-        (11, respuesta_id, None), # Q6: Si
-        (14, respuesta_id, None), # Q7: Si
-        (17, respuesta_id, None), # Q8: Si
-        # C
-        (20, respuesta_id, None), # Q9: Si
-        (23, respuesta_id, None), # Q10: Si
-        (26, respuesta_id, None), # Q11: Si
-        # D
-        (29, respuesta_id, None), # Q12: Si
-        (32, respuesta_id, None), # Q13: Si
-        (35, respuesta_id, None), # Q14: Si
-        # E
-        (38, respuesta_id, None), # Q15: Si
-        (41, respuesta_id, None), # Q16: Si
-        (44, respuesta_id, None), # Q17: Si
-        (47, respuesta_id, None), # Q18: Si
-        (50, respuesta_id, None), # Q19: Si
-        (53, respuesta_id, None), # Q20: Si
-        # F
-        (56, respuesta_id, None), # Q21: Si
-        (59, respuesta_id, None), # Q22: Si
-        (62, respuesta_id, None), # Q23: Si
-        (65, respuesta_id, None), # Q24: Si
-        (68, respuesta_id, None), # Q25: Si
-        (71, respuesta_id, None), # Q26: Si
-        # G (Cerrada)
-        (74, respuesta_id, None), # Q27: 1
-        # G (Abiertas)
-        (78, respuesta_id, "Muy buenas clases prácticas, excelente predisposición."), # Q28
-        (79, respuesta_id, "La parte teórica podría ser más ágil."), # Q29
-        (80, respuesta_id, "Que repase los temas de la unidad 1 antes de empezar."), # Q30
-        (81, respuesta_id, "Respondí NPO en la biblioteca porque nunca la usé.")  # Q31
+        (1, respuesta_alumno_id, None), (3, respuesta_alumno_id, None), (5, respuesta_alumno_id, None),
+        (7, respuesta_alumno_id, None), (9, respuesta_alumno_id, None), (11, respuesta_alumno_id, None),
+        (14, respuesta_alumno_id, None), (17, respuesta_alumno_id, None), (20, respuesta_alumno_id, None),
+        (23, respuesta_alumno_id, None), (26, respuesta_alumno_id, None), (29, respuesta_alumno_id, None),
+        (32, respuesta_alumno_id, None), (35, respuesta_alumno_id, None), (38, respuesta_alumno_id, None),
+        (41, respuesta_alumno_id, None), (44, respuesta_alumno_id, None), (47, respuesta_alumno_id, None),
+        (50, respuesta_alumno_id, None), (53, respuesta_alumno_id, None), (56, respuesta_alumno_id, None),
+        (59, respuesta_alumno_id, None), (62, respuesta_alumno_id, None), (65, respuesta_alumno_id, None),
+        (68, respuesta_alumno_id, None), (71, respuesta_alumno_id, None), (74, respuesta_alumno_id, None),
+        (78, respuesta_alumno_id, "Muy buenas clases prácticas, excelente predisposición."),
+        (79, respuesta_alumno_id, "La parte teórica podría ser más ágil."),
+        (80, respuesta_alumno_id, "Que repase los temas de la unidad 1 antes de empezar."),
+        (81, respuesta_alumno_id, "Respondí NPO en la biblioteca porque nunca la usé.")
     ]
+    cursor.executemany("INSERT INTO detalles_respuestas (id_pregunta_opcion, id_respuesta, texto_respuesta_abierta) VALUES (?, ?, ?)", detalles_a_insertar)
+    print(f"  [OK] Insertados {len(detalles_a_insertar)} detalles de respuesta (Alumno).")
 
-    for id_po, id_resp, texto in detalles_a_insertar:
-        cursor.execute("""
-            INSERT INTO detalles_respuestas (id_pregunta_opcion, id_respuesta, texto_respuesta_abierta)
-            VALUES (?, ?, ?)
-        """, (id_po, id_resp, texto))
+    # --- 📊 SECCIÓN REPORTE ---
+    cursor.execute("INSERT INTO reportes (id, id_encuesta_asignatura) VALUES (?, ?)", (1, encuesta_asignatura_id))
+    reporte_id = 1
+    print(f"  [OK] Insertado Reporte ID: {reporte_id}")
 
-    # --- 📊REPORTE ---
-    # reporte para la EncuestaAsignatura 1 (id=1)
-    cursor.execute("""
-        INSERT INTO reportes (id_encuesta_asignatura)
-        VALUES (?)
-    """, (1,)) # id_encuesta_asignatura = 1
+    # --- 📜 SECCIÓN INFORME_CURRICULARES_BASE (Molde Docente) *** ---
+    cursor.execute("INSERT INTO informes_curriculares_base (id, titulo) VALUES (?, ?)", (1, "Informe Docente Ciclo 2025"))
+    informe_curricular_base_id = 1
+    print(f"  [OK] Insertado InformeCurricularesBase (Molde Docente) ID: {informe_curricular_base_id}")
 
-
-    # --- 📜 INFORMES_CURRICULARES_BASE Y SUS PREGUNTAS ---
-    cursor.execute("""
-        INSERT INTO informes_curriculares_base (titulo)
-        VALUES (?)
-    """, ("Informe Docente Ciclo 2025",))
-    informes_curriculares_base_id = cursor.lastrowid # (ID será 1)
-
-    preguntas_informe_curricular = [
-        (
-            "Indique en el caso que corresponda, las necesidades de equipamiento y actualización de bibliografía que considere prioritarias para su actuación docente. Asimismo, en caso de corresponder, indique los insumos básicos necesarios para el desarrollo de actividades prácticas, renovación o incorporación de equipamientos informáticos requeridos para el desarrollo de clases.",
-            "open", True, None, informes_curriculares_base_id, None
-        ),
-        (
-            "Consigne el porcentaje de horas de clases (teóricas y prácticas) dictadas respecto del total establecido en el plan de estudios y si es necesario justifique.",
-            "open", True, None, informes_curriculares_base_id, None
-        ),
-        (
-            "2-A- ¿Se logró desarrollar la totalidad de los contenidos planificados? Consigne el porcentaje de contenidos planificados alcanzados. En caso de ser necesario mencione las estrategias que planificará para el próximo dictado a fin de ajustar el cronograma.",
-            "open", True, None, informes_curriculares_base_id, None
-        ),
-        (
-            "2-B- Consigne los valores que figuran en el reporte de la Encuesta a alumnos correspondientes a: B: “Comunicación y desarrollo de la asignatura”, C: “Metodología”, D “ Evaluación”, E “Actuación de los miembros de la Cátedra”. Emita un juicio de valor en el caso que lo considere oportuno.",
-            "open", True, None, informes_curriculares_base_id, None
-        ),
-        (
-            "2.C. ¿Cuáles fueron los principales aspectos positivos y los obstáculos que se manifestaron durante el desarrollo del espacio curricular? Centrándose específicamente en los procesos de enseñanza y/o aprendizaje",
-            "open", True, None, informes_curriculares_base_id, None
-        )
-    ]
-
-    print("Creando preguntas de Informe Base y sus 'pregunta_opcion' nulas...")
-
-    # Insertamos las preguntas del INFORME (IDs 32-36)
-    # Y creamos su 'pregunta_opcion' nula
-    for texto, tipo, obligatoria, id_var, id_icb, id_isb in preguntas_informe_curricular:
-        # 1. Insertar la pregunta
-        cursor.execute("""
-            INSERT INTO preguntas (texto_pregunta, tipo, obligatoria, id_variable, id_informe_curricular_base, id_informe_sintetico_base)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (texto, tipo, obligatoria, id_var, id_icb, id_isb))
+    preguntas_informe = [
+    # (Usamos la variable informe_curricular_base_id)
+    # *** CAMBIO 3: Añadida 'id_informe_sintetico_base' (NULL) ***
+    (32, "Indique en el caso que corresponda, las necesidades de equipamiento...", "open", True, informe_curricular_base_id, None, None),
+    (33, "Consigne el porcentaje de horas de clases...", "open", True, informe_curricular_base_id, None, None),
+    (34, "2-A- ¿Se logró desarrollar la totalidad de los contenidos...", "open", True, informe_curricular_base_id, None, None),
+    (35, "2-B- Consigne los valores que figuran en el reporte de la Encuesta...", "open", False, informe_curricular_base_id, None, None),
+    (36, "2.C. ¿Cuáles fueron los principales aspectos positivos...", "open", True, informe_curricular_base_id, None, None),
+]
+    
+    po_informe_ids_nulas = []
+    # *** CAMBIO 4: Añadida 'id_informe_sintetico_base' al loop y al INSERT ***
+    for id, texto, tipo, oblig, id_icb, id_var, id_isb in preguntas_informe:
+        cursor.execute(
+            "INSERT INTO preguntas (id, texto_pregunta, tipo, obligatoria, id_informe_curricular_base, id_variable, id_informe_sintetico_base) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (id, texto, tipo, oblig, id_icb, id_var, id_isb)
+    )
+        cursor.execute("INSERT INTO pregunta_opcion (id_pregunta, id_opcion_respuesta) VALUES (?, ?)", (id, None))
+        po_informe_ids_nulas.append(cursor.lastrowid)
         
-        # 2. Obtener el ID de la pregunta que acabamos de crear (serán 32, 33, 34, 35, 36)
-        pregunta_id_nueva = cursor.lastrowid 
+    print(f"  [OK] Insertadas {len(preguntas_informe)} preguntas (Informe Docente) con sus 'pregunta_opcion' nulas.")
+    
+    # ==========================================================
+    # --- 3. SECCIÓN: JERARQUÍA DE INFORMES SINTÉTICOS ---
+    # ==========================================================
 
-        # 3. Crear su entrada en 'pregunta_opcion' con 'id_opcion_respuesta' = NULL
-        # (Estas serán las 'pregunta_opcion' IDs 82, 83, 84, 85, 86)
-        cursor.execute("""
-            INSERT INTO pregunta_opcion (id_pregunta, id_opcion_respuesta)
-            VALUES (?, ?)
-        """, (pregunta_id_nueva, None))
-            
-    print("Preguntas de Informe Curricular Base y sus 'pregunta_opcion' creadas.")
-
-
-
-    # --- 📜 INFORMES_SINTETICOS_BASE Y SUS PREGUNTAS ---
+    # 🗂️ SECCIÓN InformeSinteticoBase (Molde Depto)
     cursor.execute("""
-        INSERT INTO informes_sinteticos_base (titulo)
-        VALUES (?)
-    """, ("Informe Sintetico Ciclo 2025",))
-    informes_sinteticos_base_id = cursor.lastrowid # (ID será 1)
+        INSERT INTO informes_sinteticos_base (id, titulo)
+        VALUES (?, ?)
+    """, (1, "Informe Sintético General 2025"))
+    informe_sintetico_base_id = 1
+    print(f"  [OK] Insertado InformeSinteticoBase (Molde Depto) ID: {informe_sintetico_base_id}")
 
-    preguntas_informe_sintetico = [
-        (
-            "0. Información general",
-            "open", True, None, None, informes_sinteticos_base_id
-        ),
-        (
-            "1. Necesidades de equipamiento y bibliografía. En el siguiente cuadro, informar sobre la necesidad de actualización de bibliografía (hasta dos títulos por actividad curricular). De corresponder, indicar los insumos básicos necesarios para el desarrollo de actividades prácticas, renovación o incorporación de equipamiento informático, requerimientos de nuevos equipos para el desarrollo de clases, etc.",
-            "open", True, None, None, informes_sinteticos_base_id
-        ),
-        (
-            "2. Consigne el porcentaje de horas de clases (teóricas y prácticas) dictadas respecto del total establecido en el plan de estudios y si es necesario justifique.",
-            "open", True, None, None, informes_sinteticos_base_id
-        ),
-        (
-            "2.A. Consigne el porcentaje de contenidos planificados alcanzados por cada espacio curricular. Mencione en caso de corresponder, las estrategias propuestas por el equipo de cátedra para el próximo dictado a fin de ajustar el cronograma.", "open", True, None, None, informes_sinteticos_base_id
-        ),
-        (
-            "2.C. Complete los aspectos positivos, obstáculos y de mencionarse en el Informe de Actividad Curricular, las estrategias a implementar en el proceso de enseñanza y/o del proceso de aprendizaje de cada espacio curricular." ,
-            "open", True, None, None, informes_sinteticos_base_id
-        ),
-        (
-            "3. Señale con una cruz si ha desarrollado actividades de Capacitación, Investigación, Extensión y Gestión en el ámbito de la Facultad de Ingeniería por cada uno los integrantes de la cátedra (Profesor Responsable, Profesores, JTP y Auxiliares) en el periodo evaluado. Explicite las observaciones y comentarios que considere pertinentes.",
-            "open", True, None, None, informes_sinteticos_base_id
-        ),
-        (
-            "4.- Señale con una cruz las valoraciones del desempeño de los auxiliares de cátedra consignadas en el informe de actividad curricular. Indique la justificación informada de la valoración." ,
-            "open", True, None, None, informes_sinteticos_base_id
-        ),
-        (
-            "5.- Observaciones o comentarios que desee expresar la Comisión Asesora en relación al conjunto de actividades desarrolladas por los docentes de los diferentes espacios curriculares. a) La cobertura lograda en las asignaturas y la percepción de logros alcanzados en el proceso de aprendizaje se considera muy buena. b) Las encuestas de alumnos han arrojado resultados tendientes a Bueno - Muy Bueno (Satisfactorio – Muy Satisfactorio), de todas maneras hay aspectos mejorables que han sido detectados por las cátedras en los informes y para los cuales la mayoría propone estrategias alternativas para abordar los problemas. c) Es URGENTE que se designe a un JTP para la asignatura Análisis y Diseño de Sistemas. c) Las calificaciones de los auxiliares se consideran muy buenas en general. d) Se deja constancia que solo una minoría de docentes no realizan actividades diferentes a la docencia. e) El 64% de los docentes del Departamento ha realizado tareas de capacitación. Se considera un muy buen porcentaje pero ha disminuido con respecto al año anterior, El 84% de los docentes ha participado de proyectos de investigación durante 2018/2019, y es un porcentaje que se considera muy bueno teniendo en cuenta que hay muy pocas dedicaciones exclusivas o semi-exclusivas. Hubo un incremento con respecto al año anterior. El 48% ha realizado actividades de extensión. Respecto de tareas de gestión, el 36% ha realizado tareas genuinas ocupando cargos en la Facultad o integrando comisiones. Cabe aclarar que este análisis solo se realiza sobre los docentes que dictaron las materias en el primer cuatrimestre. f) Se sugiere agregar al Informe Anual de cátedra, que se informe la cantidad de horas dedicadas a capacitación, investigación, extensión y gestión." ,
-            "open", True, None, None, informes_sinteticos_base_id
-        )
+    # --- *** NUEVO BLOQUE (Pregunta para SinteticoBase) *** ---
+    po_sintetico_ids_nulas = []
+    pregunta_sintetico_texto = """Observaciones o comentarios que desee expresar la Comisión Asesora en relación al
+conjunto de actividades desarrolladas por los docentes de los diferentes espacios curriculares.."""
+    
+    pregunta_sintetico = (
+        37, pregunta_sintetico_texto, # ID Pregunta 37
+        "open", True, None, None, informe_sintetico_base_id
+    )
+    cursor.execute(
+        "INSERT INTO preguntas (id, texto_pregunta, tipo, obligatoria, id_variable, id_informe_curricular_base, id_informe_sintetico_base) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (pregunta_sintetico[0], pregunta_sintetico[1], pregunta_sintetico[2], pregunta_sintetico[3], pregunta_sintetico[4], pregunta_sintetico[5], pregunta_sintetico[6])
+    )
+    # Crear su PO nula (ID 87)
+    cursor.execute("INSERT INTO pregunta_opcion (id_pregunta, id_opcion_respuesta) VALUES (?, ?)", (pregunta_sintetico[0], None))
+    po_sintetico_ids_nulas.append(cursor.lastrowid) # Guardamos el ID 87
+    print(f"  [OK] Insertada 1 pregunta (Informe Sintetico) con su 'pregunta_opcion' nula.")
+    # --- *** FIN NUEVO BLOQUE *** ---
+
+    
+    # --- *** BLOQUE RE-AÑADIDO (InformeSinteticoCarrera) *** ---
+    # 📁 Insertar InformeSinteticoCarrera (el "Padre")
+    cursor.execute("""
+        INSERT INTO informes_sinteticos_carreras (id, id_carrera, id_informe_sintetico_base, ciclo_lectivo, comision_asesora, sede, integrantes, estado, id_respuesta)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (1, carrera_id, informe_sintetico_base_id, "2025", "Comisión APU", "Trelew", "Decano, Secretarios", "abierto", None))
+    informe_sintetico_carrera_id = 1
+    print(f"  [OK] Insertado InformeSinteticoCarrera (Padre) ID: {informe_sintetico_carrera_id}")
+    
+    # 📄 *** CAMBIO 5: Insertar InformeAsignatura (el "Hijo") ***
+    # (Añadido 'id_respuesta'=NULL, y 'id_informe_sintetico_carrera' AHORA TIENE VALOR)
+    cursor.execute("""
+        INSERT INTO informes_asignaturas (
+            id, sede, ciclo_lectivo, docente, cant_alumnos_insc, cant_comisiones_teoricas, 
+            cant_comisiones_practicas, fecha_inicio, fecha_fin, estado, 
+            id_informe_curricular_base, id_asignatura, id_reporte, id_informe_sintetico_carrera, id_respuesta
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        1, "tw", 2025, "Leonardo Ordoñez", 50, 1, 2, 
+        date(2025, 8, 1), date(2025, 12, 1), 'abierto',
+        informe_curricular_base_id, # Molde docente (ID 1)
+        asignatura_id,                # Asignatura (ID 1)
+        reporte_id,                   # Reporte (ID 1)
+        informe_sintetico_carrera_id, # Vínculo al Padre (ID 1)
+        None                          # id_respuesta (se actualiza después)
+    ))
+    informe_asignatura_id = 1
+    print(f"  [OK] Insertado InformeAsignatura (Hijo) ID: {informe_asignatura_id}")
+
+    # --- 🗣️ SECCIÓN RESPUESTA (Docente) ---
+    # *** CAMBIO 6: Añadida 'id_informe_sintetico_carrera' (NULL) ***
+    cursor.execute("""
+        INSERT INTO respuestas (id, id_persona, id_encuesta_asignatura, id_informe_asignatura, id_informe_sintetico_carrera)
+        VALUES (?, ?, ?, ?, ?)
+    """, (2, persona_id, None, informe_asignatura_id, None))
+    respuesta_docente_id = 2
+    print(f"  [OK] Insertada Respuesta (Docente) ID: {respuesta_docente_id}")
+    
+    # --- 🔗 *** CAMBIO 7: VINCULAR InformeAsignatura CON Respuesta (Docente) *** ---
+    # (Establece la relación 1 a 1)
+    cursor.execute("""
+        UPDATE informes_asignaturas 
+        SET id_respuesta = ? 
+        WHERE id = ?
+    """, (respuesta_docente_id, informe_asignatura_id))
+    print(f"  [OK] Vinculado InformeAsignatura ID {informe_asignatura_id} con Respuesta ID {respuesta_docente_id}.")
+
+
+    # --- ✍️ SECCIÓN DE DETALLES DE RESPUESTA (Docente) ---
+    # (Usamos los IDs de po_informe_ids_nulas: 82, 83, 84, 85, 86)
+    detalles_docente = [
+        (po_informe_ids_nulas[0], respuesta_docente_id, "Se necesitan 5 computadoras nuevas."),
+        (po_informe_ids_nulas[1], respuesta_docente_id, "Se dictó el 95% de las horas."),
+        (po_informe_ids_nulas[2], respuesta_docente_id, "Se logró el 100% de los contenidos."),
+        (po_informe_ids_nulas[3], respuesta_docente_id, "Los alumnos valoraron B=3.5, C=4.0, D=3.8, E=4.2."),
+        (po_informe_ids_nulas[4], respuesta_docente_id, "El principal obstáculo fue el bajo nivel...")
     ]
+    cursor.executemany("INSERT INTO detalles_respuestas (id_pregunta_opcion, id_respuesta, texto_respuesta_abierta) VALUES (?, ?, ?)", detalles_docente)
+    print(f"  [OK] Insertados {len(detalles_docente)} detalles de respuesta (Docente).")
 
-    print("Creando preguntas de Informe Sintetico Base y sus 'pregunta_opcion' nulas...")
-
-    # Insertamos las preguntas del INFORME SINTETICO
-    # Y creamos su 'pregunta_opcion' nula
-    for texto, tipo, obligatoria, id_var, id_icb, id_isb in preguntas_informe_sintetico:
-        # 1. Insertar la pregunta
-        cursor.execute("""
-            INSERT INTO preguntas (texto_pregunta, tipo, obligatoria, id_variable, id_informe_curricular_base, id_informe_sintetico_base)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (texto, tipo, obligatoria, id_var, id_icb, id_isb))
-        
-        # 2. Obtener el ID de la pregunta que acabamos de crear
-        pregunta_id_nueva = cursor.lastrowid 
-
-        # 3. Crear su entrada en 'pregunta_opcion' con 'id_opcion_respuesta' = NULL
-        cursor.execute("""
-            INSERT INTO pregunta_opcion (id_pregunta, id_opcion_respuesta)
-            VALUES (?, ?)
-        """, (pregunta_id_nueva, None))
-            
-    print("Preguntas de Informe Sintético Base y sus 'pregunta_opcion' creadas.")
 
     # 💾 Guardar cambios
     conn.commit()
