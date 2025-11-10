@@ -1,0 +1,68 @@
+from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import select
+from fastapi import HTTPException
+from typing import List
+
+from . import schemas
+# (Asegúrate de importar todos los modelos necesarios)
+from src.informe_sintetico_carrera.models import InformeSinteticoCarrera
+from src.informes_asignaturas.models import InformeAsignatura
+from src.asignaturas.models import Asignatura
+from src.respuestas.models import Respuesta
+from src.detalle_respuesta.models import DetalleRespuesta
+from src.pregunta_opcion.models import PreguntaOpcion
+from src.preguntas.models import Pregunta
+from src.carreras.models import Carrera
+from src.informes_sinteticos_base.models import InformeSinteticoBase
+# ¡Importante! El "molde" del docente (Anexo I)
+from src.informes_curriculares_base.models import InformeCurricularBase 
+
+def _get_query_con_joins():
+    """
+    Helper para cargar TODA la jerarquía de datos,
+    corregido con los nuevos nombres de modelos.
+    """
+    return select(InformeSinteticoCarrera).options(
+        
+        joinedload(InformeSinteticoCarrera.carrera),
+        
+        joinedload(InformeSinteticoCarrera.informe_sintetico_base),
+        
+        joinedload(InformeSinteticoCarrera.informes_asignaturas)
+            .joinedload(InformeAsignatura.asignatura),
+        
+        joinedload(InformeSinteticoCarrera.informes_asignaturas)
+            .joinedload(InformeAsignatura.respuesta) 
+                .joinedload(Respuesta.detalles)
+                    .joinedload(DetalleRespuesta.pregunta_opcion)
+                        .joinedload(PreguntaOpcion.pregunta),
+        
+        joinedload(InformeSinteticoCarrera.informes_asignaturas)
+            .joinedload(InformeAsignatura.informe_curricular_base) 
+            .joinedload(InformeCurricularBase.preguntas) 
+    )
+
+def listar_informes_sinteticos_carrera(db: Session) -> List[InformeSinteticoCarrera]:
+    query = _get_query_con_joins()
+    return db.scalars(query).unique().all()
+
+
+def crear_informe_sintetico_carrera(db: Session, informe: schemas.InformeSinteticoCarreraCreate) -> InformeSinteticoCarrera:
+    _informe = InformeSinteticoCarrera(**informe.model_dump())
+    db.add(_informe)
+    db.commit()
+    db.refresh(_informe)
+    return leer_informe_sintetico_carrera(db, _informe.id)
+
+
+def leer_informe_sintetico_carrera(db: Session, informe_id: int) -> InformeSinteticoCarrera:
+    query = _get_query_con_joins().where(InformeSinteticoCarrera.id == informe_id)
+    db_informe = db.scalar(query)
+    
+    if db_informe is None:
+        raise HTTPException(
+            status_code=404, 
+            detail="Informe sintético de carrera no encontrado"
+        )
+    
+    return db_informe

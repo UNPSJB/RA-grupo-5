@@ -1,0 +1,65 @@
+import { useState, useCallback } from "react";
+
+const API_URL = "http://localhost:8000";
+
+export function useResponderInforme() {
+  const [answersByPreguntaOpcion, setAnswersByPreguntaOpcion] = useState<
+    Record<number, string>
+  >({});
+
+  const setTextoRespuesta = useCallback(
+    (id_pregunta_opcion: number, texto: string) => {
+      setAnswersByPreguntaOpcion((prev) => ({
+        ...prev,
+        [id_pregunta_opcion]: texto,
+      }));
+    },
+    []
+  );
+
+  const guardarRespuestasInforme = useCallback(
+    async (idPersona: number, idInformeAsignatura: number) => {
+      const detalles = Object.entries(answersByPreguntaOpcion).map(
+        ([id_pregunta_opcion_str, texto_respuesta_abierta]) => ({
+          id_pregunta_opcion: Number(id_pregunta_opcion_str),
+          texto_respuesta_abierta,
+        })
+      );
+
+      const payload = {
+        id_persona: idPersona,
+        id_informe_asignatura: idInformeAsignatura,
+        detalles,
+      };
+
+      const res = await fetch(`${API_URL}/respuestas/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.status === 409) {
+        const j = await res.json().catch(() => ({}));
+        return {
+          ok: false,
+          conflict: true,
+          detail: j.detail || "El informe ya tiene una respuesta.",
+        };
+      }
+
+      if (!res.ok) {
+        throw new Error("No se pudieron guardar las respuestas del informe");
+      }
+
+      const data = await res.json();
+      return { ok: true, conflict: false, data };
+    },
+    [answersByPreguntaOpcion]
+  );
+
+  return {
+    answersByPreguntaOpcion,
+    setTextoRespuesta,
+    guardarRespuestasInforme,
+  };
+}

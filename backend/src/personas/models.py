@@ -1,6 +1,6 @@
 from typing import Optional, List
 from sqlalchemy import Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.models import ModeloBase
 
 
@@ -10,3 +10,5 @@ class Persona(ModeloBase):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     nombre: Mapped[str] = mapped_column(String, index=True)
     email: Mapped[str] = mapped_column(String, unique=True, index=True)
+    
+    respuestas: Mapped[List["Respuesta"]] = relationship(back_populates="persona")
