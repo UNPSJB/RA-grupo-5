@@ -1,7 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
 
-# Importamos el schema que necesitamos anidar
 from src.pregunta_opcion.schemas import PreguntaOpcionRead
 
 class DetalleRespuestaBase(BaseModel):
