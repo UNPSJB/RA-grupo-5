@@ -45,7 +45,7 @@ function App() {
           <Route index element={<ReportesDisponibles />} />
         </Route>
         <Route path="informes">
-          {/* <Route path=":id" element={<VerInformeCurricular />} /> */}
+          <Route path=":id" element={<VerInformeCurricular />} />
         </Route>
       </Route>
 

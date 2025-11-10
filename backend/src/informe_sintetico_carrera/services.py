@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 from sqlalchemy import select
 from fastapi import HTTPException
 from typing import List
@@ -18,32 +18,43 @@ from src.informes_sinteticos_base.models import InformeSinteticoBase
 from src.informes_curriculares_base.models import InformeCurricularBase 
 
 def _get_query_con_joins():
-    """
-    Helper para cargar TODA la jerarquía de datos,
-    corregido con los nuevos nombres de modelos.
-    """
     return select(InformeSinteticoCarrera).options(
         
         joinedload(InformeSinteticoCarrera.carrera),
         
-        joinedload(InformeSinteticoCarrera.informe_sintetico_base),
+        joinedload(InformeSinteticoCarrera.informe_sintetico_base).options(
+            selectinload(InformeSinteticoBase.preguntas) # <-- Esto faltaba
+        ),
         
-        joinedload(InformeSinteticoCarrera.informes_asignaturas)
-            .joinedload(InformeAsignatura.asignatura),
+        joinedload(InformeSinteticoCarrera.respuesta).options(
+            selectinload(Respuesta.detalles).options(
+                joinedload(DetalleRespuesta.pregunta_opcion).options(
+                    joinedload(PreguntaOpcion.pregunta)
+                )
+            )
+        ),
         
-        joinedload(InformeSinteticoCarrera.informes_asignaturas)
-            .joinedload(InformeAsignatura.respuesta) 
-                .joinedload(Respuesta.detalles)
-                    .joinedload(DetalleRespuesta.pregunta_opcion)
-                        .joinedload(PreguntaOpcion.pregunta),
-        
-        joinedload(InformeSinteticoCarrera.informes_asignaturas)
-            .joinedload(InformeAsignatura.informe_curricular_base) 
-            .joinedload(InformeCurricularBase.preguntas) 
+        selectinload(InformeSinteticoCarrera.informes_asignaturas)
+        .options(
+            joinedload(InformeAsignatura.asignatura),
+            
+            joinedload(InformeAsignatura.informe_curricular_base).options(
+                selectinload(InformeCurricularBase.preguntas) 
+            ),
+            
+            joinedload(InformeAsignatura.respuesta).options(
+                selectinload(Respuesta.detalles).options(
+                    joinedload(DetalleRespuesta.pregunta_opcion).options(
+                        joinedload(PreguntaOpcion.pregunta)
+                    )
+                )
+            )
+        )
     )
 
 def listar_informes_sinteticos_carrera(db: Session) -> List[InformeSinteticoCarrera]:
     query = _get_query_con_joins()
+    # .unique() es clave para evitar duplicados por los joins
     return db.scalars(query).unique().all()
 
 
@@ -52,12 +63,14 @@ def crear_informe_sintetico_carrera(db: Session, informe: schemas.InformeSinteti
     db.add(_informe)
     db.commit()
     db.refresh(_informe)
+    # Llama a 'leer' para devolver el objeto completo
     return leer_informe_sintetico_carrera(db, _informe.id)
 
 
 def leer_informe_sintetico_carrera(db: Session, informe_id: int) -> InformeSinteticoCarrera:
     query = _get_query_con_joins().where(InformeSinteticoCarrera.id == informe_id)
-    db_informe = db.scalar(query)
+    # Usar .scalars().first() es más seguro con joins complejos
+    db_informe = db.scalars(query).first() 
     
     if db_informe is None:
         raise HTTPException(

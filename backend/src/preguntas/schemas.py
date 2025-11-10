@@ -2,6 +2,8 @@ from pydantic import BaseModel, model_validator, ConfigDict
 from typing import Optional, List
 from src.preguntas.models import TipoPreguntaEnum
 
+from src.pregunta_opcion.schemas import PreguntaOpcionRead 
+
 class PreguntaBase(BaseModel):
     texto_pregunta: str 
     tipo: TipoPreguntaEnum
@@ -9,9 +11,9 @@ class PreguntaBase(BaseModel):
     codigo: Optional[str] = None 
 
 class PreguntaCreate(PreguntaBase):
-    id_variable: Optional[int] = None   # al crear hay que especificar la variable
-    id_informe_curricular_base: Optional[int] = None  # o el informe base al que pertenece
-    id_informe_sintetico_base: Optional[int] = None  # o el informe sintetico al que pertenece
+    id_variable: Optional[int] = None
+    id_informe_curricular_base: Optional[int] = None
+    id_informe_sintetico_base: Optional[int] = None
 
     @model_validator(mode='after')
     def check_context(self):
@@ -31,4 +33,6 @@ class PreguntaRead(PreguntaBase):
     id_variable: Optional[int] = None
     id_informe_curricular_base: Optional[int] = None
     id_informe_sintetico_base: Optional[int] = None
-    model_config = {"from_attributes": True}
+    pregunta_opcion: List[PreguntaOpcionRead] = []
+    
+    model_config = ConfigDict(from_attributes=True)

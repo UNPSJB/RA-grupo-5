@@ -4,22 +4,18 @@ import { useInformeSinteticoCarrera } from "../hook/useInformeSinteticoCarrera";
 import type { Respuesta } from "../types/InformeSintetico";
 import { Container, Form, Col, Card, Tabs, Tab } from "react-bootstrap";
 
-/**
- * --- FUNCIÓN HELPER CORREGIDA ---
- * Acepta un solo objeto 'Respuesta' (o null) en lugar de un array.
- */
 const findRespuestaPorPreguntaId = (
   preguntaId: number,
-  respuesta: Respuesta | null // ✅ Es singular y opcional
+  respuesta: Respuesta | null
 ): React.ReactNode => {
-  // Si no hay respuesta (es null) o no hay detalles, retornar "Sin Respuesta"
   if (!respuesta || !respuesta.detalles) {
     return <em className="text-muted">Sin Respuesta</em>;
   }
 
-  // Buscar el detalle en el único objeto de respuesta
   const detalle = respuesta.detalles.find(
-    (d) => d.pregunta_opcion?.pregunta?.id === preguntaId
+    (d) => {
+      return d.pregunta_opcion?.id_pregunta === preguntaId;
+    }
   );
 
   if (detalle) {
@@ -32,16 +28,12 @@ const findRespuestaPorPreguntaId = (
   return <em className="text-muted">Sin Respuesta</em>;
 };
 
-// --- CAMBIO 1 ---
-// Quitamos "export const" y la anotación de tipo ": React.FC"
-// y lo reemplazamos por "export default function"
 export default function InformeSintetico() {
   const { id } = useParams<{ id: string }>();
   const informeId = id ? parseInt(id, 10) : null;
 
   const { informe, loading, error } = useInformeSinteticoCarrera(informeId);
 
-  // Guardia de carga
   if (loading || !informe) {
     return <Container className="mt-4">Cargando informe...</Container>;
   }
@@ -56,7 +48,6 @@ export default function InformeSintetico() {
   return (
     <Container>
       <Col md={8} className="mx-auto mt-4 shadow">
-        {/* --- Card del "Padre" (Sin cambios) --- */}
         <Card className="mb-4 ">
           <Card.Header as="h4">
             Informe Sintético - {informe.carrera.nombre}
