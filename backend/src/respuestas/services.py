@@ -10,22 +10,31 @@ from src.pregunta_opcion.models import PreguntaOpcion
 from src.preguntas.models import Pregunta
 from src.detalle_respuesta.models import DetalleRespuesta
 from src.informes_asignaturas.models import InformeAsignatura, EstadoInforme
+from src.informe_sintetico_carrera.models import InformeSinteticoCarrera
+
 from sqlalchemy.exc import IntegrityError
 
-def _respuesta_existente_id(db: Session, informe_id: int) -> Optional[int]:
-    rid = db.execute(
-        select(Respuesta.id).where(Respuesta.id_informe_asignatura == informe_id)
-    ).scalar_one_or_none()
-    return rid
+def _respuesta_existente_id_asignatura(db: Session, informe_id: int) -> Optional[int]:
+    return db.scalar(select(Respuesta.id).where(Respuesta.id_informe_asignatura == informe_id))
+
+
+def _respuesta_existente_id_carrera(db: Session, informe_id: int) -> Optional[int]:
+    return db.scalar(select(Respuesta.id).where(Respuesta.id_informe_sintetico_carrera == informe_id))
+
+
 
 def crear_respuesta(db: Session, respuesta: schemas.RespuestaCreate) -> Respuesta:
-    # ¿Esta respuesta es sobre un informe_asignatura (informe curricular) o sobre una encuesta?
-    es_informe = respuesta.id_informe_asignatura is not None
+    # ¿Esta respuesta es sobre una encuesta  sobre un informe curricular (informe_asignatura) ? o informe Sintetico (informe_carrera)?
+    es_informe_asignatura = respuesta.id_informe_asignatura is not None
+    es_informe_carrera = respuesta.id_informe_sintetico_carrera is not None
+    es_encuesta = respuesta.id_encuesta_asignatura is not None
     
-    if es_informe:
-        # 1) ¿existe ya una respuesta para este informe? ya_existe=true
+     # --- LÓGICA PARA INFORME ASIGNATURA ---
+    if es_informe_asignatura:
         ya_existe = db.scalar(
-            select(sa_exists().where(Respuesta.id_informe_asignatura == respuesta.id_informe_asignatura))
+            select(sa_exists().where(
+                Respuesta.id_informe_asignatura == respuesta.id_informe_asignatura
+            ))
         )
         if ya_existe:
             raise HTTPException(
@@ -33,31 +42,39 @@ def crear_respuesta(db: Session, respuesta: schemas.RespuestaCreate) -> Respuest
                 detail="Este informe curricular ya tiene una respuesta registrada.",
             )
 
-        # 2) ¿el informe ya está cerrado?
         informe = db.get(InformeAsignatura, respuesta.id_informe_asignatura)
         if informe is None:
-            raise HTTPException(status_code=404, detail="Informe curricular no encontrado para responder")
+            raise HTTPException(404, "Informe curricular no encontrado para responder")
 
         if informe.estado == EstadoInforme.cerrado:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="El informe curricular ya fue cerrado; no se admiten nuevas respuestas.",
-            )
-
-    # ⚠️ Si es informe, validamos existencia y estado antes de crear nada
-    if es_informe:
-        informe = db.get(InformeAsignatura, respuesta.id_informe_asignatura)
-        if informe is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Informe curricular no encontrado",
-            )
-        # Si ya está cerrado, devolvemos 409 y, si existe, el id de la respuesta asociada
-        if informe.estado == EstadoInforme.cerrado:
-            rid = _respuesta_existente_id(db, respuesta.id_informe_asignatura)
+            rid = _respuesta_existente_id_asignatura(db, respuesta.id_informe_asignatura)
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail={"message": "El informe ya fue respondido", "respuestaId": rid},
+            )
+
+    # --- LÓGICA PARA INFORME SINTÉTICO DE CARRERA ---
+    if es_informe_carrera:
+        ya_existe = db.scalar(
+            select(sa_exists().where(
+                Respuesta.id_informe_sintetico_carrera == respuesta.id_informe_sintetico_carrera
+            ))
+        )
+        if ya_existe:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Este informe sintético ya tiene una respuesta registrada.",
+            )
+
+        informe_sc = db.get(InformeSinteticoCarrera, respuesta.id_informe_sintetico_carrera)
+        if informe_sc is None:
+            raise HTTPException(404, "Informe sintético de carrera no encontrado para responder")
+
+        if informe_sc.estado == EstadoInforme.cerrado:
+            rid = _respuesta_existente_id_carrera(db, respuesta.id_informe_sintetico_carrera)
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={"message": "El informe sintético ya fue respondido", "respuestaId": rid},
             )
 
     # recolecto todos los id_pregunta_opcion que vienen en los detalles
@@ -85,13 +102,15 @@ def crear_respuesta(db: Session, respuesta: schemas.RespuestaCreate) -> Respuest
     }
 
     # 1. Creo la respuesta "cabecera" (aún sin commit)
+    # --- CREATE RESPUESTA ---
     db_respuesta = Respuesta(
         id_persona=respuesta.id_persona,
         id_encuesta_asignatura=respuesta.id_encuesta_asignatura,
         id_informe_asignatura=respuesta.id_informe_asignatura,
+        id_informe_sintetico_carrera=respuesta.id_informe_sintetico_carrera
     )
     db.add(db_respuesta)
-    db.flush()  # tenemos db_respuesta.id
+    db.flush()
 
     lista_detalles = []
 
@@ -141,11 +160,10 @@ def crear_respuesta(db: Session, respuesta: schemas.RespuestaCreate) -> Respuest
     # 3. Inserto todos los detalles en bloque
     db.add_all(lista_detalles)
 
-    # 4. Si esta respuesta corresponde a un informe_asignatura,
+        # 4. Si esta respuesta corresponde a un informe (asignatura o carrera),
     #    intentamos cerrarlo. (La unicidad la garantiza el índice único)
-    if es_informe:
+    if es_informe_asignatura:
         informe = db.get(InformeAsignatura, respuesta.id_informe_asignatura)
-        # si alguien lo cerró entre el pre-check y ahora, no pasa nada: el commit lo validará igual
         if informe is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -154,18 +172,37 @@ def crear_respuesta(db: Session, respuesta: schemas.RespuestaCreate) -> Respuest
         if informe.estado != EstadoInforme.cerrado:
             informe.estado = EstadoInforme.cerrado
 
-    # 5. Confirmo todo, manejando carrera por índice único (solo aplica a informes)
+    if es_informe_carrera:
+        informe_sc = db.get(InformeSinteticoCarrera, respuesta.id_informe_sintetico_carrera)
+        if informe_sc is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Informe sintético de carrera no encontrado para cerrar",
+            )
+        if informe_sc.estado != EstadoInforme.cerrado:
+            informe_sc.estado = EstadoInforme.cerrado
+
+    # 5. Confirmo todo, manejando unicidad (solo aplica a informes)
     try:
         db.commit()
     except IntegrityError:
         db.rollback()
-        if es_informe:
-            rid = _respuesta_existente_id(db, respuesta.id_informe_asignatura)
-            # Ya existe una respuesta para este informe → 409 + respuestaId
+        # caso: informe_asignatura duplicado
+        if es_informe_asignatura:
+            rid = _respuesta_existente_id_asignatura(db, respuesta.id_informe_asignatura)
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail={"message": "El informe ya fue respondido", "respuestaId": rid},
             )
+
+        # caso: informe_sintetico_carrera duplicado
+        if es_informe_carrera:
+            rid = _respuesta_existente_id_carrera(db, respuesta.id_informe_sintetico_carrera)
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={"message": "El informe sintético ya fue respondido", "respuestaId": rid},
+            )
+
         # Si fuera encuesta (no debería pegar en el índice), relanzamos
         raise
 
@@ -176,10 +213,12 @@ def crear_respuesta(db: Session, respuesta: schemas.RespuestaCreate) -> Respuest
 
 
 
+
 def listar_respuestas(db: Session,
     persona_id: Optional[int] = None,
     encuesta_asignatura_id: Optional[int] = None,
-    informe_asignatura_id: Optional[int] = None
+    informe_asignatura_id: Optional[int] = None,
+    informe_sintetico_carerra_id: Optional[int] = None
 ) -> List[Respuesta]:
     query = (
         select(Respuesta)
@@ -194,6 +233,9 @@ def listar_respuestas(db: Session,
     
     if informe_asignatura_id is not None:
         query = query.where(Respuesta.id_informe_asignatura == informe_asignatura_id)
+        
+    if informe_sintetico_carerra_id is not None:
+        query = query.where(Respuesta.id_informe_sintetico_carrera == informe_sintetico_carerra_id)    
         
     return db.scalars(query).unique().all()
 

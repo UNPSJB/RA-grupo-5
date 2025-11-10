@@ -7,12 +7,13 @@ import {
   ProgressBar,
   Tabs,
   Tab,
-} from "react-bootstrap"; // <-- CAMBIO 1
+} from "react-bootstrap";
 import { useReportes } from "../hook/useReportes";
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import LayoutReporte from "../componentes/LayoutReporte.tsx";
 import ResumenVariable from "../componentes/ResumenVariable";
+import "../styles/Resumen-reporte.css";
 
 export default function ResumenReporte() {
   const { id } = useParams();
@@ -118,99 +119,98 @@ export default function ResumenReporte() {
       docente={Datosasignatura.nombre_docente}
       carrera={Datosasignatura.carrera}
     >
-      <Container className="mt-5">
-        <Row>
-          {/* Columna izquierda: Card lateral */}
-          <Col md={3}>
-            <Card className="shadow-sm mb-4" style={{ fontSize: "0.9rem" }}>
-              <Card.Body className="p-2">
-                <div className="d-flex justify-content-between align-items-center mb-2">
-                  <span
-                    className="text-muted fw-semibold"
-                    style={{ fontSize: "0.8rem" }}
-                  >
-                    Total inscriptos
-                  </span>
-                  <span
-                    className="text-dark fw-bold"
-                    style={{ fontSize: "0.9rem" }}
-                  >
-                    25
-                  </span>
-                </div>
+      <Container className="my-4">
+        <Row className="g-4">
+          {/* IZQUIERDA: TABS / CONTENIDO */}
+          <Col xs={12} md={8} lg={8}>
+            <Card className="flat-card">
+              <Card.Body className="p-3 p-lg-4">
+                <Tabs
+                  id="variable-tabs"
+                  activeKey={activeVariableKey}
+                  onSelect={(k) => setActiveVariableKey(k || null)}
+                  className="mb-3"
+                  mountOnEnter
+                  unmountOnExit
+                >
+                  {tabsData.map((tab) => (
+                    <Tab key={tab.key} eventKey={tab.key} title={tab.cod}>
+                      <div className="mb-3 text-center">
+                        <h5 className="mb-0">
+                          {tab.cod}: {tab.title}
+                        </h5>
+                      </div>
 
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <span
-                    className="text-muted fw-semibold"
-                    style={{ fontSize: "0.8rem" }}
-                  >
-                    Encuestas procesadas
-                  </span>
-                  <span
-                    className="text-primary fw-bold"
-                    style={{ fontSize: "0.9rem" }}
-                  >
-                    {reporteCompleto.encuesta_asignatura.respuestas.length}
-                  </span>
-                </div>
-
-                <div className="d-grid">
-                  {/* --- LÓGICA CONDICIONAL APLICADA --- */}
-                  {reporteCompleto.has_respuesta ? (
-                    // Opción A: Si YA tiene respuesta
-                    <Link
-                      to={
-                        reporteCompleto.informe_id
-                          ? `/docente/informes/${reporteCompleto.informe_id}`
-                          : `/docente/informes/por-reporte/${reporteCompleto.id}`
-                      }
-                      className="btn btn-outline-primary m-2"
-                    >
-                      Ver Informe Creado
-                    </Link>
-                  ) : (
-                    // Opción B: Si AÚN NO tiene respuesta (tu botón original)
-                    <Link
-                      to={`/docente/nuevo-informe/${reporteCompleto.id}`}
-                      className="btn btn-primary m-2"
-                    >
-                      Crear informe curricular
-                    </Link>
-                  )}
-                  {/* --- FIN DE LA LÓGICA --- */}
-                </div>
+                      {/* contenido de cada variable */}
+                      {tab.content}
+                    </Tab>
+                  ))}
+                </Tabs>
               </Card.Body>
             </Card>
           </Col>
 
-          {/* Columna derecha*/}
-          <Col md={9}>
-            <Row>
-              {/* Columna A: Resultados por Pregunta (Tabs) */}
-              <Col md={7}>
-                <Card className="shadow-lg border-0 mb-4">
-                  <Card.Body>
-                    <Tabs
-                      id="variable-tabs"
-                      activeKey={activeVariableKey}
-                      onSelect={(k) => setActiveVariableKey(k || null)}
-                      className="mb-4"
-                    >
-                      {tabsData.map((tab) => (
-                        <Tab key={tab.key} eventKey={tab.key} title={tab.cod}>
-                          {tab.content}
-                        </Tab>
-                      ))}
-                    </Tabs>
-                  </Card.Body>
-                </Card>
-              </Col>
-
-              {/* Columna B: Resumen General (Filtrado) */}
-              <Col md={5}>
+          {/* DERECHA: RESUMEN + BOTÓN */}
+          <Col xs={12} md={4} lg={4}>
+            <aside className="right-rail">
+              {/* Resumen arriba (plano, sin sombra) */}
+              <div className="flat-card p-0 mb-3">
                 <ResumenVariable resumen={activeVariableSummary} />
-              </Col>
-            </Row>
+              </div>
+
+              {/* Botón en el borde derecho (sticky en desktop, abajo en mobile) */}
+              <div className="right-cta">
+                {reporteCompleto?.has_respuesta ? (
+                  <Link
+                    to={`/docente/informes/${reporteCompleto.informe_id}`}
+                    className="btn btn-outline-primary btn-lg w-100"
+                  >
+                    Ver Informe
+                  </Link>
+                ) : (
+                  <Link
+                    to={`/docente/nuevo-informe/${reporteCompleto.id}`}
+                    className="btn btn-primary btn-lg w-100"
+                  >
+                    Nuevo Informe de Act.Curricular
+                  </Link>
+                )}
+              </div>
+              {/* Métricas secundarias (opcional) */}
+              <Card className="lite-card mt-3" style={{ fontSize: "0.9rem" }}>
+                <Card.Body className="p-3">
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <span
+                      className="text-muted fw-semibold"
+                      style={{ fontSize: "0.8rem" }}
+                    >
+                      Total inscriptos
+                    </span>
+                    <span
+                      className="text-dark fw-bold"
+                      style={{ fontSize: "0.9rem" }}
+                    >
+                      25
+                    </span>
+                  </div>
+
+                  <div className="d-flex justify-content-between align-items-center">
+                    <span
+                      className="text-muted fw-semibold"
+                      style={{ fontSize: "0.8rem" }}
+                    >
+                      Encuestas procesadas
+                    </span>
+                    <span
+                      className="text-primary fw-bold"
+                      style={{ fontSize: "0.9rem" }}
+                    >
+                      {reporteCompleto.encuesta_asignatura.respuestas.length}
+                    </span>
+                  </div>
+                </Card.Body>
+              </Card>
+            </aside>
           </Col>
         </Row>
       </Container>

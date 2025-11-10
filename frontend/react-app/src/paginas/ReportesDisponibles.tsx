@@ -50,22 +50,17 @@ export default function ReportesDisponibles() {
                     {reporte.has_respuesta ? (
                       // Si ya fue respondido -> ver informe (necesita informe_id)
                       <Link
-                        to={
-                          reporte.informe_id
-                            ? `/docente/informes/${reporte.informe_id}`
-                            : `/docente/informes/por-reporte/${reporte.id}` // fallback si implementaste esa ruta
-                        }
+                        to={`/docente/informes/${reporte.informe_id}`}
                         className="btn btn-outline-primary m-2"
                       >
                         Ver Informe
                       </Link>
                     ) : (
-                      // Si no fue respondido -> responder informe (tu ruta actual)
                       <Link
                         to={`/docente/nuevo-informe/${reporte.id}`}
                         className="btn btn-primary m-2"
                       >
-                        Responder Informe
+                        Nuevo Informe de Act.Curricular
                       </Link>
                     )}
                   </td>

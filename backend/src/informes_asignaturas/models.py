@@ -30,12 +30,19 @@ class InformeAsignatura(ModeloBase):
 
     id_informe_curricular_base: Mapped[int] = mapped_column(ForeignKey("informes_curriculares_base.id"), nullable=False)
     id_asignatura: Mapped[int] = mapped_column(ForeignKey("asignaturas.id"), nullable=False)
+    id_respuesta: Mapped[int] = mapped_column(ForeignKey("respuestas.id"), nullable=True)
     id_reporte: Mapped[int] =  mapped_column(ForeignKey("reportes.id"), nullable=False)
     id_informe_sintetico_carrera: Mapped[Optional[int]] = mapped_column(ForeignKey("informes_sinteticos_carreras.id"), nullable=True)
     
     
     informe_curricular_base = relationship("InformeCurricularBase", back_populates="informes_asignaturas")
     asignatura = relationship("Asignatura", back_populates="informes_asignaturas")
-    respuestas = relationship("Respuesta", back_populates="informe_asignatura")
     reporte = relationship("Reporte", back_populates="informes_asignaturas")
     informe_sintetico_carrera = relationship("InformeSinteticoCarrera", back_populates="informes_asignaturas")
+    
+    respuesta = relationship(
+        "Respuesta",
+        back_populates="informe_asignatura",
+        foreign_keys="Respuesta.id_informe_asignatura",
+        uselist=False,   # 👈 porque solo puede haber UNA respuesta
+    )

@@ -9,7 +9,7 @@ def listar_informes_asignaturas(db:Session):
         .options(
             joinedload(InformeAsignatura.asignatura),
             joinedload(InformeAsignatura.informe_curricular_base),
-            joinedload(InformeAsignatura.respuestas)
+            joinedload(InformeAsignatura.respuesta)
         )
         .all()
     )
