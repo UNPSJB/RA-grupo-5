@@ -38,9 +38,11 @@ export function useInformesSinteticos(cicloLectivo: number) {
 
           const sintetico = sinteticos.find(
             (s: any) =>
-              Number(s.carrera?.id) === Number(carrera.id) &&
-              Number(s.ciclo_lectivo) === Number(cicloLectivo)
-          );
+            Number(s.carrera?.id) === Number(carrera.id) &&
+           Number(s.ciclo_lectivo) === Number(cicloLectivo) &&
+           s.respuesta !== null // solo si tiene respuesta asociada
+        );
+
 
           return {
             carrera,

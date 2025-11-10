@@ -53,7 +53,12 @@ export default function TablaInformeSintetico() {
                 <td>{r.totalInformes}</td>
                 <td>{r.publicados}</td>
                 <td>
-                  {r.sinteticoId ? (
+                  {r.totalInformes === 0 ? (
+                    <span className="text-muted fst-italc" >
+                      No hay informes disponibles
+                    </span>
+                  ) :
+                  r.sinteticoId ? (
                     <Link
                       to={`/departamento/informe-sintetico/${r.sinteticoId}`}
                       className="btn btn-outline-primary"
