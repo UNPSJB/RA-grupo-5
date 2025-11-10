@@ -2,8 +2,8 @@ from typing import Optional, List
 from pydantic import BaseModel, ConfigDict
 from src.opciones_respuesta.schemas import OpcionRespuestaRead
 
-# --- 1. Importación NORMAL (ya no es circular) ---
-from src.preguntas.schemas import PreguntaRead
+# --- 1. ELIMINAMOS LA IMPORTACIÓN CIRCULAR ---
+# (Ya no importamos 'src.preguntas.schemas')
 
 class PreguntaOpcionBase(BaseModel):
     id_pregunta: int
@@ -19,8 +19,8 @@ class PreguntaOpcionRead(PreguntaOpcionBase):
     id: int
     opcion_respuesta: Optional[OpcionRespuestaRead] = None
     
-    # --- 2. Campo Anidado (Necesario para el frontend) ---
-    pregunta: PreguntaRead 
+    # --- 2. ELIMINAMOS EL CAMPO REDUNDANTE ---
+    # (Ya no necesitamos el campo 'pregunta: PreguntaRead')
     
     model_config = ConfigDict(from_attributes=True)
 
