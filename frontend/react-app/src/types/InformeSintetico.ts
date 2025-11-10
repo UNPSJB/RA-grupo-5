@@ -4,7 +4,6 @@ export interface Carrera {
   sede: string;
 }
 
-// CORREGIDA: Molde del informe sintético (solo id y titulo)
 export interface InformeSinteticoBase {
   id: number;
   titulo: string;
@@ -24,7 +23,6 @@ export interface Pregunta {
   codigo: string | null; 
 }
 
-// Base del informe curricular (Anexo I)
 export interface InformeBase {
   id: number;
   titulo: string;
@@ -33,13 +31,14 @@ export interface InformeBase {
 
 export interface PreguntaOpcion {
   id: number;
-  pregunta: Pregunta;
+  id_pregunta: number; 
+  id_opcion_respuesta: number | null;
 }
 
 export interface DetalleRespuesta {
   id: number;
   texto_respuesta_abierta: string | null;
-  pregunta_opcion: PreguntaOpcion;
+  pregunta_opcion: PreguntaOpcion; 
 }
 
 export interface Respuesta {
@@ -48,8 +47,6 @@ export interface Respuesta {
   detalles: DetalleRespuesta[];
 }
 
-// --- CORREGIDA ---
-// Instancia del informe de asignatura (Anexo I)
 export interface InformeAsignatura {
   id: number;
   sede: string; 
@@ -57,16 +54,10 @@ export interface InformeAsignatura {
   docente: string;
   cant_alumnos_insc: number;
   asignatura: Asignatura;
-
-  // 1. Corregido: 'respuesta' (singular y opcional)
   respuesta: Respuesta | null;
-
-  // 2. Corregido: 'informe_curricular_base'
   informe_curricular_base: InformeBase;
 }
 
-// --- CORREGIDA ---
-// Instancia del informe sintético (Anexo II)
 export interface InformeSinteticoCarrera {
   id: number;
   ciclo_lectivo: string;
@@ -75,13 +66,8 @@ export interface InformeSinteticoCarrera {
   integrantes: string;
   id_carrera: number;
 
-  // 3. Corregido: 'id_informe_sintetico_base'
   id_informe_sintetico_base: number;
   carrera: Carrera;
-
-  // 4. Corregido: 'informe_sintetico_base'
   informe_sintetico_base: InformeSinteticoBase;
-  
-  // Usará la interfaz 'InformeAsignatura' corregida de arriba
   informes_asignaturas: InformeAsignatura[];
 }
