@@ -1,8 +1,9 @@
-import OpcionRespuesta from "./OpcionRespuesta";
 import type { Pregunta as ApiPregunta } from "../types/Encuesta";
 import type { Control, FieldErrors } from 'react-hook-form';
 import { Controller } from 'react-hook-form'; 
 import { obtenerNombreCampo } from '../validaciones/Encuesta';
+
+import { Card, Row, Col, Form } from 'react-bootstrap';
 
 interface Props {
   pregunta: ApiPregunta;
@@ -16,7 +17,6 @@ export default function Pregunta({
   errors,
 }: Props) { 
 
-
   if (!pregunta || !pregunta.id) {
     console.error(
       "ERROR: El componente <Pregunta> recibió un prop 'pregunta' inválido.", 
@@ -24,8 +24,6 @@ export default function Pregunta({
     );
     return null; 
   }
-
-  
 
   const fieldName = obtenerNombreCampo(pregunta.id); 
   const error = errors[fieldName];
@@ -35,75 +33,98 @@ export default function Pregunta({
   );
 
   return (
-    <tr>
-      <td style={{ width: "40%", fontWeight: "bold" }}>
-        {pregunta.texto_pregunta}
-        {pregunta.obligatoria && <span className="text-danger ms-1">*</span>}
-        {error && (
-          <div className="d-block mt-2 text-danger" style={{fontSize: '0.85rem'}}>
-            {error.message as string}
-          </div>
-        )}
-      </td>
-      
-      
-      {pregunta.tipo === "open" ? (
-        <td style={{ textAlign: "center", minWidth: 400 }} colSpan={3}>
-          <Controller
-            name={fieldName}
-            control={control}
-            render={({ field }) => ( 
-              <textarea
-                {...field} 
-                placeholder="Escriba su respuesta aquí"
-                rows={3}
-                className={`form-control ${error ? 'is-invalid' : ''}`}
-                style={{ width: "100%", resize: "vertical", padding: "6px", fontSize: "0.95rem" }}
-              />
+    <Card className="m-1">
+      <Card.Body className="" style={{ backgroundColor: '#D5E1F7'}}>
+        <Row className="">
+          <Col xs={12} className="text-start">
+            <Form.Label as="div" className="mb-0" style={{ fontWeight: 'bold' }}>
+              {pregunta.texto_pregunta}
+              {pregunta.obligatoria && <span className="text-danger ms-1">*</span>}
+            </Form.Label>
+            {error && (
+              <Form.Text className="text-danger d-block mt-1">
+                {error.message as string}
+              </Form.Text>
             )}
-          />
-        </td>
-      ) : (
-        opcionesDeChoice.map((opcion) => {
-          const idOpcionAGuardar = opcion.id_opcion_respuesta!;
-          const opcionData = opcion.opcion_respuesta!;
+          </Col>
 
-          return (
-            <td key={opcion.id} style={{ textAlign: "center", minWidth: 90 }}>
-              <Controller
-                name={fieldName}
-                control={control}
-                render={({ field }) => { 
-                  const handleSelect = (idDelBoton: number) => {
-                    if (pregunta.tipo === 'single_choice') {
-                      field.onChange(idDelBoton); 
-                    } 
-                    else if (pregunta.tipo === 'multiple_choice') {
-                      const currentValues = (field.value as number[]) || [];
-                      const newValues = currentValues.includes(idDelBoton)
-                        ? currentValues.filter(v => v !== idDelBoton)
-                        : [...currentValues, idDelBoton];
-                      field.onChange(newValues); 
-                    }
-                  };
-                  const seleccionada = 
-                    pregunta.tipo === 'single_choice'
-                      ? field.value === idOpcionAGuardar
-                      : (field.value as number[])?.includes(idOpcionAGuardar);
+          <Col xs={12} className="text-start m-4">
+            <Controller
+              name={fieldName}
+              control={control}
+              render={({ field }) => {
+                
+                switch (pregunta.tipo) {
 
-                  return (
-                    <OpcionRespuesta
-                      opcionRespuesta={opcionData}
-                      seleccionada={seleccionada}
-                      onSeleccionar={handleSelect} 
-                    />
-                  );
-                }}
-              />
-            </td>
-          );
-        })
-      )}
-    </tr>
+                  case 'open':
+                    return (
+                      <Form.Control
+                        {...field}
+                        as="textarea"
+                        rows={3}
+                        placeholder="Escriba su respuesta aquí"
+                        isInvalid={!!error}
+                      />
+                    );
+
+                  case 'single_choice':
+                    return (
+                      <div className="d-flex flex-wrap gap-4 justify-content-center">
+                        {opcionesDeChoice.map((opcion) => (
+                          <Form.Check
+                            {...field}
+                            key={opcion.id}
+                            type="radio"
+                            id={`opcion-${opcion.id}`}
+                            label={opcion.opcion_respuesta!.texto_opcion}
+                            value={opcion.id_opcion_respuesta!}
+                            checked={field.value == opcion.id_opcion_respuesta!}
+                            onChange={() => field.onChange(opcion.id_opcion_respuesta!)}
+                            isInvalid={!!error}
+                          />
+                        ))}
+                      </div>
+                    );
+
+                  case 'multiple_choice':
+                    return (
+                      <div className="d-flex flex-wrap gap-4 justify-content-center">
+                        {opcionesDeChoice.map((opcion) => {
+                          const idOpcion = opcion.id_opcion_respuesta!;
+                          const currentValues = (field.value as number[]) || [];
+                          const isChecked = currentValues.includes(idOpcion);
+
+                          return (
+                            <Form.Check
+                              {...field}
+                              key={opcion.id}
+                              type="checkbox"
+                              id={`opcion-${opcion.id}`}
+                              label={opcion.opcion_respuesta!.texto_opcion}
+                              value={idOpcion}
+                              checked={isChecked}
+                              isInvalid={!!error}
+                              onChange={() => {
+                                const newValues = isChecked
+                                  ? currentValues.filter(v => v !== idOpcion)
+                                  : [...currentValues, idOpcion];
+                                field.onChange(newValues);
+                              }}
+                            />
+                          );
+                        })}
+                      </div>
+                    );
+
+                  default:
+                    console.warn(`Tipo de pregunta no reconocido: ${pregunta.tipo}`);
+                    return <></>; 
+                }
+              }}
+            />
+          </Col>
+        </Row>
+      </Card.Body>
+    </Card>
   );
 }
