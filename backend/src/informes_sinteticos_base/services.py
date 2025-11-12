@@ -6,6 +6,7 @@ from src.informes_sinteticos_base import schemas
 from src.informes_sinteticos_base.models import InformeSinteticoBase
 from src.preguntas.models import Pregunta
 from src.pregunta_opcion.models import PreguntaOpcion
+from src.opciones_respuesta.models import OpcionRespuesta
 
 def crear_informe_sintetico(db: Session, informe: schemas.InformeSinteticoBaseCreate) -> InformeSinteticoBase:
     _informe = InformeSinteticoBase(**informe.model_dump())

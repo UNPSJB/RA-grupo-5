@@ -29,6 +29,6 @@ def read_informe_base_actual(db: Session = Depends(get_db)):
     if informe_base is None:
         raise HTTPException(
             status_code=404,
-            detail="No hay informe base disponible"
+            detail="No hay informe sintetico base disponible"
         )
     return informe_base

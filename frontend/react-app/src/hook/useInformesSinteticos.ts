@@ -1,6 +1,17 @@
-
 import { useState, useCallback, useEffect } from "react";
 const API_URL = "http://localhost:8000";
+
+// Definimos el tipo para el payload de creación
+export interface InformeSinteticoCarreraPayload {
+  ciclo_lectivo: string;
+  comision_asesora: string;
+  sede: string;
+  integrantes: string;
+  id_carrera: number;
+  id_informe_sintetico_base: number;
+  estado: "abierto" | "cerrado";
+  informes_asignaturas: number[]; // IDs de informes curriculares
+}
 
 export function useInformesSinteticos(cicloLectivo: number) {
   const [resumenes, setResumenes] = useState<any[]>([]);
@@ -63,5 +74,31 @@ export function useInformesSinteticos(cicloLectivo: number) {
     fetchData();
   }, [cicloLectivo]);
 
-  return { resumenes, loading, error };
+  // --- NUEVA FUNCIÓN AÑADIDA ---
+  const crearInformeSinteticoCarrera = useCallback(
+    async (payload: InformeSinteticoCarreraPayload) => {
+      const res = await fetch(`${API_URL}/informe-sintetico-carrera/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        console.error("Error al crear el informe sintético:", errData);
+        throw new Error(errData.detail || "Error al crear la cabecera del informe sintético");
+      }
+      
+      return await res.json();
+    },
+    []
+  );
+  // --- FIN DE LA NUEVA FUNCIÓN ---
+
+  return { 
+    resumenes, 
+    loading, 
+    error,
+    crearInformeSinteticoCarrera // <-- La exportamos
+  };
 }

@@ -1,14 +1,17 @@
 import type { Asignatura } from "./Asignatura";
 import type { Reporte } from "./Reporte";
+// --- IMPORTS AÑADIDOS ---
+import type { Respuesta } from "./Respuesta";
+import type { InformeBase } from "./InformeBase";
 
 enum EstadoInformeCurricular {
-  abierto = "abierto",
+  abierto = "abierta",
   cerrado = "cerrado",
 }
 
 // Modelo de Informe Curricular para leer o listar un informe curricular
 export interface InformeCurricular {
-  id: number; //
+  id: number; 
   sede: string;
   ciclo_lectivo: number;
   docente: string;
@@ -18,12 +21,15 @@ export interface InformeCurricular {
   fecha_inicio: string;
   fecha_fin: string;
   estado: EstadoInformeCurricular;
-  id_informe_base: number;
+  informe_curricular_base: InformeBase; 
+  respuesta: Respuesta | null; 
   asignatura: Asignatura;
   reporte: Reporte;
+
 }
 
 // Payload para crear o actualizar un Informe Curricular
+// (Esta interfaz no cambia, se usa solo para enviar datos, no para recibirlos)
 export interface InformeCurricularPayload {
   fecha_inicio: string;
   fecha_fin: string;
