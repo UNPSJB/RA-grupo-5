@@ -1,24 +1,43 @@
-from sqlalchemy.orm import Session
-from sqlalchemy import select
+from sqlalchemy.orm import Session, selectinload
+from sqlalchemy import select, desc
 from typing import List
 from fastapi import HTTPException
+from src.informes_sinteticos_base import schemas
+from src.informes_sinteticos_base.models import InformeSinteticoBase
+from src.preguntas.models import Pregunta
+from src.pregunta_opcion.models import PreguntaOpcion
 
-from src.informes_sinteticos_base import models, schemas 
-
-def crear_informe_sintetico(db: Session, informe: schemas.InformeSinteticoBaseCreate) -> models.InformeSinteticoBase:
-    _informe = models.InformeSinteticoBase(**informe.model_dump())
+def crear_informe_sintetico(db: Session, informe: schemas.InformeSinteticoBaseCreate) -> InformeSinteticoBase:
+    _informe = InformeSinteticoBase(**informe.model_dump())
     db.add(_informe)
     db.commit()
     db.refresh(_informe)
     return _informe
 
-def listar_informes_sinteticos(db: Session) -> List[models.InformeSinteticoBase]:
-    return db.scalars(select(models.InformeSinteticoBase)).all()
+def listar_informes_sinteticos(db: Session) -> List[InformeSinteticoBase]:
+    return db.scalars(select(InformeSinteticoBase)).all()
 
-def leer_informe_sintetico(db: Session, informe_id: int) -> models.InformeSinteticoBase:
+def leer_informe_sintetico(db: Session, informe_id: int) -> InformeSinteticoBase:
     db_informe = db.scalar(
-        select(models.InformeSinteticoBase).where(models.InformeSinteticoBase.id == informe_id)
+        select(InformeSinteticoBase).where(InformeSinteticoBase.id == informe_id)
     )
     if db_informe is None:
         raise HTTPException(status_code=404, detail="Informe sintético no encontrado")
     return db_informe
+
+def leer_informe_base_actual(db: Session):
+    query = (
+        select(InformeSinteticoBase)
+        .options(
+            selectinload(InformeSinteticoBase.preguntas)
+            .selectinload(Pregunta.pregunta_opcion)
+            .selectinload(PreguntaOpcion.opcion_respuesta)
+        )
+        .order_by(desc(InformeSinteticoBase.id))
+        .limit(1)
+    )
+
+    result = db.execute(query)
+
+    informe_base = result.unique().scalars().first()
+    return informe_base

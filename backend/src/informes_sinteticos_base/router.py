@@ -1,8 +1,7 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from src.database import get_db 
-
 from src.informes_sinteticos_base import schemas, services
 
 
@@ -22,3 +21,14 @@ def create_informe_sintetico(
     informe: schemas.InformeSinteticoBaseCreate, db: Session = Depends(get_db)
 ):
     return services.crear_informe_sintetico(db, informe)
+
+# OBTENER EL "ACTUAL"
+@router.get("/actual", response_model=schemas.InformeSinteticoBaseRead)
+def read_informe_base_actual(db: Session = Depends(get_db)):
+    informe_base = services.leer_informe_base_actual(db)
+    if informe_base is None:
+        raise HTTPException(
+            status_code=404,
+            detail="No hay informe base disponible"
+        )
+    return informe_base
