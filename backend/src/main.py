@@ -28,30 +28,45 @@ from src.seguridad.services import SeguridadService
 
 from fastapi.middleware.cors import CORSMiddleware
 
-
 load_dotenv()
 
 ENV = os.getenv("ENV")
 ROOT_PATH = os.getenv(f"ROOT_PATH_{ENV.upper()}")
 
-# seed de roles y permisos automático al iniciar (idempotente)
+# ---------- SEED DE ROLES/PERMISOS (idempotente) ----------
+
 SessionForSeed = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-def run_seed_once():
+
+def run_seed_once() -> None:
+    """Crea roles, permisos y vínculos si no existen.
+    Es idempotente, se puede llamar en cada arranque sin problemas.
+    """
     with SessionForSeed() as db:
         SeguridadService(db).seed()
 
+# ---------- LIFESPAN: crea tablas y luego hace seed ----------
+
 @asynccontextmanager
 async def db_creation_lifespan(app: FastAPI):
+    # 1) Crear todas las tablas según tus modelos
     models.ModeloBase.metadata.create_all(bind=engine)
+
+    # 2) Sembrar roles/permisos (usa las tablas recién creadas)
+    run_seed_once()
+
+    # 3) Devolver el control a la app (startup completo)
     yield
+    # si tuvieras lógica de shutdown, iría después del yield
+
+# ---------- APP FASTAPI ----------
 
 app = FastAPI(root_path=ROOT_PATH, lifespan=db_creation_lifespan)
 
 origins = [
-    "http://localhost:5173", # para recibir requests desde app React (puerto: 5173)
+    "http://localhost:5173",  # para recibir requests desde app React (puerto: 5173)
 ]
 
-app.add_middleware( #analiza la Request, se define una estructura para la Request
+app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
@@ -59,8 +74,8 @@ app.add_middleware( #analiza la Request, se define una estructura para la Reques
     allow_headers=["*"],
 )
 
+# ---------- ROUTERS ----------
 
-# asociamos los routers a nuestra app
 app.include_router(personas_router)
 app.include_router(encuestas_base_router)
 app.include_router(variables_router)
