@@ -26,6 +26,7 @@ class InformeSinteticoCarreraBase(BaseModel):
 class InformeSinteticoCarreraCreate(InformeSinteticoCarreraBase):
     id_carrera: int
     id_informe_sintetico_base: int
+    informes_asignaturas: List[int] = []
 
 class InformeSinteticoCarreraRead(InformeSinteticoCarreraBase):
     id: int

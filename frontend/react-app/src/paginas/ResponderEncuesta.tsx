@@ -10,7 +10,7 @@ import {
 
 import { useState, useEffect } from "react";
 import Alert from "react-bootstrap/Alert";
-import "../styles/Encuesta.css";
+import "../styles/encuesta.css";
 
 type SurveyFormData = Record<string, any>;
 
