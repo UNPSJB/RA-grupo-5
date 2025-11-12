@@ -1,8 +1,7 @@
-import Card from "react-bootstrap/Table";
+import Form from "react-bootstrap/Form";
 import Pregunta from "./Pregunta";
 import type { Variable as ApiVariable } from "../types/Encuesta";
 import type { Control, FieldErrors } from 'react-hook-form';
-import { Container } from "react-bootstrap";
 
 interface Props {
   variable: ApiVariable;
@@ -30,23 +29,19 @@ export default function Variable({
   }
 
   return (
-    <Container className="px-4">
-      <Card className="">
-        <h4 className="mb-3">
-          {variable.codigo}: {variable.nombre}
-        </h4>
-      
-        <tbody>
-          {preguntasLimpias.map((pregunta) => (
-            <Pregunta
-              key={pregunta.id}
-              pregunta={pregunta}
-              control={control}
-              errors={errors}
-            />
-          ))}
-        </tbody>
-      </Card>
-    </Container>
+    <Form.Group as="fieldset" className="border p-3 mt-4 rounded">
+      <legend className="h5 w-auto px-2">
+        {variable.nombre}
+      </legend>
+
+      {preguntasLimpias.map((pregunta) => (
+        <Pregunta
+          key={pregunta.id}
+          pregunta={pregunta}
+          control={control}
+          errors={errors}
+        />
+      ))}
+    </Form.Group>
   );
 }
