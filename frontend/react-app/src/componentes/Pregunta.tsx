@@ -26,25 +26,17 @@ export default function Pregunta({
     return null; 
   }
 
-  // --- Lógica (La que ya tenías) ---
   const fieldName = obtenerNombreCampo(pregunta.id); 
   const error = errors[fieldName];
 
-  // ¡Aquí está la variable! 
   const opcionesDeChoice = (pregunta.pregunta_opcion || []).filter(
     (po) => po && po.id_opcion_respuesta != null && po.opcion_respuesta != null
   );
-  // --- Fin de la Lógica ---
-
-
-  // --- Return (Con las mejoras de estilo) ---
   return (
-    // Eliminamos <Card> y usamos un 'div' con borde y padding
     <div className="border-top py-3">
       <Row>
         <Col xs={12} className="text-start">
           
-          {/* Usamos la utilidad 'fw-bold' en lugar de style */}
           <Form.Label as="div" className="mb-0 fw-bold">
             {pregunta.texto_pregunta}
             {pregunta.obligatoria && <span className="text-danger ms-1">*</span>}
@@ -57,7 +49,6 @@ export default function Pregunta({
           )}
         </Col>
 
-        {/* Reemplazamos 'm-4' por 'mt-3' para mejor alineación */}
         <Col xs={12} className="text-start mt-3">
           <Controller
             name={fieldName}
@@ -79,7 +70,6 @@ export default function Pregunta({
 
                 case 'single_choice':
                   return (
-                    // 'opcion' se usa aquí
                     <div className="d-flex flex-wrap gap-3">
                       {opcionesDeChoice.map((opcion) => (
                         <Form.Check
@@ -100,7 +90,6 @@ export default function Pregunta({
                 case 'multiple_choice':
                   return (
                     <div className="d-flex flex-wrap gap-3">
-                      {/* 'opcion' se usa aquí */}
                       {opcionesDeChoice.map((opcion) => {
                         const idOpcion = opcion.id_opcion_respuesta!;
                         const currentValues = (field.value as number[]) || [];

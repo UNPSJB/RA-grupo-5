@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'; // <-- Importamos useMemo
+import{ useState, useEffect, useMemo } from 'react'; 
 import {
     Container,
     Form,      
@@ -117,7 +117,7 @@ function ResponderEncuesta() {
     
     if (activeTabIndex === -1) {
         setActiveTab(encuesta.variables[0].id.toString());
-        return null; // El componente se re-renderizará
+        return null;
     }
 
     const handlePrevious = () => {
@@ -130,7 +130,6 @@ function ResponderEncuesta() {
         setActiveTab(nextTabKey);
     };
 
-    // --- 8. RETURN DEL JSX ---
     return (
         <Container className="py-4">
             <Col md={8} className="border rounded mx-auto shadow p-4">
@@ -140,7 +139,7 @@ function ResponderEncuesta() {
                     <h1 className='h2 mb-4 text-center' >{asignatura?.nombre}</h1>
 
                     <Tabs
-                      activeKey={activeTab} // Controlado por nuestro estado
+                      activeKey={activeTab}
                       onSelect={(k) => setActiveTab(k!)}
                       id="variable-tabs"
                       className="mb-3"
@@ -168,7 +167,6 @@ function ResponderEncuesta() {
                         </Alert>
                     )}
 
-                    {/* Lógica de Botones de Navegación */}
                     <div className="d-flex justify-content-between mt-4">
                         <Button 
                             variant="secondary" 
