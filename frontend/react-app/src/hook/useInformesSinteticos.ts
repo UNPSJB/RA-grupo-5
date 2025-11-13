@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect } from "react";
 const API_URL = "http://localhost:8000";
 
 export function useInformesSinteticos(cicloLectivo: number) {

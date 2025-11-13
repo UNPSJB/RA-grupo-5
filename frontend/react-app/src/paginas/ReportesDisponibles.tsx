@@ -63,6 +63,13 @@ export default function ReportesDisponibles() {
                         Nuevo Informe de Act.Curricular
                       </Link>
                     )}
+                      {}
+                       <Link
+                       to={`/docente/estadisticas/${reporte.id}`}
+                        className="btn btn-success m-2"
+                      >
+                        Ver Estadísticas
+                      </Link>
                   </td>
                 </tr>
               );
