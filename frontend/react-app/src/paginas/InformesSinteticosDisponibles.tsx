@@ -7,7 +7,8 @@ export default function TablaInformeSintetico() {
   const [cicloLectivo, setCicloLectivo] = useState(2025);
   const [cuatrimestre, setCuatrimestre] = useState("1° cuatrimestre");
 
-  const { resumenes, loading, error } = useInformesSinteticos(cicloLectivo);
+const { resumenes, loading, error } = useInformesSinteticos(cicloLectivo, cuatrimestre);
+
 
   const ciclosDisponibles = [2023, 2024, 2025];
 
@@ -48,8 +49,8 @@ export default function TablaInformeSintetico() {
             value={cuatrimestre}
             onChange={(e) => setCuatrimestre(e.target.value)}
           >
-            <option value="1° cuatrimestre">1° cuatrimestre</option>
-            <option value="2° cuatrimestre">2° cuatrimestre</option>
+            <option value="1° cuatrimestre">1° </option>
+            <option value="2° cuatrimestre">2° </option>
           </select>
         </div>
 
@@ -57,7 +58,7 @@ export default function TablaInformeSintetico() {
         </div>
       </div>
 
-      {/* Tabla */}
+      {}
       {loading ? (
         <p>Cargando...</p>
       ) : error ? (
