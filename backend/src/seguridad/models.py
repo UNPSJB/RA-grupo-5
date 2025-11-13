@@ -1,9 +1,12 @@
 from __future__ import annotations
 from enum import Enum
-from typing import List
+from typing import List, TYPE_CHECKING
 from sqlalchemy import Integer, String, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.models import ModeloBase
+
+if TYPE_CHECKING:
+    from src.personas.models import Persona
 
 class RoleName(str, Enum):
     admin = "admin"

@@ -1,6 +1,6 @@
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
-from src.db import get_db
+from src.database import get_db
 from src.seguridad.services import SeguridadService
 from src.seguridad.models import RoleName, PermissionName
 from src.seguridad.deps_auth import get_current_persona
