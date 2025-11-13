@@ -52,6 +52,22 @@ export default function TablaInformeSintetico() {
                 <td>{r.carrera.nombre}</td>
                 <td>{r.totalInformes}</td>
                 <td>{r.publicados}</td>
+                <td> <Link
+                      to={`/departamento/informe-sintetico/1`}
+                      className="btn btn-outline-primary"
+                    >
+                      Ver informe sintético
+                    </Link>
+                </td>
+                <td>
+                  <Link
+                      to={`/departamento/generar-informe/${r.carrera.id}?ciclo=${cicloLectivo}`}
+                      className="btn btn-primary"
+                    >
+                      Generar informe sintético
+                    </Link>
+                </td>
+                {/* 
                 <td>
                   {r.totalInformes === 0 ? (
                     <span className="text-muted fst-italc" >
@@ -73,7 +89,7 @@ export default function TablaInformeSintetico() {
                       Generar informe sintético
                     </Link>
                   )}
-                </td>
+                </td> */}
               </tr>
             ))}
           </tbody>

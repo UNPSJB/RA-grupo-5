@@ -1,63 +1,30 @@
-export interface Carrera {
-  id: number;
-  nombre: string;
-  sede: string;
-}
+// --- IMPORTAMOS LOS MODELOS CANÓNICOS ---
+import type { Carrera } from "./models/Carrera";
+import type { Asignatura } from "./models/Asignatura";
+import type { InformeBase, Pregunta } from "./models/InformeBase";
+import type { Respuesta, DetalleRespuesta, PreguntaOpcion } from "./models/Respuesta";
+import type { InformeCurricular } from "./models/InformeCurricular";
 
+// --- RE-EXPORTAMOS LOS TIPOS (buena práctica por si otros archivos los usan) ---
+export type { 
+  Carrera, 
+  Asignatura, 
+  Pregunta, 
+  InformeBase, 
+  PreguntaOpcion, 
+  DetalleRespuesta, 
+  Respuesta 
+};
+
+// Esta definición local se mantiene
 export interface InformeSinteticoBase {
   id: number;
   titulo: string;
+  // AÑADIMOS PREGUNTAS (basado en el schema del backend)
+  preguntas: Pregunta[];
 }
 
-export interface Asignatura {
-  id: number;
-  nombre: string;
-  año: number;
-  nombre_docente: string;
-}
-
-export interface Pregunta {
-  id: number;
-  texto_pregunta: string;
-  tipo: string;
-  codigo: string | null; 
-}
-
-export interface InformeBase {
-  id: number;
-  titulo: string;
-  preguntas: Pregunta[]; 
-}
-
-export interface PreguntaOpcion {
-  id: number;
-  id_pregunta: number; 
-  id_opcion_respuesta: number | null;
-}
-
-export interface DetalleRespuesta {
-  id: number;
-  texto_respuesta_abierta: string | null;
-  pregunta_opcion: PreguntaOpcion; 
-}
-
-export interface Respuesta {
-  id: number;
-  id_persona: number;
-  detalles: DetalleRespuesta[];
-}
-
-export interface InformeAsignatura {
-  id: number;
-  sede: string; 
-  ciclo_lectivo: number;
-  docente: string;
-  cant_alumnos_insc: number;
-  asignatura: Asignatura;
-  respuesta: Respuesta | null;
-  informe_curricular_base: InformeBase;
-}
-
+// ESTA INTERFAZ ES LA QUE CAMBIA
 export interface InformeSinteticoCarrera {
   id: number;
   ciclo_lectivo: string;
@@ -69,5 +36,8 @@ export interface InformeSinteticoCarrera {
   id_informe_sintetico_base: number;
   carrera: Carrera;
   informe_sintetico_base: InformeSinteticoBase;
-  informes_asignaturas: InformeAsignatura[];
+  informes_asignaturas: InformeCurricular[]; 
+  respuesta: Respuesta | null;
 }
+
+// --- TODAS LAS DEFINICIONES DUPLICADAS (Asignatura, Pregunta, InformeBase, etc.) SE ELIMINARON ---
