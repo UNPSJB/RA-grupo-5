@@ -8,7 +8,8 @@ import {
   Tab,
 } from "react-bootstrap";
 import { useReportes } from "../hook/useReportes";
-import { useEffect, useState } from "react";
+// 1. ¡Añadimos useMemo al import!
+import { useEffect, useState, useMemo } from "react"; 
 import { useParams, Link } from "react-router-dom";
 import LayoutReporte from "../componentes/LayoutReporte.tsx";
 import ResumenVariable from "../componentes/ResumenVariable";
@@ -25,12 +26,12 @@ export default function ResumenReporte() {
     null
   );
 
+  // ... (Tus useEffects para cargar datos se mantienen igual) ...
   useEffect(() => {
     if (!isNaN(idReporte)) {
       const cargarResumen = async () => {
         const data = await fetchResumenByReporteId(idReporte);
         setReporte(data);
-
         if (data && data.resultados_por_pregunta && !activeVariableKey) {
           const firstKey = Object.keys(data.resultados_por_pregunta)[0];
           if (firstKey) {
@@ -50,54 +51,60 @@ export default function ResumenReporte() {
     cargarReporte();
   }, [idReporte, fetchReporteById]);
 
+  // --- 2. ¡CORRECCIÓN! MOVEMOS useMemo AQUÍ ---
+  // Lo ponemos ANTES de los 'return' condicionales
+  const tabsData = useMemo(() => {
+    if (!reporte || !reporte.resultados_por_pregunta) {
+      return [];
+    }
+    return Object.entries(reporte.resultados_por_pregunta).map(
+      ([nombreVariable, variableData]: [string, any]) => ({
+        key: nombreVariable,
+        title: nombreVariable,
+        cod: variableData.codigo,
+        content: (
+          <div>
+            {variableData.preguntas.map((pregunta: any, j: number) => (
+              <div key={j} className={j > 0 ? "pregunta-block mt-2" : "pt-2"}>
+                <h6 className="fw-bold mb-3">
+                  {pregunta.pregunta_texto}
+                </h6>
+                {pregunta.opciones.map((opcion: any, k: number) => (
+                  <div key={k} className="mb-3"> 
+                    <div className="d-flex justify-content-between align-items-center mb-1">
+                      <span className="text-muted">{opcion.opcion_texto}</span>
+                      <span className="fw-bold small">{opcion.porcentaje}%</span>
+                    </div>
+                    <ProgressBar
+                      now={opcion.porcentaje}
+                      label={`${opcion.porcentaje}%`}
+                      variant="primary" 
+                      className="progress-compact"
+                    />
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        ),
+      })
+    );
+  }, [reporte]); // Se recalcula solo si 'reporte' cambia
+
+  // --- 3. AHORA SÍ, LOS 'return' DE CARGA ---
   if (loading) return <p>Cargando resumen...</p>;
   if (error) return <p>Error: {error}</p>;
-
   if (
     !reporte ||
     !reporteCompleto ||
     !reporte.resultados_por_pregunta ||
     !reporte.resumen_por_variable ||
-    !activeVariableKey 
+    !activeVariableKey
   ) {
     return <p>No hay datos disponibles</p>;
   }
 
-  const tabsData = Object.entries(reporte.resultados_por_pregunta).map(
-    ([nombreVariable, variableData]: [string, any]) => ({
-      key: nombreVariable,
-      title: nombreVariable,
-      cod: variableData.codigo,
-      content: (
-        <div>
-          {variableData.preguntas.map((pregunta: any, j: number) => (
-            <div key={j} className={j > 0 ? "pregunta-block mt-2" : "pt-2"}>
-              
-              <h6 className="fw-bold mb-3">
-                {pregunta.pregunta_texto}
-              </h6>
-
-              {pregunta.opciones.map((opcion: any, k: number) => (
-                <div key={k} className="mb-3"> 
-                  <div className="d-flex justify-content-between align-items-center mb-1">
-                    <span className="text-muted">{opcion.opcion_texto}</span>
-                    <span className="fw-bold small">{opcion.porcentaje}%</span>
-                  </div>
-                  <ProgressBar
-                    now={opcion.porcentaje}
-                    label={`${opcion.porcentaje}%`}
-                    variant="primary" 
-                    className="progress-compact"
-                  />
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      ),
-    })
-  );
-
+  // ... (El resto de la lógica y el return se mantienen igual)
   const activeVariableSummary = reporte.resumen_por_variable[activeVariableKey];
   const Datosasignatura = reporteCompleto.encuesta_asignatura.asignatura;
 
@@ -111,8 +118,12 @@ export default function ResumenReporte() {
       <Container className="my-4">
         <Row className="g-4">
           
+          {/* --- IZQUIERDA: TABS / CONTENIDO (CON TEMA) --- */}
           <Col xs={12} md={8} lg={8}>
             <Card className="border rounded shadow-sm">
+              <Card.Header as="h5" className="bg-primary text-white">
+                Análisis de Respuestas por Variable
+              </Card.Header>
               <Card.Body className="p-4">
                 <Tabs
                   id="variable-tabs"
@@ -137,10 +148,14 @@ export default function ResumenReporte() {
             </Card>
           </Col>
 
+          {/* --- DERECHA: RESUMEN + BOTÓN (CON TEMA) --- */}
           <Col xs={12} md={4} lg={4}>
             <aside className="right-rail">
               
               <Card className="border rounded shadow-sm mb-3">
+                <Card.Header as="h6" className="bg-light">
+                  Resumen de la Variable
+                </Card.Header>
                 <ResumenVariable resumen={activeVariableSummary} />
               </Card>
 
@@ -163,6 +178,9 @@ export default function ResumenReporte() {
               </div>
               
               <Card className="border rounded shadow-sm">
+                <Card.Header as="h6" className="bg-light">
+                  Métricas de la Encuesta
+                </Card.Header>
                 <Card.Body className="p-3">
                   <div className="d-flex justify-content-between align-items-center mb-2">
                     <span className="text-muted fw-semibold small">

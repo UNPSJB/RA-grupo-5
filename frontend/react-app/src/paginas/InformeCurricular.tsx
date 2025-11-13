@@ -62,7 +62,6 @@ export default function InformeCurricular() {
   }>({ show: false, exiting: false, variant: "success", message: "" });
 
   // --- 4. useEffects (PARA ALERTAS Y CARGA DE DATOS) ---
-  // (Todos tus useEffects se quedan aquí)
   useEffect(() => {
     if (!alert.show || alert.exiting) return;
     const t = setTimeout(() => {
@@ -100,7 +99,7 @@ export default function InformeCurricular() {
         setSede(asignatura?.sede || "");
         setDocente(asignatura?.nombre_docente || "");
         setCicloLectivo(
-          asignatura?.año ? Number(asignatura.año) : ""
+          asignatura?.año ? Number(asignatura.año) : "" // <-- Respetamos tu cambio
         );
       } catch {
         setErrorReporte("Error cargando el reporte.");
@@ -144,11 +143,81 @@ export default function InformeCurricular() {
     cargarInformeBase();
   }, [fetchInformeBaseActual]);
 
-  // --- 5. LÓGICA DE SUBMIT (useCallback es un hook) ---
+  // --- 5. LÓGICA DE SUBMIT (RESTAURADA) ---
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      // ... (Toda tu lógica de guardado se mantiene igual) ...
+      if (!reporte || !informeBase) return;
+
+      setSaving(true); // <-- LLAMADA FALTANTE
+      try {
+        const asignatura = reporte.encuesta_asignatura?.asignatura;
+        const id_asignatura =
+          asignatura?.id ||
+          asignatura?.id_asignatura ||
+          asignatura?.idAsignatura;
+
+        const payloadCabecera = {
+          fecha_inicio: "2025-03-01",
+          fecha_fin: "2025-07-30",
+          estado: "abierto",
+          sede,
+          ciclo_lectivo: Number(cicloLectivo),
+          docente,
+          cant_alumnos_insc: Number(cantInscriptos) || 0,
+          cant_comisiones_teoricas: Number(cantTeoricas) || 0,
+          cant_comisiones_practicas: Number(cantPracticas) || 0,
+          id_informe_curricular_base: informeBase.id,
+          id_asignatura,
+          id_reporte: Number(reporteId),
+        };
+
+        // 1) Crear cabecera
+        const informeCreado = await crearInformeCurricular(payloadCabecera);
+
+        // 2) Enviar respuestas
+        const idDocente = 1; // TODO: id real del usuario
+        const result = await guardarRespuestasInforme(
+          idDocente,
+          informeCreado.id
+        );
+
+        // 3) Manejo de resultado
+        if (!result.ok && result.conflict) {
+          setAlert({
+            show: true,
+            exiting: false,
+            variant: "danger",
+            message:
+              result.detail || "El informe ya tiene una respuesta registrada.",
+          });
+          return;
+        }
+
+        if (!result.ok) {
+          throw new Error(
+            result.detail || "No se pudo guardar la respuesta del informe."
+          );
+        }
+
+        // Éxito
+        setAlert({
+          show: true,
+          exiting: false,
+          variant: "success",
+          message: "Informe guardado correctamente ✔",
+        });
+      } catch (err: any) {
+        console.error(err);
+        setAlert({
+          show: true,
+          exiting: false,
+          variant: "danger",
+          message: err?.message || "No se pudo guardar el informe curricular.",
+        });
+      } finally {
+        setSaving(false); // <-- LLAMADA FALTANTE
+      }
     },
     [
       reporte,
@@ -170,6 +239,7 @@ export default function InformeCurricular() {
   const asignatura = reporte?.encuesta_asignatura?.asignatura || {};
   
   const resumenVariablesFiltradas = useMemo(() => {
+    // ... (Toda tu lógica de 'resumenVariablesFiltradas' se mantiene igual)
     const resultados: Record<string, any> =
       resumenData?.resultados_por_pregunta ?? {};
     const resumenes: Record<string, any> =
@@ -240,7 +310,8 @@ export default function InformeCurricular() {
   // -------- 8. RENDER REFACTORIZADO --------
   return (
     <div className="container mt-4">
-      <h2>Informe de Actividad Curricular</h2>
+      {/* ¡CAMBIO AQUÍ! Título de la página con color primario */}
+      <h2 className="text-primary fw-bold">Informe de Actividad Curricular</h2>
 
       {/* Alerta flotante (depende de tu informe.css) */}
       {(alert.show || alert.exiting) && (
@@ -275,28 +346,23 @@ export default function InformeCurricular() {
         carrera={asignatura.carrera}
       >
         <Container className="mt-5 text-start">
-          {/* --- INICIO DEL GRID CONSISTENTE --- */}
           <Row>
             <Col lg={9} md={10} className="mx-auto">
               
               <Form onSubmit={handleSubmit}>
                 
+                {/* --- Card de datos administrativos (CON TEMA) --- */}
                 <Card className="border rounded shadow-sm mb-4">
-                  <Card.Header as="h5">
+                  {/* ¡CAMBIO AQUÍ! Encabezado temático */}
+                  <Card.Header as="h5" className="bg-primary text-white">
                     Datos Administrativos
                   </Card.Header>
                   <Card.Body className="p-4">
+                    {/* ... (Todo tu Formulario Administrativo Refactorizado) ... */}
                     <Form.Group as={Row} className="mb-3" controlId="formSede">
-                      <Form.Label column sm={4} className="fw-semibold">
-                        Sede
-                      </Form.Label>
+                      <Form.Label column sm={4} className="fw-semibold">Sede</Form.Label>
                       <Col sm={8}>
-                        <Form.Control
-                          type="text"
-                          value={sede}
-                          readOnly
-                          plaintext
-                        />
+                        <Form.Control type="text" value={sede} readOnly plaintext />
                       </Col>
                     </Form.Group>
 
@@ -309,11 +375,7 @@ export default function InformeCurricular() {
                         <Form.Control
                           type="number"
                           value={cicloLectivo}
-                          onChange={(e) =>
-                            setCicloLectivo(
-                              e.target.value === "" ? "" : Number(e.target.value)
-                            )
-                          }
+                          onChange={(e) => setCicloLectivo(e.target.value === "" ? "" : Number(e.target.value))}
                           placeholder="2025 (ejemplo)"
                           min={2000}
                           required
@@ -321,18 +383,12 @@ export default function InformeCurricular() {
                         />
                       </Col>
                     </Form.Group>
-
+                    
+                    {/* ... (El resto de tus Form.Group de admin) ... */}
                     <Form.Group as={Row} className="mb-3" controlId="formDocente">
-                      <Form.Label column sm={4} className="fw-semibold">
-                        Docente/s Responsable/s
-                      </Form.Label>
+                      <Form.Label column sm={4} className="fw-semibold">Docente/s Responsable/s</Form.Label>
                       <Col sm={8}>
-                        <Form.Control
-                          type="text"
-                          value={docente}
-                          readOnly
-                          plaintext
-                        />
+                        <Form.Control type="text" value={docente} readOnly plaintext />
                       </Col>
                     </Form.Group>
 
@@ -345,11 +401,7 @@ export default function InformeCurricular() {
                         <Form.Control
                           type="number"
                           value={cantInscriptos}
-                          onChange={(e) =>
-                            setCantInscriptos(
-                              e.target.value === "" ? "" : Number(e.target.value)
-                            )
-                          }
+                          onChange={(e) => setCantInscriptos(e.target.value === "" ? "" : Number(e.target.value))}
                           min={1}
                           placeholder="1"
                           required
@@ -367,11 +419,7 @@ export default function InformeCurricular() {
                         <Form.Control
                           type="number"
                           value={cantTeoricas}
-                          onChange={(e) =>
-                            setCantTeoricas(
-                              e.target.value === "" ? "" : Number(e.target.value)
-                            )
-                          }
+                          onChange={(e) => setCantTeoricas(e.target.value === "" ? "" : Number(e.target.value))}
                           min={1}
                           placeholder="1"
                           required
@@ -389,11 +437,7 @@ export default function InformeCurricular() {
                         <Form.Control
                           type="number"
                           value={cantPracticas}
-                          onChange={(e) =>
-                            setCantPracticas(
-                              e.target.value === "" ? "" : Number(e.target.value)
-                            )
-                          }
+                          onChange={(e) => setCantPracticas(e.target.value === "" ? "" : Number(e.target.value))}
                           min={1}
                           placeholder="1"
                           required
@@ -401,12 +445,18 @@ export default function InformeCurricular() {
                         />
                       </Col>
                     </Form.Group>
+
                   </Card.Body>
                 </Card>
 
+                {/* --- Card de preguntas (CON TEMA) --- */}
                 <Card className="border rounded shadow-sm">
+                  {/* ¡CAMBIO AQUÍ! Encabezado temático */}
+                  <Card.Header as="h5" className="bg-primary text-white">
+                    Responda
+                  </Card.Header>
                   <Card.Body className="p-4">
-                    <h5 className="mb-4">Responda:</h5>
+                    {/* El h5 que estaba aquí se movió al Card.Header */}
 
                     {informeBase.preguntas?.map((pregunta: any) => {
                       const primeraOpcion = pregunta.pregunta_opcion?.[0];
@@ -421,9 +471,7 @@ export default function InformeCurricular() {
                           controlId={idHtml}
                         >
                           <Form.Label className="fw-bold">
-                            {pregunta.texto_pregunta ??
-                              pregunta.texto ??
-                              "Pregunta"}
+                            {pregunta.texto_pregunta ?? "Pregunta"}
                             {esObligatoria && (
                               <span className="text-danger ms-1">*</span>
                             )}
@@ -432,7 +480,6 @@ export default function InformeCurricular() {
                           {Number(pregunta.id) === 35 && (
                             <div className="my-3">
                               {resumenVariablesFiltradas.length > 0 ? (
-                                // --- ¡CAMBIO AQUÍ! ---
                                 <div className="d-flex flex-wrap gap-3 mt-2 justify-content-center">
                                   {resumenVariablesFiltradas.map(
                                     ({ codigo, resumen, nombreVar }) => (
@@ -446,6 +493,7 @@ export default function InformeCurricular() {
                                         }}
                                       >
                                         <Card.Body className="p-3">
+                                          {/* Este text-secondary ahora será GRIS */}
                                           <div className="fw-semibold text-center mb-2 text-secondary">
                                             Variable {codigo}
                                           </div>
@@ -490,6 +538,7 @@ export default function InformeCurricular() {
                     })}
 
                     <div className="text-center mt-4">
+                      {/* ¡Este botón ahora será AZUL UNPSJB! */}
                       <Button
                         variant="primary"
                         type="submit"
@@ -519,7 +568,6 @@ export default function InformeCurricular() {
 
             </Col>
           </Row>
-          {/* --- FIN DEL GRID CONSISTENTE --- */}
         </Container>
       </LayoutReporte>
     </div>

@@ -1,0 +1,33 @@
+/* src/styles/custom.scss (La Versión Confiable) */
+
+// --- 1. IMPORTA FUNCIONES PRIMERO ---
+// (Necesario para que las variables funcionen)
+@import "bootstrap/scss/functions";
+
+
+// --- 2. DEFINE TUS COLORES PERSONALIZADOS ---
+$azul-unpsjb: #004a99;
+$amarillo-unpsjb: #FFC72C;
+$gris-claro: #f8f9fa;
+
+
+// --- 3. MAPEA TUS VARIABLES PRINCIPALES ---
+// (Sobrescribe los valores ANTES de que Bootstrap los use)
+$primary:       $azul-unpsjb;
+$light:         $gris-claro;
+
+
+// --- 4. IMPORTA LAS VARIABLES DE BOOTSTRAP ---
+// (Esto carga TODOS los valores por defecto de Bootstrap, 
+// incluyendo el mapa de $gray-colors)
+@import "bootstrap/scss/variables";
+
+
+// --- 5. MAPEA EL RESTO DE TUS VARIABLES ---
+// (Ahora que $gray-600 existe, podemos usarlo para $secondary)
+$secondary:     $gray-600;
+
+
+// --- 6. IMPORTA TODO BOOTSTRAP (AL FINAL) ---
+// (Esto "cocina" el CSS final usando tus variables $primary y $secondary)
+@import "bootstrap/scss/bootstrap";
