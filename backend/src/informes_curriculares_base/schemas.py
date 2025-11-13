@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List
 from src.preguntas.schemas import PreguntaRead
 
@@ -15,4 +15,5 @@ class InformeCurricularBaseUpdate(InformeCurricularBase):
 class InformeCurricularBaseRead(InformeCurricularBase):
     id: int
     preguntas: List[PreguntaRead] = []
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(from_attributes=True)
+    
