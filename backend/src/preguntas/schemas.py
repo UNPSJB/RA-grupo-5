@@ -8,7 +8,6 @@ class PreguntaBase(BaseModel):
     texto_pregunta: str 
     tipo: TipoPreguntaEnum
     obligatoria: bool
-    codigo: Optional[str] = None 
 
 class PreguntaCreate(PreguntaBase):
     id_variable: Optional[int] = None

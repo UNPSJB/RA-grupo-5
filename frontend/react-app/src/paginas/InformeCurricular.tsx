@@ -93,7 +93,7 @@ export default function InformeCurricular() {
         setSede(asignatura?.sede || "");
         setDocente(asignatura?.nombre_docente || "");
         setCicloLectivo(
-          asignatura?.ciclo_lectivo ? Number(asignatura.ciclo_lectivo) : ""
+          asignatura?.año ? Number(asignatura.año) : ""
         );
       } catch {
         setErrorReporte("Error cargando el reporte.");
@@ -377,6 +377,7 @@ export default function InformeCurricular() {
                       placeholder="2025 (ejemplo)"
                       min={2000}
                       required
+                      readOnly
                       disabled={saving}
                     />
                   </div>

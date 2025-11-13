@@ -16,7 +16,7 @@ import InformeSintetico from "./paginas/InformeSintetico.tsx";
 import VerInformeCurricular from "./paginas/VerInformeCurricular.tsx";
 import EstadisticasDepartamentoPage from "./paginas/EstadisticasDepartamentoPage.tsx";
 import EstadisticasDocentePage from "./paginas/EstadisticasDocentePage.tsx";
-
+import GenerarInformeSintetico from "./paginas/GenerarInformeSintetico.tsx";
 
 function App() {
   return (
@@ -56,10 +56,18 @@ function App() {
       <Route path="/departamento" element={<LayoutDepartamento />}>
         <Route index element={<InformesSinteticosDisponibles />} />
 
+        {/* Esta ruta es para VER uno ya creado */}
         <Route path="informe-sintetico">
           <Route path=":id" element={<InformeSintetico/>} />
         </Route>
 
+        {/* --- ESTA ES LA NUEVA RUTA: Captura el /:carreraId y espera ?ciclo=... */}
+        <Route 
+          path="generar-informe/:carreraId" 
+          element={<GenerarInformeSintetico />} 
+        />
+
+        {/*Esta ruta muestra los informes curriculares abiertos y cerrados*/}
         <Route path="informes" element={<InformesCurricularesDisponibles />} />
 
         <Route
