@@ -139,14 +139,39 @@ export default function GenerarInformeSintetico() {
   // --- Fin Lógica de GUARDADO ---
 
 
-  // --- Renderizado ---
+ // --- Renderizado ---
   if (loadingInformes || loadingBase) {
-    return <Container className="mt-4">Cargando datos para generar informe...</Container>;
+    return (
+      <Container className="mt-4">
+        Cargando datos... 
+        (Hook de Informes/Carrera: {loadingInformes ? 'CARGANDO' : 'OK'} | 
+         Hook de Plantilla Base: {loadingBase ? 'CARGANDO' : 'OK'})
+      </Container>
+    );
   }
 
-  if (!carrera || !informeBase || !informesFiltrados) {
-    return <Container className="mt-4 alert alert-danger">Error: Faltan datos esenciales (carrera, ciclo o plantilla base).</Container>;
+  // --- Bloque de depuración ---
+  if (!carrera) {
+    return <Container className="mt-4 alert alert-danger">
+      <b>Error de Carga:</b> No se pudo cargar la <b>Carrera</b> (ID: {numCarreraId}).
+      <br/>
+      Verifica que la carrera con ID={numCarreraId} existe en tu base de datos y que el endpoint `/carreras/{numCarreraId}` funciona.
+      </Container>;
   }
+  if (!informeBase) {
+    return <Container className="mt-4 alert alert-danger">
+      <b>Error de Carga:</b> No se pudo cargar la <b>Plantilla Base</b> (informeBase es null).
+      <br/>
+      Esto es causado por el error <b>422 Unprocessable Entity</b> que viste en la consola. 
+      Aplica la "Solución (Arreglo en Backend)" para simplificar la consulta.
+      </Container>;
+  }
+  // (Este chequeo es por si acaso, pero es improbable que falle)
+  if (!informesFiltrados) { 
+    return <Container className="mt-4 alert alert-danger">Error: <b>informesFiltrados</b> es nulo.</Container>;
+  }
+  // --- Fin bloque de depuración ---
+
   
   return (
     <Container>
