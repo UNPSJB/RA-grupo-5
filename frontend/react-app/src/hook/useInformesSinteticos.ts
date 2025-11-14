@@ -63,10 +63,12 @@ export function useInformesSinteticos(cicloLectivo: number, cuatrimestre: string
 
           const sintetico = sinteticos.find(
             (s: any) => {
-              // Obtenemos el 'cursado' del informe sintético (ej: "cuatrimestre 1")
-              const cursadoSintetico = s.cursado; 
+              // 1. Obtenemos el primer informe curricular (hijo) de este sintético para identificar su cursado
+              const primerInformeHijo = s.informes_asignaturas?.[0];
               
-              // Aplicamos la MISMA lógica de mapeo que usaste arriba
+              // 2. De ese hijo, obtenemos el 'cursado' (ej: "cuatrimestre 1")
+              const cursadoSintetico = primerInformeHijo?.asignatura?.cursado;
+
               const etiquetaCuatrimestreSintetico =
                 cursadoSintetico === "cuatrimestre 1" ? "1° cuatrimestre" :
                 cursadoSintetico === "cuatrimestre 2" ? "2° cuatrimestre" :
@@ -76,7 +78,7 @@ export function useInformesSinteticos(cicloLectivo: number, cuatrimestre: string
               return (
                 Number(s.carrera?.id) === Number(carrera.id) &&
                 Number(s.ciclo_lectivo) === Number(cicloLectivo) &&
-                etiquetaCuatrimestreSintetico === cuatrimestre && // <-- ¡ESTA ES LA LÍNEA CLAVE!
+                etiquetaCuatrimestreSintetico === cuatrimestre && 
                 s.respuesta !== null
               );
             }
