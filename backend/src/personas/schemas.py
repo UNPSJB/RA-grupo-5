@@ -7,8 +7,13 @@ from typing import List
 
 
 class PersonaBase(BaseModel):
+    apellido: str
     nombre: str
+    dni: int
+    telefono: str
     email: EmailStr
+    contacto_emergencia: str
+
 
 
 class PersonaCreate(PersonaBase):
