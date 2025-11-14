@@ -11,6 +11,7 @@ export interface InformeSinteticoCarreraPayload {
   id_informe_sintetico_base: number;
   estado: "abierto" | "cerrado";
   informes_asignaturas: number[]; // IDs de informes curriculares
+  cursado: string; // Cuatrimestre
 }
 
 export function useInformesSinteticos(cicloLectivo: number, cuatrimestre: string) {
@@ -61,10 +62,24 @@ export function useInformesSinteticos(cicloLectivo: number, cuatrimestre: string
           );
 
           const sintetico = sinteticos.find(
-            (s: any) =>
-              Number(s.carrera?.id) === Number(carrera.id) &&
-              Number(s.ciclo_lectivo) === Number(cicloLectivo) &&
-              s.respuesta !== null
+            (s: any) => {
+              // Obtenemos el 'cursado' del informe sintético (ej: "cuatrimestre 1")
+              const cursadoSintetico = s.cursado; 
+              
+              // Aplicamos la MISMA lógica de mapeo que usaste arriba
+              const etiquetaCuatrimestreSintetico =
+                cursadoSintetico === "cuatrimestre 1" ? "1° cuatrimestre" :
+                cursadoSintetico === "cuatrimestre 2" ? "2° cuatrimestre" :
+                cursadoSintetico === "anual" ? "2° cuatrimestre" :
+                null;
+
+              return (
+                Number(s.carrera?.id) === Number(carrera.id) &&
+                Number(s.ciclo_lectivo) === Number(cicloLectivo) &&
+                etiquetaCuatrimestreSintetico === cuatrimestre && // <-- ¡ESTA ES LA LÍNEA CLAVE!
+                s.respuesta !== null
+              );
+            }
           );
 
           return {

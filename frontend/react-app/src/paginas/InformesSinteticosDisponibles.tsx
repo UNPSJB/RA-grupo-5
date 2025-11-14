@@ -93,7 +93,7 @@ const { resumenes, loading, error } = useInformesSinteticos(cicloLectivo, cuatri
                     </Link>
                   ) : (
                     <Link
-                      to={`/departamento/generar-informe/${r.carrera.id}?ciclo=${cicloLectivo}`}
+                      to={`/departamento/generar-informe/${r.carrera.id}?ciclo=${cicloLectivo}&cuatrimestre=${cuatrimestre}`}
                       className="btn btn-primary btn-sm"
                     >
                       Generar informe sintético

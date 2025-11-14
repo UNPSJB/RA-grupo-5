@@ -11,6 +11,7 @@ import { useInformesParaSintetico } from "../hook/useInformesParaSintetico";
 import { useInformesSinteticos } from "../hook/useInformesSinteticos";
 
 import "../styles/informe.css"; // Reutilizamos los estilos del alert flotante
+import { Cursado } from "../types/models/Cursado";
 
 // Función helper (copiada de InformeSintetico.tsx)
 const findRespuestaPorPreguntaId = (
@@ -40,14 +41,15 @@ export default function GenerarInformeSintetico() {
 
   const numCarreraId = carreraId ? parseInt(carreraId, 10) : null;
   const numCiclo = searchParams.get("ciclo") ? parseInt(searchParams.get("ciclo")!, 10) : null;
+  const cuatrimestre = searchParams.get("cuatrimestre");
 
   // --- 1. Hooks de DATOS ---
   const { fetchInformeSinteticoBaseActual } = useInformeSinteticoBase();
   // Este hook nos trae los informes curriculares para las pestañas
-  const { informesFiltrados, carrera, loading: loadingInformes } = useInformesParaSintetico(numCarreraId, numCiclo);
+  const { informesFiltrados, carrera, loading: loadingInformes } = useInformesParaSintetico(numCarreraId, numCiclo, cuatrimestre);
   
   // --- 2. Hooks de FORMULARIO y GUARDADO ---
-  const { crearInformeSinteticoCarrera } = useInformesSinteticos(numCiclo ?? 0); // (el ciclo no se usa en la función create, pero el hook lo pide)
+  const { crearInformeSinteticoCarrera } = useInformesSinteticos(numCiclo ?? 0, cuatrimestre ?? ""); // (el ciclo no se usa en la función create, pero el hook lo pide)
   const { answersByPreguntaOpcion, setTextoRespuesta, guardarRespuestaSintetico } = useResponderInformeSintetico();
   
   // --- 3. Estado local de la PÁGINA ---
@@ -91,7 +93,7 @@ export default function GenerarInformeSintetico() {
   // --- Lógica de GUARDADO (handleSubmit) ---
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!carrera || !informeBase || !numCiclo || !informesFiltrados) return;
+    if (!carrera || !informeBase || !numCiclo || !cuatrimestre || !informesFiltrados ) return;
 
     setSaving(true);
 
@@ -106,6 +108,7 @@ export default function GenerarInformeSintetico() {
         id_informe_sintetico_base: informeBase.id,
         estado: "abierto" as const, // Se pone 'abierto'
         informes_asignaturas: informesFiltrados.map(inf => inf.id), // IDs de los informes hijos
+        cursado : cuatrimestre
       };
 
       const informeCreado = await crearInformeSinteticoCarrera(payloadCabecera);
@@ -131,7 +134,7 @@ export default function GenerarInformeSintetico() {
       setSaving(false);
     }
   }, [
-    carrera, informeBase, numCiclo, informesFiltrados, // Datos
+    carrera, informeBase, numCiclo, cuatrimestre, informesFiltrados, // Datos
     comisionAsesora, integrantes, // Estado del form
     crearInformeSinteticoCarrera, guardarRespuestaSintetico, // Acciones
     navigate
@@ -200,6 +203,7 @@ export default function GenerarInformeSintetico() {
               <Card.Text as="div" className="text-start row">
                 <Col md={6}>
                   <p><strong>Ciclo Lectivo:</strong> {numCiclo}</p>
+                  <p><strong>Cuatrimestre:</strong> {cuatrimestre}</p>
                   <p><strong>Sede:</strong> {carrera.sede}</p>
                 </Col>
                 <Col md={6}>
