@@ -5,7 +5,7 @@ import type { Respuesta } from "./Respuesta";
 import type { InformeBase } from "./InformeBase";
 
 enum EstadoInformeCurricular {
-  abierto = "abierta",
+  abierto = "abierto",
   cerrado = "cerrado",
 }
 
