@@ -152,8 +152,8 @@ export default function ResumenReporte() {
           <Col xs={12} md={4} lg={4}>
             <aside className="right-rail">
               
-              <Card className="border rounded shadow-sm mb-3">
-                <Card.Header as="h6" className="bg-light">
+              <Card className="border rounded shadow-sm mb-3 bg-white">
+                <Card.Header as="h6" className="bg-primary text-white">
                   Resumen de la Variable
                 </Card.Header>
                 <ResumenVariable resumen={activeVariableSummary} />
@@ -178,7 +178,7 @@ export default function ResumenReporte() {
               </div>
               
               <Card className="border rounded shadow-sm">
-                <Card.Header as="h6" className="bg-light">
+                <Card.Header as="h6" className="bg-primary text-white">
                   Métricas de la Encuesta
                 </Card.Header>
                 <Card.Body className="p-3">

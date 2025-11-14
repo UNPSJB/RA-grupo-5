@@ -14,7 +14,7 @@ export default function InformesCurricularesDisponibles() {
 
 const mapInforme = (i: any) => {
   console.log("Informe recibido:", i); //  Esto te muestra el objeto completo en consola
-
+  
   return {
     id: i.id,
     asignatura: i.asignatura.nombre, // si es un objeto

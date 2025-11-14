@@ -1,4 +1,4 @@
-import  { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
     Container,
     Form,      
@@ -6,8 +6,8 @@ import {
     Alert,     
     Spinner,
     Col,
-    Row,  // <-- Añadido para el layout
-    Card, // <-- Añadido para la "cáscara"
+    Row,
+    Card,
     Tabs,
     Tab
 } from 'react-bootstrap';
@@ -18,7 +18,8 @@ import { useResponderEncuesta } from '../hook/useResponderEncuesta';
 import Variable from '../componentes/Variable';
 import {
     construirEsquemaEncuesta,
-    construirValoresPorDefecto
+    construirValoresPorDefecto,
+    obtenerNombreCampo // <-- Importado para la validación
 } from '../validaciones/Encuesta';
 
 type SurveyFormData = Record<string, any>;
@@ -53,7 +54,8 @@ function ResponderEncuesta() {
         control,
         handleSubmit,
         formState: { errors, isSubmitting },
-        reset 
+        reset,
+        trigger // <-- 1. Obtenemos 'trigger' de useForm
     } = useForm<SurveyFormData>({
         defaultValues: defaultValues,
         resolver: schema ? zodResolver(schema) : undefined, 
@@ -61,15 +63,19 @@ function ResponderEncuesta() {
 
     const [activeTab, setActiveTab] = useState<string | null>(null);
 
-    // --- 4. useEffect (PARA SINCRONIZAR) ---
+    // --- 4. useEffects (CORREGIDOS) ---
+    
+    // Efecto 1: Resetea el formulario SÓLO cuando los datos (defaultValues) cambian.
     useEffect(() => {
         reset(defaultValues); 
+    }, [defaultValues, reset]);
 
+    // Efecto 2: Establece la pestaña inicial SÓLO una vez, cuando la data carga.
+    useEffect(() => {
         if (encuesta && encuesta.variables && encuesta.variables.length > 0 && activeTab === null) {
             setActiveTab(encuesta.variables[0].id.toString());
         }
-        
-    }, [encuesta, defaultValues, reset, activeTab]);
+    }, [encuesta, activeTab]);
 
     // --- 5. LÓGICA DE MANEJADORES ---
     const onSubmit = async (data: SurveyFormData) => {
@@ -82,44 +88,16 @@ function ResponderEncuesta() {
 
     // --- 6. ESTADOS DE CARGA / ERRORES (EARLY RETURNS) ---
     if (loading) {
-        return (
-            <Container className="py-4 text-center">
-                <Spinner animation="border" role="status" className="me-2" />
-                Cargando encuesta... ⏳
-            </Container>
-        );
+        return ( <Container className="py-4 text-center">Cargando...</Container> );
     }
-
     if (!encuesta || !encuesta.variables) {
-        return (
-            <Container className="py-4 text-center">
-                <Alert variant="danger">
-                    {error || "Error: No se pudo cargar la encuesta o la encuesta no tiene variables."}
-                </Alert>
-            </Container>
-        );
+        return ( <Container className="py-4 text-center"><Alert variant="danger">Error al cargar.</Alert></Container> );
     }
-    
     if (encuesta.variables.length === 0) {
-        return (
-            <Container className="py-4">
-                <Col md={8} className="border rounded mx-auto shadow p-4 text-center">
-                    <h1 className='h2 mb-4 text-center'>{asignatura?.nombre}</h1>
-                    <Alert variant="info">
-                        Esta encuesta no tiene preguntas para responder.
-                    </Alert>
-                </Col>
-            </Container>
-        );
+        return ( <Container className="py-4 text-center"><Alert variant="info">No hay preguntas.</Alert></Container> );
     }
-    
     if (activeTab === null) {
-        return (
-            <Container className="py-4 text-center">
-                <Spinner animation="border" role="status" className="me-2" />
-                Iniciando formulario...
-            </Container>
-        );
+        return ( <Container className="py-4 text-center">Iniciando...</Container> );
     }
 
     // --- 7. LÓGICA DE RENDER (SEGURA) ---
@@ -135,28 +113,70 @@ function ResponderEncuesta() {
         setActiveTab(previousTabKey);
     };
 
-    const handleNext = () => {
-        const nextTabKey = encuesta.variables[activeTabIndex + 1].id.toString();
-        setActiveTab(nextTabKey);
+    // --- 8. LÓGICA DE VALIDACIÓN (¡NUEVO!) ---
+
+    // Función reutilizable para validar la pestaña actual
+    const validateCurrentTab = async () => {
+        // 2. Encontramos la variable (pestaña) actual
+        const currentVariable = encuesta.variables[activeTabIndex];
+        
+        // 3. Obtenemos los nombres de campo (ej: "pregunta_123") 
+        //    SÓLO de las preguntas obligatorias en esta pestaña
+        const fieldsToValidate = currentVariable.preguntas
+            .filter(p => p.obligatoria && p.tipo === 'single_choice') // Solo validamos single_choice obligatorias
+            .map(p => obtenerNombreCampo(p.id));
+        
+        if (fieldsToValidate.length === 0) {
+            return true; // No hay nada que validar en esta pestaña
+        }
+
+        // 4. Disparamos la validación SÓLO para esos campos
+        const isValid = await trigger(fieldsToValidate);
+        return isValid;
     };
 
-    // --- 8. RENDER REFACTORIZADO CON TEMA ---
+    // Actualizamos handleNext para que sea async y valide
+    const handleNext = async () => {
+        const isValid = await validateCurrentTab();
+        
+        if (isValid) {
+            const nextTabKey = encuesta.variables[activeTabIndex + 1].id.toString();
+            setActiveTab(nextTabKey);
+        }
+        // Si no es válido, trigger() ya mostró los errores
+    };
+
+    // Actualizamos onSelect para que valide si vamos hacia adelante
+    const handleTabSelect = async (key: string | null) => {
+        if (key === null || key === activeTab) return;
+
+        const newTabIndex = encuesta.variables.findIndex(v => v.id.toString() === key);
+        
+        // Si vamos hacia atrás (o a la misma pestaña), no validamos
+        if (newTabIndex < activeTabIndex) {
+            setActiveTab(key);
+            return;
+        }
+
+        // Si vamos hacia adelante (clic en una pestaña futura), validamos
+        const isValid = await validateCurrentTab();
+        if (isValid) {
+            setActiveTab(key);
+        }
+        // Si no es válido, nos quedamos en la pestaña actual
+    };
+    // --- FIN DE LA LÓGICA DE VALIDACIÓN ---
+
+
+    // --- 9. RENDER (CON EL NUEVO 'onSelect') ---
     return (
         <Container className="py-4">
-          
-          {/* 1. Usamos <Row> y <Col> solo para el layout (centrar) */}
           <Row>
             <Col md={8} className="mx-auto">
-              
-              {/* 2. Usamos <Card> para el contenido (nuestra "cáscara" estándar) */}
-              <Card className="border rounded shadow-sm">
-                
-                {/* 3. ¡TU IDEA! El encabezado con el color $primary (Azul UNPSJB) */}
+              <Card className="border rounded shadow-sm bg-white"> 
                 <Card.Header as="h4" className="bg-primary text-white text-center">
                   {asignatura?.nombre}
                 </Card.Header>
-                
-                {/* 4. Usamos <Card.Body> para el padding */}
                 <Card.Body className="p-4">
                   <Form onSubmit={handleSubmit(onSubmit)}> 
                     
@@ -164,7 +184,7 @@ function ResponderEncuesta() {
                     
                     <Tabs
                       activeKey={activeTab}
-                      onSelect={(k) => setActiveTab(k!)}
+                      onSelect={handleTabSelect} // <-- USAMOS EL NUEVO HANDLER
                       id="variable-tabs"
                       className="mb-3"
                     >
@@ -191,10 +211,7 @@ function ResponderEncuesta() {
                         </Alert>
                     )}
 
-                    {/* Botones de Navegación */}
                     <div className="d-flex justify-content-between mt-4">
-                      
-                      {/* Este botón (secondary) será GRIS */}
                       <Button 
                           variant="secondary" 
                           onClick={handlePrevious}
@@ -204,7 +221,6 @@ function ResponderEncuesta() {
                           Anterior
                       </Button>
 
-                      {/* Estos botones (primary) serán AZUL UNPSJB */}
                       {activeTabIndex === encuesta.variables.length - 1 ? (
                         <Button
                             variant="primary"
@@ -230,7 +246,7 @@ function ResponderEncuesta() {
                       ) : (
                         <Button 
                             variant="primary" 
-                            onClick={handleNext}
+                            onClick={handleNext} // <-- Usa el nuevo handler
                             type="button" 
                         >
                             Siguiente
@@ -240,7 +256,6 @@ function ResponderEncuesta() {
                   </Form>
                 </Card.Body>
               </Card>
-              
             </Col>  
           </Row>
         </Container>

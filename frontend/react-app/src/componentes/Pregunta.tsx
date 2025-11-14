@@ -75,6 +75,7 @@ export default function Pregunta({
                         <Form.Check
                           {...field}
                           key={opcion.id}
+                          style={{color: "rgba(0,0,0)"}}
                           type="radio"
                           id={`opcion-${opcion.id}`}
                           label={opcion.opcion_respuesta!.texto_opcion}

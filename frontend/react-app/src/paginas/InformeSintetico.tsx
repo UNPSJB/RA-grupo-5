@@ -47,11 +47,11 @@ export default function InformeSintetico() {
       <Col md={10} lg={8} className="mx-auto mt-4">
         
         {/* 2. Card de Cabecera (con tema y estilo estándar) */}
-        <Card className="mb-4 border rounded shadow-sm">
+        <Card className="mb-4 border rounded shadow-sm bg-white">
           <Card.Header as="h4" className="bg-primary text-white">
             Informe Sintético - {informe.carrera.nombre}
           </Card.Header>
-          <Card.Body className="p-4">
+          <Card.Body className="p-4 ">
             <Card.Title as="h4" className="m-2">
               {informe.informe_sintetico_base.titulo}
             </Card.Title>
