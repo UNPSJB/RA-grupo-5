@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 const API_URL = "http://localhost:8000";
 
-// Definimos el tipo para el payload de creación
 export interface InformeSinteticoCarreraPayload {
   ciclo_lectivo: string;
   comision_asesora: string;
@@ -10,7 +9,7 @@ export interface InformeSinteticoCarreraPayload {
   id_carrera: number;
   id_informe_sintetico_base: number;
   estado: "abierto" | "cerrado";
-  informes_asignaturas: number[]; // IDs de informes curriculares
+  informes_asignaturas: number[]; 
 }
 
 export function useInformesSinteticos(cicloLectivo: number) {
@@ -51,7 +50,7 @@ export function useInformesSinteticos(cicloLectivo: number) {
             (s: any) =>
             Number(s.carrera?.id) === Number(carrera.id) &&
            Number(s.ciclo_lectivo) === Number(cicloLectivo) &&
-           s.respuesta !== null // solo si tiene respuesta asociada
+           s.respuesta !== null 
         );
 
 
@@ -93,12 +92,11 @@ export function useInformesSinteticos(cicloLectivo: number) {
     },
     []
   );
-  // --- FIN DE LA NUEVA FUNCIÓN ---
 
   return { 
     resumenes, 
     loading, 
     error,
-    crearInformeSinteticoCarrera // <-- La exportamos
+    crearInformeSinteticoCarrera 
   };
 }

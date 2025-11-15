@@ -1,55 +1,92 @@
 import { useEncuestas } from '../hook/useEncuestas';
-import Table from "react-bootstrap/Table";
 import { Link } from "react-router-dom";
+import { 
+  Container, 
+  Col, 
+  Row, 
+  Card, 
+  ListGroup, 
+  Spinner, 
+  Alert 
+} from "react-bootstrap";
 
 export default function EncuestasPendientes() {
-    const { encuestas, loading, error } = useEncuestas();
+  const { encuestas, loading, error } = useEncuestas();
 
-    if (loading) return <p>Cargando encuestas...</p>;
-    if (error) return <p>Error: {error}</p>;
-
-    const Pendientes = encuestas.filter(
-    (encuesta) => encuesta.estado === "abierta"
-    );
-
+  if (loading) {
     return (
-    <div className="container mt-4 p-4 border">
-        <h1 className="m-3">Encuestas Pendientes</h1>
-        <Table className="table table-striped border mt-5">
-        <thead>
-            <tr className="border">
-            <th>Asignatura</th>
-            <th>Año</th>
-            <th>Cursado</th>
-            <th>Fecha Fin</th>
-            <th>Acciones</th>
-            </tr>
-        </thead>
-            <tbody>
-            {Pendientes.length === 0 ? (
-            <tr>
-                <td colSpan={5}>No hay encuestas pendientes.</td>
-            </tr>
-            ) : (
-            Pendientes.map((encuesta) => (
-                <tr key={encuesta.id}>
-                <td>{encuesta.asignatura?.nombre}</td>  
-                <td>{encuesta.asignatura?.año}</td>
-                <td>{encuesta.asignatura?.cursado}</td>
-                <td>{encuesta.fecha_fin}</td>
-                <td>
-                    <Link
-                    to={`/alumno/encuestas-pendientes/${encuesta.id}`}
-                    className="btn btn-primary m-2"
-                    >
-                    Ir a encuesta
-                    </Link>
-                </td>
-                </tr>
-            ))
-            )}
-        </tbody>
-        </Table>
-    </div>
+      <Container className="my-4 text-center">
+        <Spinner animation="border" variant="primary" />
+        <p className="mt-2">Cargando encuestas...</p>
+      </Container>
     );
+  }
+
+  if (error) {
+    return (
+      <Container className="my-4">
+        <Row>
+          <Col md={10} lg={8} className="mx-auto">
+            <Alert variant="danger">Error: {error}</Alert>
+          </Col>
+        </Row>
+      </Container>
+    );
+  }
+
+  const Pendientes = encuestas.filter(
+    (encuesta) => encuesta.estado === "abierta"
+  );
+
+  return (
+    <Container className="my-4">
+      <Row>
+        <Col md={10} lg={8} className="mx-auto">
+          
+          <Card className="border rounded shadow-sm bg-white">
+            
+            <Card.Header as="h5" className="bg-primary text-white">
+              Encuestas Pendientes
+            </Card.Header>
+            
+            <ListGroup variant="flush">
+              {Pendientes.length === 0 ? (
+                <ListGroup.Item>
+                  <p className="text-muted mb-0">No hay encuestas pendientes.</p>
+                </ListGroup.Item>
+              ) : (
+                Pendientes.map((encuesta) => (
+                  <ListGroup.Item 
+                    key={encuesta.id}
+                    className="d-flex align-items-start" 
+                  >
+                    <div className="me-3 flex-grow-1 text-start">
+                      <span className="fw-bold">{encuesta.asignatura?.nombre}</span>
+                      <br /> 
+                      <small className="text-muted">
+                        {`Año: ${encuesta.asignatura?.año} | Cursado: ${encuesta.asignatura?.cursado} | `}
+                        
+                        <span className="text-danger fw-bold">
+                          Límite: {encuesta.fecha_fin}
+                        </span>
+                      </small>
+                    </div>
+
+                    <Link
+                      to={`/alumno/encuestas-pendientes/${encuesta.id}`}
+                      className="btn btn-primary btn-sm align-self-center"
+                      title="Responder la encuesta"
+                    >
+                      <i className="bi bi-pencil-square"></i>
+                      <span className="ms-2 d-none d-md-inline">Responder</span>
+                    </Link>
+                  </ListGroup.Item>
+                ))
+              )}
+            </ListGroup>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
+  );
 }
