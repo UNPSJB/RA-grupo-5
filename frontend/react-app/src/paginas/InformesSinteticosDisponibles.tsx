@@ -15,9 +15,12 @@ import { Link } from "react-router-dom";
 
 export default function TablaInformeSintetico() {
   const [cicloLectivo, setCicloLectivo] = useState(2025);
-  const { resumenes, loading, error } = useInformesSinteticos(cicloLectivo);
+  const [cuatrimestre, setCuatrimestre] = useState("1° cuatrimestre"); 
+  
+  const { resumenes, loading, error } = useInformesSinteticos(cicloLectivo, cuatrimestre);
 
   const ciclosDisponibles = [2023, 2024, 2025]; 
+  const cuatrimestresDisponibles = ["1° cuatrimestre", "2° cuatrimestre"];
 
   if (loading) {
     return (
@@ -27,7 +30,6 @@ export default function TablaInformeSintetico() {
       </Container>
     );
   }
-
   if (error) {
     return (
       <Container className="my-4">
@@ -53,11 +55,10 @@ export default function TablaInformeSintetico() {
             
             <Card.Body className="p-4">
               
-              <Form.Group as={Row} className="mb-3" controlId="cicloSelect">
-                <Form.Label column sm="auto" className="fw-bold">
-                  Ciclo lectivo:
-                </Form.Label>
-                <Col sm="auto" md={3}>
+              <Row className="mb-3">
+                {/* Filtro de Ciclo Lectivo */}
+                <Form.Group as={Col} md={4} controlId="cicloSelect">
+                  <Form.Label className="fw-bold">Ciclo lectivo:</Form.Label>
                   <Form.Select
                     value={cicloLectivo}
                     onChange={(e) => setCicloLectivo(Number(e.target.value))}
@@ -68,13 +69,27 @@ export default function TablaInformeSintetico() {
                       </option>
                     ))}
                   </Form.Select>
-                </Col>
-              </Form.Group>
+                </Form.Group>
+                
+                <Form.Group as={Col} md={5} controlId="cuatrimestreSelect">
+                  <Form.Label className="fw-bold">Cuatrimestre:</Form.Label>
+                  <Form.Select
+                    value={cuatrimestre}
+                    onChange={(e) => setCuatrimestre(e.target.value)}
+                  >
+                    {cuatrimestresDisponibles.map((cuatri) => (
+                      <option key={cuatri} value={cuatri}>
+                        {cuatri}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+              </Row>
 
               <ListGroup variant="flush" className="mt-4">
                 {resumenes.length === 0 ? (
                   <ListGroup.Item>
-                    <p className="text-muted mb-0">No hay informes para este ciclo lectivo.</p>
+                    <p className="text-muted mb-0">No hay informes para este período.</p>
                   </ListGroup.Item>
                 ) : (
                   resumenes.map((r) => (
@@ -112,7 +127,7 @@ export default function TablaInformeSintetico() {
                           </Link>
                         ) : (
                           <Link
-                            to={`/departamento/generar-informe/${r.carrera.id}?ciclo=${cicloLectivo}`}
+                            to={`/departamento/generar-informe/${r.carrera.id}?ciclo=${cicloLectivo}&cuatrimestre=${cuatrimestre}`}
                             className="btn btn-primary btn-sm"
                             title="Generar informe"
                           >

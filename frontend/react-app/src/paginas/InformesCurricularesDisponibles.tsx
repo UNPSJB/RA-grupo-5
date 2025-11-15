@@ -42,12 +42,7 @@ export default function InformesCurricularesDisponibles() {
     <Container className="my-4">
       <Row>
         <Col md={10} lg={8} className="mx-auto">
-          
-          <h2 className="mb-4 text-primary fw-bold">
-            Gestión de Informes Curriculares
-          </h2>
 
-          {/* --- TARJETA #1: INFORMES ABIERTOS --- */}
           <Card className="border rounded shadow-sm bg-white mb-4">
             
             <Card.Header 
@@ -67,10 +62,8 @@ export default function InformesCurricularesDisponibles() {
                 abiertos.map(informe => (
                   <ListGroup.Item 
                     key={informe.id} 
-                    // 1. Quitamos 'justify-content-between'
                     className="d-flex align-items-start"
                   >
-                    {/* 2. Añadimos 'flex-grow-1' y 'text-start' */}
                     <div className="me-3 flex-grow-1 text-start">
                       <span className="fw-bold">{informe.asignatura.nombre}</span>
                       <br/>
@@ -92,7 +85,6 @@ export default function InformesCurricularesDisponibles() {
             </ListGroup>
           </Card>
 
-          {/* --- TARJETA #2: INFORMES CERRADOS --- */}
           <Card className="border rounded shadow-sm bg-white">
             
             <Card.Header 
@@ -112,10 +104,8 @@ export default function InformesCurricularesDisponibles() {
                 cerrados.map(informe => (
                   <ListGroup.Item 
                     key={informe.id} 
-                    // 1. Quitamos 'justify-content-between'
                     className="d-flex align-items-start"
                   >
-                    {/* 2. Añadimos 'flex-grow-1' y 'text-start' */}
                     <div className="me-3 flex-grow-1 text-start">
                       <span className="fw-bold">{informe.asignatura.nombre}</span>
                       <br/>
