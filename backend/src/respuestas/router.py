@@ -42,7 +42,7 @@ def validar_permiso_respuesta(payload: schemas.RespuestaCreate, persona_actual):
         return
 
     # 3️⃣ Departamento responde INFORME SINTÉTICO
-    if payload.id_informe_sintetico_carerra is not None:
+    if payload.id_informe_sintetico_carrera is not None:   # 👈 corregido aquí
         if PermissionName.GENERAR_INFORMES_SINTETICOS not in permisos_persona:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,

@@ -21,6 +21,7 @@ ROLE_PERMISSION_MAP = {
         PermissionName.GENERAR_INFORMES_SINTETICOS,
         PermissionName.VER_MIS_SINTETICOS,
         PermissionName.VER_RESUMENES_BASICOS,
+        PermissionName.RESPONDER_INFORME_CURRICULAR,
     },
     RoleName.secretaria_academica: {
         PermissionName.CREAR_PLANTILLAS,

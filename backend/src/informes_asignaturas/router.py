@@ -6,8 +6,12 @@ from src.informes_asignaturas import schemas, services
 from src.seguridad.deps import require_permissions
 from src.seguridad.models import PermissionName
 
-router = APIRouter(prefix="/informes-asignaturas", tags=["informes-asignaturas"])
+router = APIRouter(
+    prefix="/informes-asignaturas",
+    tags=["informes-asignaturas"],
+)
 
+# ================== LISTA GENERAL (DOCENTE) ==================
 
 @router.get(
     "/",
@@ -17,6 +21,40 @@ router = APIRouter(prefix="/informes-asignaturas", tags=["informes-asignaturas"]
 def read_informes_asignaturas(db: Session = Depends(get_db)):
     return services.listar_informes_asignaturas(db)
 
+
+# ==== ENDPOINTS PARA DEPARTAMENTO (solo lectura) ====
+
+@router.get(
+    "/departamento",
+    response_model=list[schemas.InformeAsignaturaRead],
+    dependencies=[Depends(require_permissions(PermissionName.VER_INFORMES_CURRICULARES))],
+)
+def read_informes_asignaturas_departamento(
+    db: Session = Depends(get_db),
+):
+    """
+    Listado de informes curriculares visibles para Departamento.
+    Por ahora devolvemos todos; luego se puede filtrar por carrera/período.
+    """
+    return services.listar_informes_asignaturas(db)
+
+
+@router.get(
+    "/departamento/{informe_id}",
+    response_model=schemas.InformeAsignaturaRead,
+    dependencies=[Depends(require_permissions(PermissionName.VER_INFORMES_CURRICULARES))],
+)
+def read_informe_asignatura_departamento(
+    informe_id: int,
+    db: Session = Depends(get_db),
+):
+    """
+    Detalle de un informe curricular para Departamento (solo lectura).
+    """
+    return services.leer_informe_asignatura(db, informe_id)
+
+
+# ================== CRUD PARA DOCENTE ==================
 
 @router.post(
     "/",
@@ -35,7 +73,10 @@ def create_informe_asignatura(
     response_model=schemas.InformeAsignaturaRead,
     dependencies=[Depends(require_permissions(PermissionName.RESPONDER_INFORME_CURRICULAR))],
 )
-def read_informe_asignatura(informe_id: int, db: Session = Depends(get_db)):
+def read_informe_asignatura(
+    informe_id: int,
+    db: Session = Depends(get_db),
+):
     return services.leer_informe_asignatura(db, informe_id)
 
 
@@ -47,6 +88,8 @@ def confirmar_informe_asignatura(informe_id: int):
     # lógica para confirmar el informe
     return {"status": "ok", "mensaje": f"Informe {informe_id} confirmado"}
 
+
+# ================== ESTADO (DOCENTE) ==================
 
 @router.get(
     "/estado/listado",
@@ -68,7 +111,10 @@ def read_informes_asignaturas_estado(db: Session = Depends(get_db)):
     response_model=schemas.InformeAsignaturaEstado,
     dependencies=[Depends(require_permissions(PermissionName.RESPONDER_INFORME_CURRICULAR))],
 )
-def read_informe_asignatura_estado(informe_id: int, db: Session = Depends(get_db)):
+def read_informe_asignatura_estado(
+    informe_id: int,
+    db: Session = Depends(get_db),
+):
     """
     Estado derivado por ID. Útil como guard antes de renderizar el formulario.
     """
