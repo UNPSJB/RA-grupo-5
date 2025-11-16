@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 const API_URL = "http://localhost:8000";
 
-// Definimos el tipo para el payload de creación
 export interface InformeSinteticoCarreraPayload {
   ciclo_lectivo: string;
   comision_asesora: string;
@@ -122,12 +121,11 @@ export function useInformesSinteticos(cicloLectivo: number, cuatrimestre: string
     },
     []
   );
-  // --- FIN DE LA NUEVA FUNCIÓN ---
 
   return { 
     resumenes, 
     loading, 
     error,
-    crearInformeSinteticoCarrera // <-- La exportamos
+    crearInformeSinteticoCarrera 
   };
 }

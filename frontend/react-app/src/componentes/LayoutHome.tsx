@@ -1,11 +1,8 @@
 import { Link, Outlet } from "react-router-dom";
-import { Container, Col, Navbar } from "react-bootstrap";
+import { Container, Col, Navbar, Row } from "react-bootstrap";
 import "../styles/Layout.css";
-import logoUnpsjb from "../assets/unpsjb.png";
+import logoUnpsjb from "../assets/escudo_tranparente_sinletras.png";
 import malvinasIcon from "../assets/icon.jpg";
-import logoAlumno from "../assets/al.jpg";
-import logoDocente from "../assets/doc.jpg";
-import logoDepartamento from "../assets/dep.jpg";
 
 export default function LayoutHome() {
   return (
@@ -14,8 +11,8 @@ export default function LayoutHome() {
         <Navbar.Brand className="ms-3" href="/">
           <img
             src={logoUnpsjb}
-            width="100"
-            height="100"
+            width="50"
+            height="60"
             className="d-inline-block align-top ms-3"
             alt="Logo UNPSJB"
           />
@@ -29,34 +26,35 @@ export default function LayoutHome() {
         >
           <img src={malvinasIcon} alt="" />
           <Outlet />
-          <div className="d-flex gap-3 mt-5">
-            <div>
-              <Col className="d-flex flex-column align-items-center">
-                <img src={logoAlumno} alt="logoAlumno" />
-                <Link to="/alumno" className="btn btn-secondary">
-                  Alumno
-                </Link>
-              </Col>
-            </div>
 
-            <div>
-              <Col className="d-flex flex-column align-items-center">
-                <img src={logoDocente} alt="logoDocente" />
-                <Link to="/docente" className="btn btn-secondary">
-                  Docente
-                </Link>
-              </Col>
-            </div>
+          <Row className="text-center mt-5 g-5">
+            
+            <Col md={4} className="d-flex flex-column align-items-center">
+              {/* ¡CAMBIO AQUÍ! 
+                  Quitamos 'fs-1' y 'mb-3', añadimos 'home-icon' */}
+              <i className="bi bi-mortarboard-fill home-icon text-primary"></i>
+              <Link to="/alumno" className="btn btn-secondary btn-lg">
+                Alumno
+              </Link>
+            </Col>
 
-            <div>
-              <Col className="d-flex flex-column align-items-center">
-                <img src={logoDepartamento} alt="logoDepartamento" />
-                <Link to="/departamento" className="btn btn-secondary">
-                  Departamento
-                </Link>
-              </Col>
-            </div>
-          </div>
+            <Col md={4} className="d-flex flex-column align-items-center">
+              {/* ¡CAMBIO AQUÍ! */}
+              <i className="bi bi-briefcase-fill home-icon text-primary"></i>
+              <Link to="/docente" className="btn btn-secondary btn-lg">
+                Docente
+              </Link>
+            </Col>
+
+            <Col md={4} className="d-flex flex-column align-items-center">
+              {/* ¡CAMBIO AQUÍ! */}
+              <i className="bi bi-building home-icon text-primary"></i>
+              <Link to="/departamento" className="btn btn-secondary btn-lg">
+                Departamento
+              </Link>
+            </Col>
+
+          </Row>
         </Container>
       </main>
 

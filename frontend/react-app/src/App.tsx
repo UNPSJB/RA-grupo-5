@@ -53,26 +53,16 @@ function App() {
       <Route path="/departamento" element={<LayoutDepartamento />}>
         <Route index element={<InformesSinteticosDisponibles />} />
 
-        {/* Esta ruta es para VER uno ya creado */}
         <Route path="informe-sintetico">
           <Route path=":id" element={<InformeSintetico/>} />
         </Route>
-
-        {/* --- ESTA ES LA NUEVA RUTA: Captura el /:carreraId y espera ?ciclo=... */}
-        <Route 
-          path="generar-informe/:carreraId" 
-          element={<GenerarInformeSintetico />} 
-        />
-
-        {/*Esta ruta muestra los informes curriculares abiertos y cerrados*/}
-        <Route path="informes" element={<InformesCurricularesDisponibles />} />
-
-        <Route
-          path="informes-sinteticos"
-          element={<InformesSinteticosDisponibles />}
-        />
+        <Route path="generar-informe/:carreraId" element={<GenerarInformeSintetico />}/>
+        <Route path="informes">
+            <Route index element={<InformesCurricularesDisponibles />} />
+            <Route path=":id" element={<VerInformeCurricular />} />
+        </Route>
+        <Route path="informes-sinteticos" element={<InformesSinteticosDisponibles />}/>
         <Route path="estadisticas" element={<EstadisticasDepartamentoPage />} />
-
       </Route>
     </Routes>
   );
