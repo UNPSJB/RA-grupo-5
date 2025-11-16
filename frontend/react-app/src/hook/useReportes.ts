@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-
-const API_URL = "http://localhost:8000";
+import { apiFetch } from "../api/client"; // 👈 nuestro wrapper que agrega X-Persona-Id
 
 type Flags = {
   id: number;
@@ -32,18 +31,20 @@ export function useReportes() {
       setLoading(true);
       setError(null);
 
-      // Traemos ambos en paralelo
+      // Traemos ambos en paralelo, pero ahora usando apiFetch
       const [resFull, resFlags] = await Promise.all([
-        fetch(`${API_URL}/reportes`),
-        fetch(`${API_URL}/reportes/disponibles`),
+        apiFetch("/reportes"),
+        apiFetch("/reportes/disponibles"),
       ]);
 
-      if (!resFull.ok)
+      if (!resFull.ok) {
         throw new Error("No se pudo obtener la lista de reportes");
-      if (!resFlags.ok)
+      }
+      if (!resFlags.ok) {
         throw new Error("No se pudieron obtener los flags de reportes");
+      }
 
-      const full = await resFull.json(); // reportes con encuesta_asignatura/asignatura
+      const full = await resFull.json(); // reportes completos
       const flags = (await resFlags.json()) as Flags[]; // {id, has_informe, has_respuesta, informe_id}
 
       setReportes(mergeWithFlags(full, flags));
@@ -61,13 +62,14 @@ export function useReportes() {
 
     try {
       const [resFull, resFlags] = await Promise.all([
-        fetch(`${API_URL}/reportes/${rid}`),
-        fetch(`${API_URL}/reportes/disponibles`),
+        apiFetch(`/reportes/${rid}`),
+        apiFetch("/reportes/disponibles"),
       ]);
 
       if (!resFull.ok) throw new Error("No se pudo obtener el reporte");
-      if (!resFlags.ok)
+      if (!resFlags.ok) {
         throw new Error("No se pudieron obtener los flags de reportes");
+      }
 
       const full = await resFull.json();
       const flagsList = (await resFlags.json()) as Flags[];
@@ -86,13 +88,13 @@ export function useReportes() {
     }
   }, []);
 
-  // Nota: este setLoading afecta al estado global del hook; si querés un loading independiente para el resumen,
-  // movelo al componente que lo consuma. Por ahora lo dejamos igual a como lo tenías.
   const fetchResumenByReporteId = useCallback(async (id: number) => {
     try {
       setLoading(true);
-      const res = await fetch(`${API_URL}/reportes/generar/${id}`);
-      if (!res.ok) throw new Error("Error al obtener el resumen");
+      const res = await apiFetch(`/reportes/generar/${id}`);
+      if (!res.ok) {
+        throw new Error("Error al obtener el resumen");
+      }
       return await res.json();
     } catch (err: any) {
       setError(err.message || "Error al obtener el resumen");

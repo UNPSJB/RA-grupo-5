@@ -8,6 +8,12 @@ import logoDocente from "../assets/doc.jpg";
 import logoDepartamento from "../assets/dep.jpg";
 
 export default function LayoutHome() {
+  // ⚠️ IMPORTANTE:
+  // Estos IDs tienen que coincidir con los ids de Persona que creaste en la BD
+  const ALUMNO_ID = "2";
+  const DOCENTE_ID = "1";
+  const DEPARTAMENTO_ID = "3";
+
   return (
     <div className="layout">
       <Navbar bg="dark" variant="dark" expand="lg">
@@ -33,7 +39,11 @@ export default function LayoutHome() {
             <div>
               <Col className="d-flex flex-column align-items-center">
                 <img src={logoAlumno} alt="logoAlumno" />
-                <Link to="/alumno" className="btn btn-secondary">
+                <Link
+                  to="/alumno"
+                  className="btn btn-secondary"
+                  onClick={() => localStorage.setItem("personaId", ALUMNO_ID)}
+                >
                   Alumno
                 </Link>
               </Col>
@@ -42,7 +52,11 @@ export default function LayoutHome() {
             <div>
               <Col className="d-flex flex-column align-items-center">
                 <img src={logoDocente} alt="logoDocente" />
-                <Link to="/docente" className="btn btn-secondary">
+                <Link
+                  to="/docente"
+                  className="btn btn-secondary"
+                  onClick={() => localStorage.setItem("personaId", DOCENTE_ID)}
+                >
                   Docente
                 </Link>
               </Col>
@@ -51,7 +65,13 @@ export default function LayoutHome() {
             <div>
               <Col className="d-flex flex-column align-items-center">
                 <img src={logoDepartamento} alt="logoDepartamento" />
-                <Link to="/departamento" className="btn btn-secondary">
+                <Link
+                  to="/departamento"
+                  className="btn btn-secondary"
+                  onClick={() =>
+                    localStorage.setItem("personaId", DEPARTAMENTO_ID)
+                  }
+                >
                   Departamento
                 </Link>
               </Col>
