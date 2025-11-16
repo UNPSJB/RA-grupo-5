@@ -5,8 +5,7 @@ import logoUnpsjb from "../assets/escudo_tranparente_sinletras.png";
 import malvinasIcon from "../assets/icon.jpg";
 
 export default function LayoutHome() {
-  // ⚠️ IMPORTANTE:
-  // Estos IDs tienen que coincidir con los ids de Persona que creaste en la BD
+  // Estos IDs tienen que coincidir con los ids de Persona de la BD
   const ALUMNO_ID = "2";
   const DOCENTE_ID = "1";
   const DEPARTAMENTO_ID = "3";
@@ -32,6 +31,7 @@ export default function LayoutHome() {
         >
           <img src={malvinasIcon} alt="" />
           <Outlet />
+
           <Row className="text-center mt-5 g-5">
             <Col md={4} className="d-flex flex-column align-items-center">
               <i className="bi bi-mortarboard-fill home-icon text-primary"></i>
