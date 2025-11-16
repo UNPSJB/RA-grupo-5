@@ -1,11 +1,13 @@
 const API_BASE = "http://localhost:8000";
-//pequeño “cliente” HTTP que siempre envíe ese header
-export async function apiFetch(input: string, init: RequestInit = {}) {
-  const personaId = localStorage.getItem("personaId") ?? "1"; // dev: por defecto docente
 
-  const headers = {
+//“cliente” HTTP que siempre envía el token si existe
+export async function apiFetch(input: string, init: RequestInit = {}) {
+  const token = localStorage.getItem("accessToken");
+
+  const headers: HeadersInit = {
     ...(init.headers || {}),
-    "X-Persona-Id": personaId,
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    "Content-Type": "application/json",
   };
 
   const res = await fetch(`${API_BASE}${input}`, {
@@ -14,7 +16,6 @@ export async function apiFetch(input: string, init: RequestInit = {}) {
   });
 
   if (!res.ok) {
-    // acá podés loguear 401/403, etc.
     console.error("API error", res.status, await res.text());
   }
 
