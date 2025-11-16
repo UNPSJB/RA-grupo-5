@@ -12,8 +12,15 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import ReportesDisponibles from "./paginas/ReportesDisponibles.tsx";
 import EncuestasRespondidas from "./componentes/EncuestasRespondidas.tsx";
 import InformesSinteticosDisponibles from "./paginas/InformesSinteticosDisponibles.tsx";
+<<<<<<< HEAD
 import EstadisticasDepartamentoPage from "./paginas/EstadisticasDepartamentoPage.tsx";
 import InformeSintetico from "./paginas/InformeSintetico.tsx";
+=======
+import InformeSintetico from "./paginas/InformeSintetico.tsx";
+import VerInformeCurricular from "./paginas/VerInformeCurricular.tsx";
+import EstadisticasDepartamentoPage from "./paginas/EstadisticasDepartamentoPage.tsx";
+
+>>>>>>> 5e0fd4795752d8e6c249f416b02365d91023389c
 
 function App() {
   return (
@@ -47,11 +54,19 @@ function App() {
         </Route>
       </Route>
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5e0fd4795752d8e6c249f416b02365d91023389c
       <Route path="/departamento" element={<LayoutDepartamento />}>
         <Route index element={<InformesSinteticosDisponibles />} />
 
         <Route path="informe-sintetico">
+<<<<<<< HEAD
           <Route path=":id" element={<InformeSintetico />} />
+=======
+          <Route path=":id" element={<InformeSintetico/>} />
+>>>>>>> 5e0fd4795752d8e6c249f416b02365d91023389c
         </Route>
 
         <Route path="informes" element={<InformesCurricularesDisponibles />} />
@@ -61,6 +76,10 @@ function App() {
           element={<InformesSinteticosDisponibles />}
         />
         <Route path="estadisticas" element={<EstadisticasDepartamentoPage />} />
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5e0fd4795752d8e6c249f416b02365d91023389c
       </Route>
     </Routes>
   );
