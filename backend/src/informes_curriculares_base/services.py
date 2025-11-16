@@ -5,6 +5,7 @@ from src.informes_curriculares_base.models import InformeCurricularBase
 from src.informes_curriculares_base import schemas, exceptions
 from src.preguntas.models import Pregunta
 from src.pregunta_opcion.models import PreguntaOpcion
+from src.opciones_respuesta.models import OpcionRespuesta
 
 def listar_informes_base(db:Session) -> List[schemas.InformeCurricularBaseRead]:
     return db.scalars(select(InformeCurricularBase)).all()

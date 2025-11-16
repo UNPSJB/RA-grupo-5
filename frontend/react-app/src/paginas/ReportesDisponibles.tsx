@@ -1,75 +1,110 @@
 import { useReportes } from "../hook/useReportes";
-import Table from "react-bootstrap/Table";
 import { Link } from "react-router-dom";
+import { 
+  Container, 
+  Row, 
+  Col, 
+  Card, 
+  ListGroup, 
+  Spinner, 
+  Alert 
+} from "react-bootstrap";
 
 export default function ReportesDisponibles() {
   const { reportes, loading, error } = useReportes();
 
-  if (loading) return <p>Cargando reportes...</p>;
-  if (error) return <p>Error: {error}</p>;
+  if (loading) {
+    return (
+      <Container className="my-4 text-center">
+        <Spinner animation="border" variant="primary" />
+        <p className="mt-2">Cargando reportes...</p>
+      </Container>
+    );
+  }
+  if (error) {
+    return (
+      <Container className="my-4">
+        <Row>
+          <Col md={10} lg={8} className="mx-auto">
+            <Alert variant="danger">Error: {error}</Alert>
+          </Col>
+        </Row>
+      </Container>
+    );
+  }
 
   return (
-    <div className="container mt-3 p-4 border">
-      <h2 className="m-3">Reportes Disponibles</h2>
-      <Table className="table table-striped border mt-5">
-        <thead>
-          <tr className="border">
-            <th>Asignatura</th>
-            <th>Año</th>
-            <th>Cursado</th>
-            <th>Docente</th>
-            <th>Carrera</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {reportes.length === 0 ? (
-            <tr>
-              <td colSpan={4}>No hay reportes disponibles.</td>
-            </tr>
-          ) : (
-            reportes.map((reporte) => {
-              const asignatura = reporte.encuesta_asignatura.asignatura;
-              return (
-                <tr key={reporte.id}>
-                  <td>{asignatura.nombre}</td>
-                  <td>{asignatura.año}</td>
-                  <td>{asignatura.cursado}</td>
-                  <td>{asignatura.nombre_docente}</td>
-                  <td>{asignatura.carrera.nombre}</td>
-                  <td>
-                    {/* Ver Reporte siempre */}
-                    <Link
-                      to={`/docente/reportes/${reporte.id}`}
-                      className="btn btn-secondary m-2"
+    <Container className="my-4">
+      <Row>
+        <Col md={10} lg={8} className="mx-auto">
+          <Card className="border rounded shadow-sm bg-white">
+            
+            <Card.Header as="h5" className="bg-primary text-white">
+              Reportes Disponibles
+            </Card.Header>
+            
+            <ListGroup variant="flush">
+              {reportes.length === 0 ? (
+                <ListGroup.Item>
+                  <p className="text-muted mb-0">No hay reportes disponibles.</p>
+                </ListGroup.Item>
+              ) : (
+                reportes.map((reporte) => {
+                  const asignatura = reporte.encuesta_asignatura.asignatura;
+                  return (
+                    <ListGroup.Item 
+                      key={reporte.id}
+                      className="d-flex align-items-start"
                     >
-                      Ver Reporte
-                    </Link>
+                      <div className="me-3 flex-grow-1 text-start"> 
+                        <span className="fw-bold">{asignatura.nombre}</span>
+                        <br/>
+                        <small className="d-block m-1">
+                          <strong>Docente:</strong> {asignatura.nombre_docente}
+                        </small>
+                        <small className="d-block m-1">
+                          <strong>Carrera:</strong> {`${asignatura.carrera.nombre} | Año: ${asignatura.año} | Cursado: ${asignatura.cursado}`}
+                        </small>
+                      </div>
 
-                    {/* Condicional según flags */}
-                    {reporte.has_respuesta ? (
-                      // Si ya fue respondido -> ver informe (necesita informe_id)
-                      <Link
-                        to={`/docente/informes/${reporte.informe_id}`}
-                        className="btn btn-outline-primary m-2"
-                      >
-                        Ver Informe
-                      </Link>
-                    ) : (
-                      <Link
-                        to={`/docente/nuevo-informe/${reporte.id}`}
-                        className="btn btn-primary m-2"
-                      >
-                        Nuevo Informe de Act.Curricular
-                      </Link>
-                    )}
-                  </td>
-                </tr>
-              );
-            })
-          )}
-        </tbody>
-      </Table>
-    </div>
+                      <div className="d-flex flex-column gap-2" style={{ minWidth: '130px' }}>                        
+                        <Link
+                          to={`/docente/reportes/${reporte.id}`}
+                          className="btn btn-secondary btn-sm"
+                          title="Ver Reporte"
+                        >
+                          <i className="bi bi-bar-chart-line-fill"></i>
+                          <span className="ms-2 d-none d-md-inline">Ver Reporte</span>
+                        </Link>
+
+                        {reporte.has_respuesta ? (
+                          <Link
+                            to={`/docente/informes/${reporte.informe_id}`}
+                            className="btn btn-outline-primary btn-sm"
+                            title="Ver Informe"
+                          >
+                            <i className="bi bi-file-earmark-text-fill"></i>
+                            <span className="ms-2 d-none d-md-inline">Ver Informe</span>
+                          </Link>
+                        ) : (
+                          <Link
+                            to={`/docente/nuevo-informe/${reporte.id}`}
+                            className="btn btn-primary btn-sm"
+                            title="Nuevo Informe"
+                          >
+                            <i className="bi bi-plus-circle-fill"></i>
+                            <span className="ms-2 d-none d-md-inline">Nuevo Informe</span>
+                          </Link>
+                        )}
+                      </div>
+                    </ListGroup.Item>
+                  );
+                })
+              )}
+            </ListGroup>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
   );
 }

@@ -7,7 +7,7 @@ export default function LayoutDepartamento() {
   return (
     <div className="layout">
       <Navbar bg="dark" variant="dark" expand="lg">
-        <Container>
+        <Container >
           <Navbar.Brand as={Link} to="/">
             <img
               src={logoUnpsjb}
@@ -35,7 +35,7 @@ export default function LayoutDepartamento() {
       </Navbar>
 
       <main className="center">
-        <Container className="mt-4 text-center">
+        <Container className="mt-4 text-center" >
           <Outlet /> {/* aquí se renderizan las subrutas */}
         </Container>
       </main>

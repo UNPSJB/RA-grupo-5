@@ -59,11 +59,23 @@ def listar_informes_sinteticos_carrera(db: Session) -> List[InformeSinteticoCarr
 
 
 def crear_informe_sintetico_carrera(db: Session, informe: schemas.InformeSinteticoCarreraCreate) -> InformeSinteticoCarrera:
-    _informe = InformeSinteticoCarrera(**informe.model_dump())
+    _informe = InformeSinteticoCarrera(**informe.model_dump(exclude={"informes_asignaturas"}))
     db.add(_informe)
     db.commit()
     db.refresh(_informe)
-    # Llama a 'leer' para devolver el objeto completo
+    
+     # Vincular informes de asignaturas ya existentes
+    if informe.informes_asignaturas:
+        db.query(InformeAsignatura).filter(
+            InformeAsignatura.id.in_(informe.informes_asignaturas)
+        ).update(
+            {"id_informe_sintetico_carrera": _informe.id},
+            synchronize_session=False
+        )
+        db.commit()
+
+    db.refresh(_informe)
+
     return leer_informe_sintetico_carrera(db, _informe.id)
 
 
