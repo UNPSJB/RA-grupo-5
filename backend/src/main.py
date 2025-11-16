@@ -6,7 +6,7 @@ from src.database import engine
 from src import models
 from sqlalchemy.orm import sessionmaker
 
-from src.personas.router import router as personas_router 
+from src.personas.router import router as personas_router
 from src.encuestas_base.router import router as encuestas_base_router
 from src.informes_curriculares_base.router import router as informes_curriculares_base_router
 from src.reportes.router import router as reportes_router
@@ -49,22 +49,18 @@ def run_seed_once() -> None:
 
 @asynccontextmanager
 async def db_creation_lifespan(app: FastAPI):
-    # 1) Crear todas las tablas según tus modelos
     models.ModeloBase.metadata.create_all(bind=engine)
-
-    # 2) Sembrar roles/permisos (usa las tablas recién creadas)
     run_seed_once()
-
-    # 3) Devolver el control a la app (startup completo)
     yield
-    # si tuvieras lógica de shutdown, iría después del yield
 
 # ---------- APP FASTAPI ----------
 
 app = FastAPI(root_path=ROOT_PATH, lifespan=db_creation_lifespan)
 
+# ---------- CORS (para permitir frontend React 5173) ----------
+
 origins = [
-    "http://localhost:5173",  # para recibir requests desde app React (puerto: 5173)
+    "http://localhost:5173",
 ]
 
 app.add_middleware(
@@ -75,7 +71,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ---------- ROUTERS ----------
+# ---------- ROUTERS (auth primero) ----------
+
+app.include_router(auth_router)          # 👈 LOGIN /auth/login
+app.include_router(seguridad_router)     # 👈 /seguridad/... (usa get_current_persona)
 
 app.include_router(personas_router)
 app.include_router(encuestas_base_router)
@@ -93,5 +92,3 @@ app.include_router(informes_asignaturas_router)
 app.include_router(informes_sinteticos_base_router)
 app.include_router(carreras_router)
 app.include_router(informe_sintetico_carrera_router)
-app.include_router(seguridad_router)
-app.include_router(auth_router)

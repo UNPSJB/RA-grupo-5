@@ -1,9 +1,28 @@
-import { Link, Outlet } from "react-router-dom";
-import { Container, Navbar, Nav } from "react-bootstrap";
+import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Container, Navbar, Nav, Button } from "react-bootstrap";
 import "../styles/Layout.css";
 import logoUnpsjb from "../assets/unpsjb.png";
+import { useAuth } from "../context/AuthContext";
 
 export default function LayoutAlumno() {
+  const navigate = useNavigate();
+  const { roles, logout } = useAuth();
+
+  // Si no tiene rol de alumno, no debería estar acá
+  if (!roles.includes("alumno")) {
+    return (
+      <div className="mt-5 text-center">
+        <h4>No autorizado</h4>
+        <p>Iniciá sesión con un usuario de tipo alumno.</p>
+      </div>
+    );
+  }
+
+  function handleLogout() {
+    logout();
+    navigate("/login");
+  }
+
   return (
     <div className="layout">
       <Navbar bg="dark" variant="dark" expand="lg">
@@ -16,6 +35,7 @@ export default function LayoutAlumno() {
             alt="Logo UNPSJB"
           />
         </Navbar.Brand>
+
         <Nav className="me-auto">
           <Nav.Link as={Link} to="/alumno/encuestas-pendientes">
             Encuestas pendientes
@@ -24,12 +44,15 @@ export default function LayoutAlumno() {
             Encuestas respondidas
           </Nav.Link>
         </Nav>
+
+        <Button variant="outline-light" className="me-3" onClick={handleLogout}>
+          Cerrar sesión
+        </Button>
       </Navbar>
 
       <main className="content">
-        {/* Contenido principal */}
         <Container className="mt-4 text-center">
-          <Outlet /> {/* Outlet solo renderiza páginas hijas, si las hubiera */}
+          <Outlet />
         </Container>
       </main>
 
