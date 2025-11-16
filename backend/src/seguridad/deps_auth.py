@@ -5,7 +5,7 @@ import jwt
 
 from src.database import get_db
 from src.personas import services as persona_services
-from src.auth.services import SECRET, ALGORITHM  # importás esto de tu auth/services.py
+from src.auth.services import SECRET, ALGORITHM  # usamos los valores reales del módulo auth
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from src.database import get_db
 from src.personas.models import Persona
 from .schemas import LoginIn, TokenOut
-from .utils import crear_access_token
+from .services import crear_access_token
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
