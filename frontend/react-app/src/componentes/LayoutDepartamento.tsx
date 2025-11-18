@@ -1,42 +1,61 @@
-import { Link, Outlet } from "react-router-dom";
-import { Container, Navbar, Nav } from "react-bootstrap";
+import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Container, Navbar, Nav, Button } from "react-bootstrap";
 import "../styles/Layout.css";
 import logoUnpsjb from "../assets/unpsjb.png";
+import { useAuth } from "../context/AuthContext";
 
 export default function LayoutDepartamento() {
+  const navigate = useNavigate();
+  const { roles, logout } = useAuth();
+
+  // Seguridad básica: si no tiene rol de departamento, no debería estar acá
+  if (!roles.includes("departamento")) {
+    return (
+      <div className="mt-5 text-center">
+        <h4>No autorizado</h4>
+        <p>Iniciá sesión con un usuario de tipo departamento.</p>
+      </div>
+    );
+  }
+
+  function handleLogout() {
+    logout();
+    navigate("/login");
+  }
+
   return (
     <div className="layout">
       <Navbar bg="dark" variant="dark" expand="lg">
-        <Container >
-          <Navbar.Brand as={Link} to="/">
-            <img
-              src={logoUnpsjb}
-              width="80"
-              height="80"
-              className="d-inline-block align-top"
-              alt="Logo UNPSJB"
-            />
-          </Navbar.Brand>
+        <Navbar.Brand className="ms-3" href="/">
+          <img
+            src={logoUnpsjb}
+            width="80"
+            height="80"
+            className="d-inline-block align-top ms-3"
+            alt="Logo UNPSJB"
+          />
+        </Navbar.Brand>
 
-          <Nav className="me-auto">
-            <Nav.Link as={Link} to="/departamento/informes">
-              Informes curriculares
-            </Nav.Link>
+        <Nav className="me-auto">
+          <Nav.Link as={Link} to="/departamento">
+            Informes sintéticos
+          </Nav.Link>
+          <Nav.Link as={Link} to="/departamento/informes">
+            Informes curriculares
+          </Nav.Link>
+          <Nav.Link as={Link} to="/departamento/estadisticas">
+            Estadísticas
+          </Nav.Link>
+        </Nav>
 
-            <Nav.Link as={Link} to="/departamento/informes-sinteticos">
-              Informes sintéticos
-            </Nav.Link>
-
-            <Nav.Link as={Link} to="/departamento/estadisticas">
-              Estadísticas
-            </Nav.Link>
-          </Nav>
-        </Container>
+        <Button variant="outline-light" className="me-3" onClick={handleLogout}>
+          Cerrar sesión
+        </Button>
       </Navbar>
 
-      <main className="center">
-        <Container className="mt-4 text-center" >
-          <Outlet /> {/* aquí se renderizan las subrutas */}
+      <main className="content">
+        <Container className="mt-4 text-center">
+          <Outlet />
         </Container>
       </main>
 
