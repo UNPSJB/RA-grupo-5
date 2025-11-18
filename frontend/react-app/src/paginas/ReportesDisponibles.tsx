@@ -51,6 +51,10 @@ export default function ReportesDisponibles() {
               ) : (
                 reportes.map((reporte) => {
                   const asignatura = reporte.encuesta_asignatura.asignatura;
+                  const fechaInicio = reporte.encuesta_asignatura.fecha_inicio;
+                const cicloLectivo = fechaInicio 
+                 ? new Date(fechaInicio).getFullYear() 
+                   : 'N/A';
                   return (
                     <ListGroup.Item 
                       key={reporte.id}
@@ -64,6 +68,8 @@ export default function ReportesDisponibles() {
                         </small>
                         <small className="d-block m-1">
                           <strong>Carrera:</strong> {`${asignatura.carrera.nombre} | Año: ${asignatura.año} | Cursado: ${asignatura.cursado}`}
+                        <small className="d-block m-1"></small>  
+                          <strong>Ciclo:</strong> {cicloLectivo} {/* <-- FORMATO FINAL */}
                         </small>
                       </div>
 
@@ -96,6 +102,16 @@ export default function ReportesDisponibles() {
                             <span className="ms-2 d-none d-md-inline">Nuevo Informe</span>
                           </Link>
                         )}
+                         {}
+<Link
+  to={`/docente/estadisticas/${reporte.id}`}
+  className="btn btn-outline-success btn-sm"
+  title="Ver Estadísticas"
+>
+  <i className="bi bi-graph-up-arrow"></i>
+  <span className="ms-2 d-none d-md-inline">Ver Estadísticas</span>
+</Link>
+
                       </div>
                     </ListGroup.Item>
                   );
