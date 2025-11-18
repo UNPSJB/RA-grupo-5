@@ -36,54 +36,11 @@ export default function InformesCurricularesDisponibles() {
   }
 
   const cerrados = informesCurriculares.filter((informe) => informe.estado === "cerrado");
-  const abiertos = informesCurriculares.filter((informe) => informe.estado === "abierto");
 
   return (
     <Container className="my-4">
       <Row>
         <Col md={10} lg={8} className="mx-auto">
-
-          <Card className="border rounded shadow-sm bg-white mb-4">
-            
-            <Card.Header 
-              as="h5" 
-              className="bg-primary text-white d-flex justify-content-between align-items-center"
-            >
-              Informes Abiertos
-              <Badge bg="light" text="dark" pill>
-                {abiertos.length}
-              </Badge>
-            </Card.Header>
-            
-            <ListGroup variant="flush">
-              {abiertos.length === 0 ? (
-                <ListGroup.Item>No hay informes abiertos.</ListGroup.Item>
-              ) : (
-                abiertos.map(informe => (
-                  <ListGroup.Item 
-                    key={informe.id} 
-                    className="d-flex align-items-start"
-                  >
-                    <div className="me-3 flex-grow-1 text-start">
-                      <span className="fw-bold">{informe.asignatura.nombre}</span>
-                      <br/>
-                      <small className="text-muted">
-                        {`Docente: ${informe.docente} | Sede: ${informe.sede}`}
-                      </small>
-                    </div>
-                    <Link 
-                      to={`/docente/informes/${informe.id}`} 
-                      className="btn btn-secondary btn-sm align-self-center"
-                      title="Ver Informe"
-                    >
-                      <i className="bi bi-eye-fill"></i>
-                      <span className="ms-2 d-none d-md-inline">Ver</span>
-                    </Link>
-                  </ListGroup.Item>
-                ))
-              )}
-            </ListGroup>
-          </Card>
 
           <Card className="border rounded shadow-sm bg-white">
             
