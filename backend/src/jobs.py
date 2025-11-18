@@ -16,9 +16,9 @@ def check_deadlines():
     
     db: Session = SessionLocal()
     try:
-        #today = date.today()
-        today = date(2025, 11, 18)
-        log.info(f"Ejecutando check_deadlines (Fecha simulada: {today})...")
+        today = date.today()
+        #today = date(2025, 11, 18) simular otra fecha
+        log.info(f"Ejecutando check_deadlines (Fecha: {today})...")
         
         # Obtenemos IDs de encuestas 'abiertas' cuya fecha_fin ya pasó
         encuestas_a_cerrar_ids = db.scalars(
