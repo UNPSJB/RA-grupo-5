@@ -16,6 +16,7 @@ import InformeSintetico from "./paginas/InformeSintetico.tsx";
 import VerInformeCurricular from "./paginas/VerInformeCurricular.tsx";
 import EstadisticasDepartamentoPage from "./paginas/EstadisticasDepartamentoPage.tsx";
 import GenerarInformeSintetico from "./paginas/GenerarInformeSintetico.tsx";
+import EstadisticasDocentePage from "./paginas/EstadisticasDocentePage.tsx";
 
 function App() {
   return (
@@ -47,6 +48,8 @@ function App() {
         <Route path="informes">
           <Route path=":id" element={<VerInformeCurricular />} />
         </Route>
+          {/* Nueva ruta para estadísticas */}
+      <Route path="estadisticas/:id" element={<EstadisticasDocentePage />} />
       </Route>
 
 

@@ -1,7 +1,8 @@
 from typing import List
 from src.informes_asignaturas.models import EstadoInforme
 from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session, selectinload, joinedload
+from sqlalchemy.sql.expression import func # <-- NECESARIO PARA strftime
 from src.reportes.models import Reporte
 from src.encuestas_asignaturas.models import EncuestaAsignatura
 from src.encuestas_base.models import EncuestaBase
@@ -88,6 +89,21 @@ def leer_reporte_con_relaciones_completas(db: Session, reporte_id: int):
         )
     ).filter(Reporte.id == reporte_id).first()
 
+# --- AUXILIAR: Carga completa de EncuestaAsignatura ---
+def _leer_encuesta_asignatura_completa(db: Session, encuesta_asignatura_id: int) -> EncuestaAsignatura | None:
+    """Obtiene la EncuestaAsignatura con todas las respuestas y preguntas necesarias para el resumen."""
+    return db.query(EncuestaAsignatura).options(
+        joinedload(EncuestaAsignatura.asignatura),
+        joinedload(EncuestaAsignatura.encuesta_base).options(
+            selectinload(EncuestaBase.variables).selectinload(Variable.preguntas).selectinload(Pregunta.pregunta_opcion).selectinload(PreguntaOpcion.opcion_respuesta)
+        ),
+        selectinload(EncuestaAsignatura.respuestas).selectinload(Respuesta.detalles).selectinload(DetalleRespuesta.pregunta_opcion).options(
+            selectinload(PreguntaOpcion.opcion_respuesta)
+        )
+    ).filter(EncuestaAsignatura.id == encuesta_asignatura_id).first()
+
+
+
 def generar_resumen_variable(db: Session, reporte_id: int) -> dict:
     """
     Se encarga de la generación del reporte completo,
@@ -110,7 +126,6 @@ def generar_resumen_variable(db: Session, reporte_id: int) -> dict:
         "resultados_por_pregunta": resultados_preguntas,
         "resumen_por_variable": resumen_variables
     }
-
 
 
 def _generar_resultados_preguntas_cerradas(encuesta_asig: EncuestaAsignatura) -> dict:
@@ -237,4 +252,52 @@ def _generar_resumen_por_variable(encuesta_asig: EncuestaAsignatura) -> dict:
             }
             
     return resumen_final_variables    
+
+
+
+# --- NUEVA FUNCIÓN PRINCIPAL PARA COMPARATIVA REAL ---
+def generar_resumen_comparativo_real(db: Session, reporte_id: int, ciclo_lectivo_comparar: int) -> dict | None:
+    """
+    Busca la EncuestaAsignatura anterior basada en la fecha_inicio y genera el resumen de variables.
+    """
+    
+    # 1. Obtener parámetros del reporte actual
+    db_reporte_actual = leer_reporte(db, reporte_id)
+    encuesta_actual = db_reporte_actual.encuesta_asignatura
+    
+    if not encuesta_actual:
+        return {} # No hay encuesta actual asociada
+
+    asignatura_id = encuesta_actual.id_asignatura
+    encuesta_base_id = encuesta_actual.id_encuesta_base
+
+    # 2. Buscar la EncuestaAsignatura del año de comparación
+    encuesta_anterior = db.scalar(
+        select(EncuestaAsignatura)
+        .where(
+            EncuestaAsignatura.id_asignatura == asignatura_id,
+            EncuestaAsignatura.id_encuesta_base == encuesta_base_id,
+            # Filtro por año usando SQLite strftime en la fecha_inicio
+            func.strftime('%Y', EncuestaAsignatura.fecha_inicio) == str(ciclo_lectivo_comparar)
+        )
+        .order_by(EncuestaAsignatura.id.desc()) # Tomar la más reciente si hay varias
+        .limit(1)
+    )
+    
+    if not encuesta_anterior:
+        return {} # Devolver diccionario vacío si no se encuentra (No hay datos para ese año)
+
+    # 3. Recargar la encuesta antigua con todas las relaciones (Respuestas, Detalles, etc.)
+    encuesta_anterior_completa = _leer_encuesta_asignatura_completa(db, encuesta_anterior.id)
+    
+    if not encuesta_anterior_completa:
+        return {}
+
+    # 4. Generar el resumen por variable (reutilizando la lógica existente)
+    # Reutilizamos _generar_resumen_por_variable pero con el objeto de la encuesta anterior
+    resumen_comparativo = _generar_resumen_por_variable(encuesta_anterior_completa)
+    
+    # Devolvemos el mapa de resumen con porcentajes (el frontend calculará los scores)
+    return resumen_comparativo
+
 
