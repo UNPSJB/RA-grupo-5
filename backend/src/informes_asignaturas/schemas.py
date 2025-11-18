@@ -18,9 +18,7 @@ class InformeAsignaturaBase(BaseModel):
     fecha_fin: date
     estado: EstadoInforme
     sede: Sede 
-    
     ciclo_lectivo: int 
-    
     docente: str
     cant_alumnos_insc: int
     cant_comisiones_teoricas: int
@@ -38,10 +36,7 @@ class InformeAsignaturaRead(InformeAsignaturaBase):
     id_asignatura: int
     id_reporte: int
     id_informe_sintetico_carrera: Optional[int] = None
-    
     informe_curricular_base: InformeCurricularBaseRead 
-    
     asignatura: AsignaturaRead
     respuesta: Optional[RespuestaRead] = None
-    
     model_config = ConfigDict(from_attributes=True)

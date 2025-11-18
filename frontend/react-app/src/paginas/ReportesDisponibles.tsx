@@ -110,7 +110,7 @@ export default function ReportesDisponibles() {
                             style={{cursor: 'not-allowed'}} // Estilo extra para claridad
                           >
                             <i className="bi bi-x-circle-fill"></i>
-                            <span className="ms-2 d-none d-md-inline">No Generado</span>
+                            <span className="ms-2 d-none d-md-inline">Fuera de termino</span>
                           </button>
                         )}
                       </div>

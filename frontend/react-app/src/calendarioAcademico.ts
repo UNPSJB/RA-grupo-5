@@ -6,30 +6,30 @@
  * Julio = 6, Agosto = 7, Septiembre = 8, Octubre = 9, Noviembre = 10, Diciembre = 11
  */
 
-// --- 1. VENTANAS PARA RESPONDER ENCUESTAS (ALUMNOS) --- un mes para responder cada cuatri
-const ENCUESTA_C1_START = new Date(2025, 6, 1); //julio
-const ENCUESTA_C1_END = new Date(2025, 6, 30);  
-const ENCUESTA_C2_START = new Date(2025, 11, 1);  //diciembre
-const ENCUESTA_C2_END = new Date(2025, 11, 30);  
+// --- 1. VENTANAS PARA RESPONDER ENCUESTAS (ALUMNOS) 
+//Período C1
+export const ENCUESTA_C1_START = new Date(2025, 6, 1); 
+export const ENCUESTA_C1_END = new Date(2025, 11, 31);  
+// Período C2/Anual
+export const ENCUESTA_C2_START = new Date(2025, 6, 1);  
+export const ENCUESTA_C2_END = new Date(2025, 11, 31);  
 
 // --- 2. VENTANAS PARA GENERAR INFORMES CURRICULARES (DOCENTES) ---
 // Período C1 
-const IC_C1_START = new Date(2025, 7, 1);//agosto
-const IC_C1_END = new Date(2025, 10, 30); //noviembre
-
+export const IC_C1_START = new Date(2025, 6, 1);
+export const IC_C1_END = new Date(2025, 11, 31); 
 // Período C2/Anual 
-const IC_C2_START = new Date(2025, 11, 1); //diciembre
-const IC_C2_END = new Date(2026, 1, 30); //febrero
+export const IC_C2_START = new Date(2025, 6, 1); 
+export const IC_C2_END = new Date(2025, 11, 31); 
 
 // --- 3. VENTANAS PARA GENERAR INFORMES SINTÉTICOS (DEPARTAMENTO) ---
 
 // Período C1
-const IS_C1_START = new Date(2025, 11, 1); //diciembre
-const IS_C1_END = new Date(2026, 1, 30); //febrero
-
+export const IS_C1_START = new Date(2025, 6, 1); 
+export const IS_C1_END = new Date(2025, 11, 31); 
 // Período C2/Anual 
-const IS_C2_START = new Date(2026, 2, 1); //marzo  
-const IS_C2_END = new Date(2026, 4, 1);  //mayo
+export const IS_C2_START = new Date(2025, 6, 1);   
+export const IS_C2_END = new Date(2025, 11, 31);  
 
 
 const CUATRIMESTRE_1 = "cuatrimestre 1";
