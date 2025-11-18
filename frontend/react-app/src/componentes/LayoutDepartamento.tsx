@@ -30,6 +30,11 @@ export default function LayoutDepartamento() {
             <Nav.Link as={Link} to="/departamento/estadisticas">
               Estadísticas
             </Nav.Link>
+
+            <Nav.Link as={Link} to="/departamento/informes-sinteticos-respondidos">
+              Mis Informes Enviados
+            </Nav.Link>
+
           </Nav>
         </Container>
       </Navbar>

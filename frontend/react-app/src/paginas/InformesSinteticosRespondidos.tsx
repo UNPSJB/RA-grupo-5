@@ -10,22 +10,24 @@ import {
   Spinner, 
   Alert 
 } from "react-bootstrap";
-import type { InformeCurricular } from "../types/models/InformeCurricular";
+import type { InformeSinteticoCarrera } from "../types/InformeSintetico"; 
 
-export default function InformesRespondidos() {
-  const [informes, setInformes] = useState<InformeCurricular[]>([]);
+export default function InformesSinteticosRespondidos() {
+  const [informes, setInformes] = useState<InformeSinteticoCarrera[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  // ID DOCENTE HARDCODEADO
-  const ID_DOCENTE = 1; 
+
+  // ID DEPARTAMENTO HARDCODEADO (Debe coincidir con el usado al guardar)
+  const ID_DEPARTAMENTO = 1; 
 
   useEffect(() => {
-    const fetchRespondidos = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`http://localhost:8000/informes-asignaturas/docente/${ID_DOCENTE}`);
-        if (!res.ok) throw new Error("Error al cargar informes respondidos");
+        // --- URL ACTUALIZADA CON ID DEPARTAMENTO ---
+        const res = await fetch(`http://localhost:8000/informe-sintetico-carrera/departamento/${ID_DEPARTAMENTO}`);
+        
+        if (!res.ok) throw new Error("Error al cargar informes sintéticos respondidos");
         const data = await res.json();
         setInformes(data);
       } catch (err: any) {
@@ -34,14 +36,14 @@ export default function InformesRespondidos() {
         setLoading(false);
       }
     };
-    fetchRespondidos();
+    fetchData();
   }, []);
 
   if (loading) {
     return (
       <Container className="my-4 text-center">
         <Spinner animation="border" variant="primary" />
-        <p className="mt-2">Cargando informes...</p>
+        <p className="mt-2">Cargando historial...</p>
       </Container>
     );
   }
@@ -49,11 +51,7 @@ export default function InformesRespondidos() {
   if (error) {
     return (
       <Container className="my-4">
-        <Row>
-          <Col md={10} lg={8} className="mx-auto">
-            <Alert variant="danger">Error: {error}</Alert>
-          </Col>
-        </Row>
+        <Alert variant="danger">Error: {error}</Alert>
       </Container>
     );
   }
@@ -69,7 +67,7 @@ export default function InformesRespondidos() {
               as="h5" 
               className="bg-light d-flex justify-content-between align-items-center"
             >
-              Informes Curriculares Respondidos
+              Historial de Informes Sintéticos Enviados
               <Badge bg="secondary" pill>
                 {informes.length}
               </Badge>
@@ -78,7 +76,7 @@ export default function InformesRespondidos() {
             <ListGroup variant="flush">
               {informes.length === 0 ? (
                 <ListGroup.Item className="text-muted text-center py-3">
-                  No hay informes respondidos.
+                  No has enviado ningún informe sintético todavía.
                 </ListGroup.Item>
               ) : (
                 informes.map(informe => (
@@ -87,21 +85,21 @@ export default function InformesRespondidos() {
                     className="d-flex align-items-start"
                   >
                     <div className="me-3 flex-grow-1 text-start">
-                      <span className="fw-bold fs-5">{informe.asignatura?.nombre}</span>
+                      <span className="fw-bold fs-5">{informe.carrera?.nombre}</span>
                       <br/>
                       <small className="text-muted d-block mt-1">
-                        Docente: {informe.docente}
+                        <strong>Sede:</strong> {informe.sede} | <strong>Ciclo:</strong> {informe.ciclo_lectivo}
                       </small>
                       <small className="text-muted d-block">
-                        {`Carrera: ${informe.asignatura?.carrera?.nombre} | Año: ${informe.asignatura?.año} | Cursado: ${informe.asignatura?.cursado} | Ciclo: ${informe.ciclo_lectivo}`}
+                        <strong>Comisión:</strong> {informe.comision_asesora}
                       </small>
                       <small className="text-success fw-bold d-block mt-1">
-                         Estado: {informe.estado === 'cerrado' ? 'Finalizado' : 'Abierto'}
+                         {/* Estado: {informe.estado === 'cerrado' ? 'Finalizado' : 'Enviado'} */}
                       </small>
                     </div>
                     
                     <Link 
-                      to={`/docente/informes-curriculares-respondidos/${informe.id}`} 
+                      to={`/departamento/informes-sinteticos-respondidos/${informe.id}`} 
                       className="btn btn-outline-primary btn-sm align-self-center"
                       title="Ver Informe Completo"
                     >

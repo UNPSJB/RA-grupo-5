@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
-import { Container, Form, Button, Alert, Card, Tabs, Tab } from 'react-bootstrap';
+import { useState, useEffect } from 'react';
+import { Container, Form, Button, Alert, Card, Tabs, Tab, Spinner } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import Variable from '../componentes/Variable';
@@ -32,14 +32,12 @@ export default function VerEncuesta() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     
-    // Estado para las respuestas formateadas para el form
-    const [respuestasFormulario, setRespuestasFormulario] = useState<Record<string, any>>({});
     const [activeTab, setActiveTab] = useState<string | null>(null);
 
-    // ID ALUMNO HARDCODEADO (Mismo que en el listado)
+    // ID ALUMNO HARDCODEADO
     const ID_ALUMNO = 1;
 
-    // Hook del formulario (sin validación, porque es solo lectura)
+    // Hook del formulario (sin validación)
     const { control, formState: { errors }, reset } = useForm();
 
     useEffect(() => {
@@ -48,7 +46,7 @@ export default function VerEncuesta() {
         const cargarDatos = async () => {
             setLoading(true);
             try {
-                // 1. Cargar estructura de la encuesta (igual que al responder)
+                // 1. Cargar estructura de la encuesta
                 const resAsig = await fetch(`http://localhost:8000/encuestas-asignaturas/${id}`);
                 if (!resAsig.ok) throw new Error("Error al cargar encuesta");
                 const dataAsig: EncuestaAsignatura = await resAsig.json();
@@ -57,8 +55,7 @@ export default function VerEncuesta() {
                 if (!resBase.ok) throw new Error("Error al cargar base");
                 const dataBase: EncuestaBase = await resBase.json();
 
-                // 2. Cargar las RESPUESTAS del alumno para esta encuesta
-                // Usamos el filtro que ya existe en el backend: ?persona_id=X&encuesta_asignatura_id=Y
+                // 2. Cargar las respuestas
                 const resRespuestas = await fetch(
                     `http://localhost:8000/respuestas/?persona_id=${ID_ALUMNO}&encuesta_asignatura_id=${id}`
                 );
@@ -69,20 +66,15 @@ export default function VerEncuesta() {
                 const valoresIniciales: Record<string, any> = {};
                 
                 if (dataRespuestas.length > 0) {
-                    const miRespuesta = dataRespuestas[0]; // Tomamos la primera (debería ser única)
+                    const miRespuesta = dataRespuestas[0];
                     
                     miRespuesta.detalles.forEach(detalle => {
                         const idPregunta = detalle.pregunta_opcion.id_pregunta;
                         const fieldName = obtenerNombreCampo(idPregunta);
                         
-                        // Si es texto libre
                         if (detalle.texto_respuesta_abierta) {
                             valoresIniciales[fieldName] = detalle.texto_respuesta_abierta;
-                        } 
-                        // Si es opción cerrada (single choice)
-                        else if (detalle.pregunta_opcion.id_opcion_respuesta) {
-                            // Nota: Para multiple choice la lógica sería un poco más compleja (array),
-                            // pero para single choice esto funciona directo.
+                        } else if (detalle.pregunta_opcion.id_opcion_respuesta) {
                             valoresIniciales[fieldName] = detalle.pregunta_opcion.id_opcion_respuesta;
                         }
                     });
@@ -90,9 +82,6 @@ export default function VerEncuesta() {
 
                 setAsignatura(dataAsig.asignatura);
                 setEncuesta(dataBase);
-                setRespuestasFormulario(valoresIniciales);
-                
-                // Resetear el formulario con los datos cargados
                 reset(valoresIniciales);
 
                 if (dataBase.variables && dataBase.variables.length > 0) {
@@ -110,16 +99,22 @@ export default function VerEncuesta() {
     }, [id, reset]);
 
 
-    if (loading) return <Container className="py-4 text-center">Cargando visualización...</Container>;
-    if (error) return <Container className="py-4"><Alert variant="danger">{error}</Alert></Container>;
+    if (loading) return <Container className="py-5 text-center"><Spinner animation="border" variant="primary" /></Container>;
+    if (error) return <Container className="py-5"><Alert variant="danger">{error}</Alert></Container>;
     if (!encuesta) return null;
 
     return (
-        <Container className="py-4">
+        <Container className="my-4">
+          {/* Título fuera de la Card, estilo consistente con Informes */}
+          <h2 className="text-primary fw-bold mb-4">Encuesta Respondida</h2>
+          
           <Card className="border rounded shadow-sm bg-white"> 
-            <Card.Header as="h4" className="bg-secondary text-white text-center">
-              Vista de Respuestas: {asignatura?.nombre}
+            
+            {/* Cabecera Gris (Secondary) para indicar "Solo Lectura" */}
+            <Card.Header as="h5" className="bg-secondary text-white">
+              Respuesta Registrada: {asignatura?.nombre}
             </Card.Header>
+            
             <Card.Body className="p-4">
               
               <Alert variant="info" className="mb-4">
@@ -144,7 +139,7 @@ export default function VerEncuesta() {
                             variable={variable}
                             control={control}
                             errors={errors}
-                            disabled={true} // <--- CLAVE: Deshabilitar todo
+                            disabled={true} // Bloquea todos los inputs
                         />
                       </div>
                     </Tab>
@@ -152,7 +147,8 @@ export default function VerEncuesta() {
                 </Tabs>
 
                 <div className="text-center mt-4">
-                  <Button variant="primary" onClick={() => navigate('/alumno/encuestas-respondidas')}>
+                  {/* Botón Secondary para navegación */}
+                  <Button variant="secondary" onClick={() => navigate('/alumno/encuestas-respondidas')}>
                     Volver al listado
                   </Button>
                 </div>

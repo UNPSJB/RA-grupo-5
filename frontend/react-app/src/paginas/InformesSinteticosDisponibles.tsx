@@ -138,7 +138,7 @@ export default function TablaInformeSintetico() {
                         ) : r.sinteticoId ? (
                           // 1. Si ya existe un informe sintético, "Ver informe"
                           <Link
-                            to={`/departamento/informe-sintetico/${r.sinteticoId}`}
+                            to={`/departamento/informes-sinteticos-respondidos/${r.sinteticoId}`}
                             className="btn btn-outline-primary btn-sm"
                             title="Ver informe"
                           >

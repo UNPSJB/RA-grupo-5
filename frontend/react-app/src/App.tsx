@@ -19,6 +19,7 @@ import GenerarInformeSintetico from "./paginas/GenerarInformeSintetico.tsx";
 import VerEncuesta from "./paginas/VerEncuestaRespondida.tsx";
 import InformesCurricularesRespondidos from "./paginas/InformesCurricularesRespondidos.tsx";
 import VerInformeCurricularRespondido from "./paginas/VerInformeCurricularRespondido.tsx";
+import InformesSinteticosRespondidos from "./paginas/InformesSinteticosRespondidos.tsx";
 
 
 function App() {
@@ -57,12 +58,17 @@ function App() {
         </Route>
       </Route>
 
+
+
+
       <Route path="/departamento" element={<LayoutDepartamento />}>
         <Route index element={<InformesSinteticosDisponibles />} />
 
-        <Route path="informe-sintetico">
-          <Route path=":id" element={<InformeSintetico/>} />
+        <Route path="informes-sinteticos-respondidos">
+          <Route index element={<InformesSinteticosRespondidos />} />
+          <Route path=":id" element={< VerInformeCurricularRespondido />} />
         </Route>
+
         <Route path="generar-informe/:carreraId" element={<GenerarInformeSintetico />}/>
         <Route path="informes">
             <Route index element={<InformesCurricularesDisponibles />} />

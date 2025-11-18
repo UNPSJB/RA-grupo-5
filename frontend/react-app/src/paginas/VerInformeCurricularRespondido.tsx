@@ -44,29 +44,23 @@ export default function VerInformeRespondido() {
         const cargarDatos = async () => {
             setLoading(true);
             try {
-                // 1. Cargar el Informe Asignatura (que incluye asignatura, carrera, etc.)
                 const resInforme = await fetch(`http://localhost:8000/informes-asignaturas/${id}`);
                 if (!resInforme.ok) throw new Error("Error al cargar el informe curricular");
                 const dataInforme: InformeCurricular = await resInforme.json();
                 
-                // 2. Cargar la estructura base (preguntas)
-                // Usamos el ID que viene en el informe: id_informe_curricular_base
-                // @ts-ignore (si el tipo no coincide exacto, asumimos que viene el id)
+                // @ts-ignore
                 const idBase = dataInforme.id_informe_curricular_base || dataInforme.informe_curricular_base?.id;
                 
                 const resBase = await fetch(`http://localhost:8000/informes-curriculares-base/${idBase}`);
                 if (!resBase.ok) throw new Error("Error al cargar la plantilla base");
                 const dataBase: InformeBase = await resBase.json();
 
-                // 3. Cargar las RESPUESTAS específicas de este informe
-                // El endpoint de respuestas filtra por informe_asignatura_id
                 const resRespuestas = await fetch(
                     `http://localhost:8000/respuestas/?persona_id=${ID_DOCENTE}&informe_asignatura_id=${id}`
                 );
                 if (!resRespuestas.ok) throw new Error("Error al cargar las respuestas");
                 const dataRespuestas: RespuestaBackend[] = await resRespuestas.json();
 
-                // 4. Mapear respuestas para el formulario (React Hook Form)
                 const valoresIniciales: Record<string, any> = {};
                 
                 if (dataRespuestas.length > 0) {
@@ -109,7 +103,8 @@ export default function VerInformeRespondido() {
 
     return (
         <Container className="my-4">
-            <h2 className="text-success fw-bold mb-4">Informe Enviado</h2>
+            {/* Título cambiado a primary para consistencia general, o secondary si prefieres */}
+            <h2 className="text-primary fw-bold mb-4">Informe Enviado</h2>
             
             <LayoutReporte
                 asignatura={asignatura.nombre}
@@ -121,7 +116,8 @@ export default function VerInformeRespondido() {
                     <Form>
                          {/* --- Datos Administrativos (Solo lectura) --- */}
                          <Card className="border rounded shadow-sm mb-4">
-                            <Card.Header as="h5" className="bg-success text-white">
+                            {/* CAMBIO DE COLOR: bg-success -> bg-secondary */}
+                            <Card.Header as="h5" className="bg-secondary text-white">
                                 Datos Administrativos Registrados
                             </Card.Header>
                             <Card.Body className="p-4 bg-light">
@@ -142,28 +138,13 @@ export default function VerInformeRespondido() {
 
                         {/* --- Respuestas --- */}
                         <Card className="border rounded shadow-sm">
-                            <Card.Header as="h5" className="bg-success text-white">
+                            {/* CAMBIO DE COLOR: bg-success -> bg-secondary */}
+                            <Card.Header as="h5" className="bg-secondary text-white">
                                 Respuestas Enviadas
                             </Card.Header>
                             <Card.Body className="p-4">
-                                {/* Como InformeBase no tiene 'variables' agrupadas como EncuestaBase, 
-                                    sino 'preguntas' directas, las renderizamos.
-                                    Sin embargo, el componente Variable espera una estructura de Variable.
-                                    Vamos a simular una variable "dummy" para reutilizar el componente 
-                                    o mapear las preguntas directamente. 
-                                    
-                                    Dado que InformeBase.ts dice "preguntas: Pregunta[]", 
-                                    y tus preguntas en DB pueden tener id_variable nulo...
-                                    
-                                    Vamos a renderizar Pregunta por Pregunta manualmente para asegurar compatibilidad.
-                                */}
-                                
                                 {informeBase.preguntas.map(pregunta => (
                                     <div key={pregunta.id} className="mb-3">
-                                        {/* Reutilizamos el componente Pregunta pasándole disabled={true} */}
-                                        {/* Necesitamos importar Pregunta desde componentes */}
-                                        {/* Nota: Variable.tsx ya hace esto, podemos usar un Variable "falso" si queremos */}
-                                        
                                         <Variable 
                                             variable={{
                                                 id: 0, 
@@ -179,7 +160,7 @@ export default function VerInformeRespondido() {
                                 ))}
 
                                 <div className="text-center mt-4">
-                                    <Button variant="secondary" onClick={() => navigate('/docente/informes-curriculares-respondidos')}>
+                                    <Button variant="primary" onClick={() => navigate('/docente/informes-curriculares-respondidos')}>
                                         Volver al listado
                                     </Button>
                                 </div>
