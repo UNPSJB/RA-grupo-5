@@ -253,32 +253,41 @@ export default function EstadisticasDocentePage() {
                                 </ListGroup>
                             </Col>
                         </Row>
-
                         <div className="mt-4">
-                            <ResponsiveContainer width="100%" height={250}>
-                                <BarChart
-                                    data={rankingData.sort((a, b) => a.valor - b.valor)}
-                                    margin={{ top: 5, right: 30, left: 20, bottom: 100 }} 
-                                >
-                                    <XAxis 
-                                        dataKey="texto" 
-                                        interval={0} 
-                                        angle={-30} 
-                                        textAnchor="end" 
-                                        height={110} 
-                                        style={{ fontSize: '0.7rem' }} 
-                                        tickFormatter={(value) => rankingSource === 'general' ? `${value.substring(0, 30)}...` : value.substring(0, 30) + '...'}
-                                    />
-                                    <YAxis tickFormatter={(value) => `${value}%`} />
-                                    <Tooltip formatter={(value: number, props: any) => [`${value}%`, props.payload.variableNombre]} />
-                                    <Bar 
-                                        dataKey="valor" 
-                                        fill="#0d6efd" 
-                                        name="Score"
-                                    />
-                                </BarChart>
-                            </ResponsiveContainer>
+                          <ResponsiveContainer width="100%" height={250}>
+                            <BarChart
+                              data={[...rankingData].sort((a, b) => a.valor - b.valor)} // ← copia antes de ordenar
+                              margin={{ top: 5, right: 30, left: 20, bottom: 100 }}
+                            >
+                              <XAxis
+                                dataKey="texto"
+                                interval={0}
+                                angle={-30}
+                                textAnchor="end"
+                                height={110}
+                                style={{ fontSize: '0.7rem' }}
+                                tickFormatter={(value: unknown) => {
+                                  const text = typeof value === 'string' ? value : '';
+                                  const trunc = text.length > 30 ? text.substring(0, 30) + '...' : text;
+                                  return rankingSource === 'general' ? trunc : trunc;
+                                }}
+                              />
+                              <YAxis tickFormatter={(value: number) => `${value}%`} />
+                              <Tooltip
+                                formatter={(value: unknown, _name: unknown, props: any) => {
+                                  const v = typeof value === 'number' && isFinite(value) ? value : 0;
+                                  const varName =
+                                    props?.payload?.variableNombre ??
+                                    (typeof props?.label === 'string' ? props.label : ''); // fallback
+                                  return [`${v}%`, varName];
+                                }}
+                                cursor={{ fill: 'rgba(13,110,253,0.08)' }} // opcional: mejora hover
+                              />
+                              <Bar dataKey="valor" fill="#0d6efd" name="Score" />
+                            </BarChart>
+                          </ResponsiveContainer>
                         </div>
+
                     </>
                 ) : (
                     <p className="text-muted">Utiliza el selector de arriba para elegir el alcance del ranking (General o por Variable).</p>
