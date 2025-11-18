@@ -122,7 +122,7 @@ export default function EstadisticasDocentePage() {
   const [calculatedComparativeScores, setCalculatedComparativeScores] = useState<Record<string, number> | null>(null);
   const [loadingComparative, setLoadingComparative] = useState(false);
   const [rankingSource, setRankingSource] = useState<'general' | string>('general');
-  const [comparisonYear, setComparisonYear] = useState<number>(new Date().getFullYear());
+  const [comparisonYear, setComparisonYear] = useState<number>(new Date().getFullYear() - 1);
 
   const inscriptos = 10;
 
@@ -419,7 +419,7 @@ const renderComparativaSection = () => {
                     dataKey="promedio"
                     nameKey="nombre"
                     innerRadius={50}
-                    outerRadius={70}
+                    outerRadius={65}
                     paddingAngle={2}
                     // FIX: Agregando el valor del promedio como etiqueta simple
                     label={(props: any) => `${props.promedio}%`} 
