@@ -83,14 +83,16 @@ export default function LoginPage() {
           onSubmit={handleSubmit}
         >
           <h2 className="text-center mb-4">Iniciar sesión</h2>
+          <h6 className="text-center mb-4">Sistema de encuestas</h6>
 
           <div className="mb-3">
-            <label>DNI</label>
+            <label>Usuario</label>
             <input
               type="text"
               className="form-control"
               value={dni}
               onChange={(e) => setDni(e.target.value)}
+              placeholder="ej: su DNI"
               required
             />
           </div>
@@ -102,6 +104,7 @@ export default function LoginPage() {
               className="form-control"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="ej: 1234"
               required
             />
           </div>
