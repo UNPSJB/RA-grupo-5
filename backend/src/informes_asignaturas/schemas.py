@@ -14,8 +14,6 @@ class InformeAsignaturaEstado(BaseModel):
     canResponder: bool
 
 class InformeAsignaturaBase(BaseModel):
-    fecha_inicio: date
-    fecha_fin: date
     estado: EstadoInforme
     sede: Sede 
     ciclo_lectivo: int 
