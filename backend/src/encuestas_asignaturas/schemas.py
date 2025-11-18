@@ -7,8 +7,8 @@ from src.respuestas.schemas import RespuestaRead
 from datetime import date
 
 class EncuestaAsignaturaBase(BaseModel):
-    fecha_inicio: date
-    fecha_fin: date
+    fecha_inicio: date = date(2025, 7, 1)
+    fecha_fin: date = date(2025,12,31)
     estado: EstadoEncuesta
 
 class EncuestaAsignaturaCreate(EncuestaAsignaturaBase):

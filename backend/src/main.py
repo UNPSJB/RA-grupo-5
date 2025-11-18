@@ -4,9 +4,9 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from src.database import engine
 from src import models
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
 import logging
-from src.jobs import check_deadlines
+from src.jobs import start_scheduler, shutdown_scheduler 
 
 from src.personas.router import router as personas_router 
 from src.encuestas_base.router import router as encuestas_base_router
@@ -33,23 +33,22 @@ load_dotenv()
 ENV = os.getenv("ENV")
 ROOT_PATH = os.getenv(f"ROOT_PATH_{ENV.upper()}")
 
-logging.basicConfig(level=logging.INFO)
+# --- CONFIGURACIÓN DE LOGGING y PROGRAMADOR DE TAREAS---
+logging.basicConfig(
+    level=logging.INFO, 
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 log = logging.getLogger(__name__)
 
-scheduler = AsyncIOScheduler()
-
+logging.getLogger('apscheduler').setLevel(logging.INFO)
+logging.getLogger('src.jobs').setLevel(logging.INFO)
 
 @asynccontextmanager
 async def db_creation_lifespan(app: FastAPI):
     models.ModeloBase.metadata.create_all(bind=engine)
-    scheduler.add_job(check_deadlines, 'interval', minutes=1, id="check_deadlines_job") #'minutes=1' o 'seconds=30' o 'hours=1' logica para programar el scheduler
-    scheduler.start()
-    log.info("Scheduler iniciado... El job 'check_deadlines' se ejecutará cada 1 min.")
-    
+    start_scheduler()
     yield
-    scheduler.shutdown()
-    log.info("Scheduler detenido.")
-
+    shutdown_scheduler()
 
 
 app = FastAPI(root_path=ROOT_PATH, lifespan=db_creation_lifespan)
