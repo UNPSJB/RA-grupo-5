@@ -9,6 +9,7 @@ import {
   Spinner, 
   Alert 
 } from "react-bootstrap";
+import type { EncuestaAsignatura } from '../types/Encuesta'; // Importamos el tipo
 
 export default function EncuestasPendientes() {
   const { encuestas, loading, error } = useEncuestas();
@@ -55,21 +56,25 @@ export default function EncuestasPendientes() {
                   <p className="text-muted mb-0">No hay encuestas pendientes.</p>
                 </ListGroup.Item>
               ) : (
-                Pendientes.map((encuesta) => (
+                Pendientes.map((encuesta: EncuestaAsignatura) => (
                   <ListGroup.Item 
                     key={encuesta.id}
                     className="d-flex align-items-start" 
                   >
                     <div className="me-3 flex-grow-1 text-start">
                       <span className="fw-bold">{encuesta.asignatura?.nombre}</span>
+                      <span className="text-danger fw-bold ms-3">
+                          Cierre: {encuesta.fecha_fin}
+                      </span>  
+                      
                       <br /> 
-                      <small className="text-muted">
-                        {`Año: ${encuesta.asignatura?.año} | Cursado: ${encuesta.asignatura?.cursado} | `}
-                        
-                        <span className="text-danger fw-bold">
-                          Límite: {encuesta.fecha_fin}
-                        </span>
+                      <small className="d-block m-1">
+                          <strong>Docente:</strong> {encuesta.asignatura.nombre_docente}
                       </small>
+                      <small className="d-block m-1"> 
+                        <strong>Carrera:</strong> {`${encuesta.asignatura.carrera.nombre} | Año: ${encuesta.asignatura.año} | Cursado: ${encuesta.asignatura.cursado}`}
+                      </small>
+                        
                     </div>
 
                     <Link

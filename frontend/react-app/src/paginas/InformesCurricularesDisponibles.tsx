@@ -1,5 +1,6 @@
 import { useInformesCurriculares } from "../hook/useInformesCurriculares";
 import { Link } from "react-router-dom";
+import { IC_C1_START, IC_C1_END, IC_C2_START, IC_C2_END}from "../calendarioAcademico";
 import { 
   Container, 
   Row, 
@@ -59,6 +60,7 @@ export default function InformesCurricularesDisponibles() {
                 <ListGroup.Item>No hay informes cerrados.</ListGroup.Item>
               ) : (
                 cerrados.map(informe => (
+                 
                   <ListGroup.Item 
                     key={informe.id} 
                     className="d-flex align-items-start"
@@ -66,8 +68,11 @@ export default function InformesCurricularesDisponibles() {
                     <div className="me-3 flex-grow-1 text-start">
                       <span className="fw-bold">{informe.asignatura.nombre}</span>
                       <br/>
-                      <small className="text-muted">
-                        {`Docente: ${informe.docente} | Fecha Fin: ${informe.fecha_fin}`}
+                      <small className="d-block m-1">
+                          <strong>Docente:</strong> {informe.asignatura.nombre_docente}
+                      </small>
+                      <small className="d-block m-1"> 
+                          <strong>Carrera:</strong> {`${informe.asignatura.carrera.nombre} | Año: ${informe.asignatura.año} | Cursado: ${informe.asignatura.cursado}`}
                       </small>
                     </div>
                     <Link 

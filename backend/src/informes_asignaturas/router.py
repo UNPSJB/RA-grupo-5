@@ -17,6 +17,10 @@ def create_informe_asignatura(informe: schemas.InformeAsignaturaCreate,  db: Ses
 def read_informe_asignatura(informe_id: int, db:Session = Depends(get_db)):
     return services.leer_informe_asignatura(db, informe_id)
 
+@router.get("/docente/{persona_id}", response_model=list[schemas.InformeAsignaturaRead])
+def read_informes_respondidos_docente(persona_id: int, db:Session = Depends(get_db)):
+    return services.listar_informes_respondidos_docente(db, persona_id)
+
 @router.post("/{informe_id}/confirmar")
 def confirmar_informe_asignatura(informe_id: int):
     # lógica para confirmar el informe

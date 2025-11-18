@@ -10,12 +10,16 @@ import InformesCurricularesDisponibles from "./paginas/InformesCurricularesDispo
 import InformeCurricular from "./paginas/InformeCurricular.tsx";
 import "bootstrap/dist/css/bootstrap.min.css";
 import ReportesDisponibles from "./paginas/ReportesDisponibles.tsx";
-import EncuestasRespondidas from "./componentes/EncuestasRespondidas.tsx";
+import EncuestasRespondidas from "./paginas/EncuestasRespondidas.tsx";
 import InformesSinteticosDisponibles from "./paginas/InformesSinteticosDisponibles.tsx";
 import InformeSintetico from "./paginas/InformeSintetico.tsx";
-import VerInformeCurricular from "./paginas/VerInformeCurricular.tsx";
+import VerInformeCurricular from "./paginas/VerInformeCurricularRespondido.tsx";
 import EstadisticasDepartamentoPage from "./paginas/EstadisticasDepartamentoPage.tsx";
 import GenerarInformeSintetico from "./paginas/GenerarInformeSintetico.tsx";
+import VerEncuesta from "./paginas/VerEncuestaRespondida.tsx";
+import InformesCurricularesRespondidos from "./paginas/InformesCurricularesRespondidos.tsx";
+import VerInformeCurricularRespondido from "./paginas/VerInformeCurricularRespondido.tsx";
+
 
 function App() {
   return (
@@ -28,10 +32,12 @@ function App() {
           <Route path=":id" element={<Encuesta />} />
           <Route index element={<EncuestasPendientes />} />
         </Route>
+
         <Route path="encuestas-respondidas">
-          <Route path=":id" element={<Encuesta />} />
           <Route index element={<EncuestasRespondidas />} />
+          <Route path=":id" element={<VerEncuesta />} />
         </Route>
+        
       </Route>
 
       <Route path="/docente" element={<LayoutDocente />}>
@@ -44,11 +50,12 @@ function App() {
           <Route path=":reporteId" element={<InformeCurricular />} />
           <Route index element={<ReportesDisponibles />} />
         </Route>
-        <Route path="informes">
-          <Route path=":id" element={<VerInformeCurricular />} />
+
+        <Route path="informes-curriculares-respondidos">
+          <Route index element={<InformesCurricularesRespondidos />} />
+          <Route path=":id" element={< VerInformeCurricularRespondido />} />
         </Route>
       </Route>
-
 
       <Route path="/departamento" element={<LayoutDepartamento />}>
         <Route index element={<InformesSinteticosDisponibles />} />

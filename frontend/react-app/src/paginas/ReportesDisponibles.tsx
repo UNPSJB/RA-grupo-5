@@ -67,7 +67,7 @@ export default function ReportesDisponibles() {
                         <small className="d-block m-1">
                           <strong>Docente:</strong> {asignatura.nombre_docente}
                         </small>
-                        <small className="d-block m-1">
+                        <small className="d-block m-1"> 
                           <strong>Carrera:</strong> {`${asignatura.carrera.nombre} | Año: ${asignatura.año} | Cursado: ${asignatura.cursado}`}
                         </small>
                       </div>
@@ -84,7 +84,7 @@ export default function ReportesDisponibles() {
 
                         {reporte.has_respuesta ? (
                           <Link
-                            to={`/docente/informes/${reporte.informe_id}`}
+                            to={`/docente/informes-curriculares-respondidos/${reporte.informe_id}`}
                             className="btn btn-outline-primary btn-sm"
                             title="Ver Informe"
                           >
