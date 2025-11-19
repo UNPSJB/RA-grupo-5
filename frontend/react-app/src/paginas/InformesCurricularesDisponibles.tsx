@@ -41,7 +41,7 @@ export default function InformesCurricularesDisponibles() {
       <Row>
         <Col md={10} lg={8} className="mx-auto">
 
-          <Card className="border rounded shadow-sm bg-white">
+          <Card className="border rounded shadow-sm">
             
             <Card.Header 
               as="h5" 
