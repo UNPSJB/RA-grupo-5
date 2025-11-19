@@ -7,22 +7,21 @@ import {
   Card,
   Tabs,
   Tab,
-  Alert,
   Button,
   Row,
   Spinner
 } from "react-bootstrap";
 import type { Respuesta } from "../types/InformeSintetico";
 
-
 import { useInformeSinteticoBase } from "../hook/useInformeSinteticoBase";
 import { useResponderInformeSintetico } from "../hook/useResponderInformeSintetico";
 import { useInformesParaSintetico } from "../hook/useInformesParaSintetico";
 import { useInformesSinteticos } from "../hook/useInformesSinteticos";
 
-import "../styles/informe.css"; 
-import { Cursado } from "../types/models/Cursado";
+import { useAlertaFlotante } from "../hook/useAlertaFlotante";
+import AlertaFlotante from "../componentes/AlertaFlotante";
 
+import "../styles/informe.css"; 
 
 const findRespuestaPorPreguntaId = (
   preguntaId: number,
@@ -44,14 +43,6 @@ const findRespuestaPorPreguntaId = (
 };
 
 
-type AlertState = {
-  show: boolean;
-  exiting: boolean;
-  variant: "success" | "danger";
-  message: string;
-};
-
-
 export default function GenerarInformeSintetico() {
   const { carreraId } = useParams<{ carreraId: string }>();
   const [searchParams] = useSearchParams();
@@ -59,29 +50,27 @@ export default function GenerarInformeSintetico() {
 
   const numCarreraId = carreraId ? parseInt(carreraId, 10) : null;
   const numCiclo = searchParams.get("ciclo") ? parseInt(searchParams.get("ciclo")!, 10) : null;
-  const cuatrimestre = searchParams.get("cuatrimestre");
+  const cuatrimestre = searchParams.get("cuatrimestre") || ""; 
 
   const { fetchInformeSinteticoBaseActual } = useInformeSinteticoBase();
   const { informesFiltrados, carrera, loading: loadingInformes } = useInformesParaSintetico(numCarreraId, numCiclo, cuatrimestre);
-  
-
-  const { crearInformeSinteticoCarrera } = useInformesSinteticos(numCiclo ?? 0, cuatrimestre ?? ""); // (el ciclo no se usa en la función create, pero el hook lo pide)
+  const { crearInformeSinteticoCarrera } = useInformesSinteticos(numCiclo ?? 0, cuatrimestre);
   const { answersByPreguntaOpcion, setTextoRespuesta, guardarRespuestaSintetico } = useResponderInformeSintetico();
   
+  const { alerta, mostrarAlerta, cerrarAlerta } = useAlertaFlotante();
+
+  const handleAlertExited = () => {
+    if (alerta.variant === 'success') {
+      navigate("/departamento/informes-sinteticos");
+    }
+  };
+
   const [informeBase, setInformeBase] = useState<any>(null);
   const [loadingBase, setLoadingBase] = useState(true);
   const [comisionAsesora, setComisionAsesora] = useState("");
   const [integrantes, setIntegrantes] = useState("");
   const [saving, setSaving] = useState(false);
   
-
-  const [alert, setAlert] = useState<AlertState>({ 
-    show: false, 
-    exiting: false, 
-    variant: "success", 
-    message: "" 
-  });
-
 
   useEffect(() => {
     fetchInformeSinteticoBaseActual()
@@ -90,54 +79,42 @@ export default function GenerarInformeSintetico() {
       .finally(() => setLoadingBase(false));
   }, [fetchInformeSinteticoBaseActual]);
 
-
-  useEffect(() => {
-    if (!alert.show || alert.exiting) return;
-    const t = setTimeout(() => setAlert((a: AlertState) => ({ ...a, exiting: true, show: false })), 2500);
-    return () => clearTimeout(t);
-  }, [alert.show, alert.exiting]);
-
-  useEffect(() => {
-    if (!alert.exiting) return;
-    const t = setTimeout(() => {
-      const go = alert.variant === "success";
-      setAlert({ show: false, exiting: false, variant: "success", message: "" });
-      if (go) navigate("/departamento/informes-sinteticos");
-    }, 300);
-    return () => clearTimeout(t);
-  }, [alert.exiting, alert.variant, navigate]);
-  
-
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!carrera || !informeBase || !numCiclo || !cuatrimestre || !informesFiltrados ) return;
+    if (!carrera || !informeBase || !numCiclo || !informesFiltrados || !cuatrimestre) return;
 
     setSaving(true);
+
     try {
       const payloadCabecera = {
         ciclo_lectivo: numCiclo.toString(),
+        cursado: cuatrimestre,
         comision_asesora: comisionAsesora,
         sede: carrera.sede,
         integrantes: integrantes,
         id_carrera: carrera.id,
         id_informe_sintetico_base: informeBase.id,
-        estado: "abierto" as const, 
-        informes_asignaturas: informesFiltrados.map(inf => inf.id), 
-        cursado : cuatrimestre
+        estado: "abierto" as const,
+        informes_asignaturas: informesFiltrados.map(inf => inf.id),
       };
+
       const informeCreado = await crearInformeSinteticoCarrera(payloadCabecera);
+
       const idDepartamento = 1; 
       const resultGuardado = await guardarRespuestaSintetico(
         idDepartamento,
         informeCreado.id
       );
+
       if (!resultGuardado.ok) {
         throw new Error(resultGuardado.detail || "No se pudo guardar la respuesta del informe.");
       }
-      setAlert({ show: true, exiting: false, variant: "success", message: "Informe Sintético guardado ✔" });
+
+      mostrarAlerta("success", "Informe Sintético guardado ✔");
+
     } catch (err: any) {
       console.error(err);
-      setAlert({ show: true, exiting: false, variant: "danger", message: err?.message || "Error al guardar el informe." });
+      mostrarAlerta("danger", err?.message || "Error al guardar el informe.");
     } finally {
       setSaving(false);
     }
@@ -145,45 +122,30 @@ export default function GenerarInformeSintetico() {
     carrera, informeBase, numCiclo, cuatrimestre, informesFiltrados, 
     comisionAsesora, integrantes,
     crearInformeSinteticoCarrera, guardarRespuestaSintetico,
-    navigate
+    mostrarAlerta
   ]);
 
-
   if (loadingInformes || loadingBase) {
-    return (
-      <Container className="mt-4">
-        Cargando datos... 
-      </Container>
-    );
+    return <Container className="mt-4">Cargando datos...</Container>;
   }
-  if (!carrera) {
-    return <Container className="mt-4 alert alert-danger">Error: No se pudo cargar la <b>Carrera</b>...</Container>;
-  }
-  if (!informeBase) {
-    return <Container className="mt-4 alert alert-danger">Error: No se pudo cargar la <b>Plantilla Base</b>...</Container>;
-  }
-  if (!informesFiltrados) { 
-    return <Container className="mt-4 alert alert-danger">Error: <b>informesFiltrados</b> es nulo.</Container>;
-  }
+  if (!carrera) return <Container className="mt-4 alert alert-danger">Error: No se pudo cargar la Carrera.</Container>;
+  if (!informeBase) return <Container className="mt-4 alert alert-danger">Error: No se pudo cargar la Plantilla Base.</Container>;
+  if (!informesFiltrados) return <Container className="mt-4 alert alert-danger">Error: informesFiltrados es nulo.</Container>;
   
-
   return (
     <Container>
-      {/* ALERT FLOTANTE */}
-      {(alert.show || alert.exiting) && (
-        <div className={`alert-float ${alert.exiting ? "alert-float-hide" : "alert-float-show"}`}>
-          <Alert show={alert.show} variant={alert.variant} dismissible={false} transition={false} className="shadow-lg">
-            {alert.message}
-          </Alert>
-        </div>
-      )}
-
+      <AlertaFlotante 
+        show={alerta.show}
+        variant={alerta.variant}
+        message={alerta.message}
+        onClose={cerrarAlerta}
+        onExited={handleAlertExited}
+      />
 
       <Form onSubmit={handleSubmit}>
         <Col md={10} lg={8} className="mx-auto my-4">
           
-
-          <Card className="mb-4 border rounded shadow-sm">
+          <Card className="mb-4 border rounded shadow-sm bg-white">
             <Card.Header as="h4" className="bg-primary text-white">
               Generar Informe Sintético - {carrera.nombre}
             </Card.Header>
@@ -193,9 +155,24 @@ export default function GenerarInformeSintetico() {
               </Card.Title>
               <Row>
                 <Col md={6}>
-                  <p><strong>Ciclo Lectivo:</strong> {numCiclo}</p>
-                  <p><strong>Cuatrimestre:</strong> {cuatrimestre}</p>
-                  <p><strong>Sede:</strong> {carrera.sede}</p>
+                  <Form.Group as={Row} className="mb-3">
+                    <Form.Label column sm={5} className="fw-semibold">Ciclo Lectivo:</Form.Label>
+                    <Col sm={7}>
+                      <Form.Control type="text" value={numCiclo || ""} readOnly plaintext />
+                    </Col>
+                  </Form.Group>
+                  <Form.Group as={Row} className="mb-3">
+                    <Form.Label column sm={5} className="fw-semibold">Sede:</Form.Label>
+                    <Col sm={7}>
+                      <Form.Control type="text" value={carrera.sede || ""} readOnly plaintext />
+                    </Col>
+                  </Form.Group>
+                  <Form.Group as={Row} className="mb-3">
+                    <Form.Label column sm={5} className="fw-semibold">Cursado:</Form.Label>
+                    <Col sm={7}>
+                      <Form.Control type="text" value={cuatrimestre} readOnly plaintext />
+                    </Col>
+                  </Form.Group>
                 </Col>
                 
                 <Col md={6}>
@@ -232,8 +209,8 @@ export default function GenerarInformeSintetico() {
             </Card.Body>
           </Card>
 
-          <Card className="mb-4 border rounded shadow-sm">
-            <Card.Header as="h5" className="bg-primary text-white">
+          <Card className="mb-4 border rounded shadow-sm bg-white">
+            <Card.Header as="h5" className="bg-light">
               Informes Curriculares incluídos ({informesFiltrados.length})
             </Card.Header>
             <Card.Body className="p-4">
@@ -257,6 +234,7 @@ export default function GenerarInformeSintetico() {
                           <strong> Año:</strong> {informeAsignatura.asignatura?.año} | 
                           <strong> Alumnos:</strong> {informeAsignatura.cant_alumnos_insc}
                         </div>
+
                         {preguntas.length > 0 ? (
                           preguntas.map((pregunta) => (
                             <div key={pregunta.id} className="border-top py-3 text-start">
@@ -282,8 +260,7 @@ export default function GenerarInformeSintetico() {
             </Card.Body>
           </Card>
 
-
-          <Card className="border rounded shadow-sm mt-5">
+          <Card className="border rounded shadow-sm bg-white mt-5">
             <Card.Header as="h5" className="bg-primary text-white">
               Análisis y Conclusiones del Departamento
             </Card.Header>

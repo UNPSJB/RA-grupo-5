@@ -5,11 +5,9 @@ import { useInformesCurriculares } from "../hook/useInformesCurriculares";
 import { useInformeCurricularBase } from "../hook/useInformeCurricularBase";
 import { useResponderInforme } from "../hook/useResponderInforme";
 import LayoutReporte from "../componentes/LayoutReporte";
-import { IC_C1_START, IC_C1_END, IC_C2_START, IC_C2_END}from "../calendarioAcademico";
 import {
   Container,
   Card,
-  Alert,
   Form,
   Row,
   Col,
@@ -19,20 +17,13 @@ import {
 import ResumenVariable from "../componentes/ResumenVariable";
 import "../styles/informe.css"; 
 
-//. FUNCIÓN AUXILIAR: Convierte Date a "YYYY-MM-DD"
-const formatearFecha = (date: Date): string => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
+import { useAlertaFlotante } from "../hook/useAlertaFlotante";
+import AlertaFlotante from "../componentes/AlertaFlotante";
 
 export default function InformeCurricular() {
   const { reporteId } = useParams();
   const navigate = useNavigate();
 
-  // --- 1. HOOKS DE DATOS ---
   const { fetchReporteById, fetchResumenByReporteId } = useReportes();
   const { crearInformeCurricular } = useInformesCurriculares();
   const { fetchInformeBaseActual } = useInformeCurricularBase();
@@ -42,7 +33,16 @@ export default function InformeCurricular() {
     guardarRespuestasInforme,
   } = useResponderInforme();
 
-  // --- 2. ESTADOS DE CARGA Y DATOS ---
+
+  const { alerta, mostrarAlerta, cerrarAlerta } = useAlertaFlotante();
+
+  const handleAlertExited = () => {
+    if (alerta.variant === 'success') {
+      navigate("/docente");
+    }
+  };
+
+
   const [reporte, setReporte] = useState<any>(null);
   const [loadingReporte, setLoadingReporte] = useState(true);
   const [errorReporte, setErrorReporte] = useState<string | null>(null);
@@ -55,45 +55,15 @@ export default function InformeCurricular() {
   const [loadingBase, setLoadingBase] = useState(true);
   const [errorBase, setErrorBase] = useState<string | null>(null);
 
-  // --- 3. ESTADOS DEL FORMULARIO ---
+
   const [sede, setSede] = useState("");
   const [cicloLectivo, setCicloLectivo] = useState<number | "">("");
   const [docente, setDocente] = useState("");
   const [cantInscriptos, setCantInscriptos] = useState<number | "">("");
   const [cantTeoricas, setCantTeoricas] = useState<number | "">("");
   const [cantPracticas, setCantPracticas] = useState<number | "">("");
-
   const [saving, setSaving] = useState(false);
-  const [alert, setAlert] = useState<{
-    show: boolean;
-    exiting: boolean;
-    variant: "success" | "danger" | "warning" | "info";
-    message: string;
-  }>({ show: false, exiting: false, variant: "success", message: "" });
-
-  // --- 4. useEffects (PARA ALERTAS Y CARGA DE DATOS) ---
-  useEffect(() => {
-    if (!alert.show || alert.exiting) return;
-    const t = setTimeout(() => {
-      setAlert((a: any) => ({ ...a, exiting: true, show: false }));
-    }, 2500);
-    return () => clearTimeout(t);
-  }, [alert.show, alert.exiting]);
-
-  useEffect(() => {
-    if (!alert.exiting) return;
-    const t = setTimeout(() => {
-      const go = alert.variant === "success";
-      setAlert({
-        show: false,
-        exiting: false,
-        variant: "success",
-        message: "",
-      });
-      if (go) navigate("/docente");
-    }, 300);
-    return () => clearTimeout(t);
-  }, [alert.exiting, alert.variant, navigate]);
+  
 
   useEffect(() => {
     async function cargarReporte() {
@@ -153,6 +123,7 @@ export default function InformeCurricular() {
     cargarInformeBase();
   }, [fetchInformeBaseActual]);
 
+  // --- Lógica de Submit ---
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -165,13 +136,8 @@ export default function InformeCurricular() {
           asignatura?.id ||
           asignatura?.id_asignatura ||
           asignatura?.idAsignatura;
-        const cursado = asignatura?.cursado;
-        const fechaInicioObj = cursado === "cuatrimestre 1" ? IC_C1_START : IC_C2_START;
-        const fechaFinObj = cursado === "cuatrimestre 1" ? IC_C1_END : IC_C2_END;
 
         const payloadCabecera = {
-          fecha_inicio: formatearFecha(fechaInicioObj),
-          fecha_fin: formatearFecha(fechaFinObj),
           estado: "abierto",
           sede,
           ciclo_lectivo: Number(cicloLectivo),
@@ -192,13 +158,7 @@ export default function InformeCurricular() {
         );
 
         if (!result.ok && result.conflict) {
-          setAlert({
-            show: true,
-            exiting: false,
-            variant: "danger",
-            message:
-              result.detail || "El informe ya tiene una respuesta registrada.",
-          });
+          mostrarAlerta("danger", result.detail || "El informe ya tiene una respuesta registrada.");
           return;
         }
 
@@ -208,20 +168,11 @@ export default function InformeCurricular() {
           );
         }
 
-        setAlert({
-          show: true,
-          exiting: false,
-          variant: "success",
-          message: "Informe guardado correctamente ✔",
-        });
+        mostrarAlerta("success", "Informe guardado correctamente ✔");
+
       } catch (err: any) {
         console.error(err);
-        setAlert({
-          show: true,
-          exiting: false,
-          variant: "danger",
-          message: err?.message || "No se pudo guardar el informe curricular.",
-        });
+        mostrarAlerta("danger", err?.message || "No se pudo guardar el informe curricular.");
       } finally {
         setSaving(false);
       }
@@ -238,13 +189,11 @@ export default function InformeCurricular() {
       reporteId,
       crearInformeCurricular,
       guardarRespuestasInforme,
-      navigate,
+      mostrarAlerta,
     ]
   );
 
-
   const asignatura = reporte?.encuesta_asignatura?.asignatura || {};
-  
   const resumenVariablesFiltradas = useMemo(() => {
     const resultados: Record<string, any> =
       resumenData?.resultados_por_pregunta ?? {};
@@ -287,61 +236,26 @@ export default function InformeCurricular() {
       );
   }, [resumenData]); 
 
-
-  if (loadingReporte || loadingBase || loadingResumen)
-    return <div className="container mt-4">Cargando...</div>;
-
-  if (errorReporte)
-    return <div className="container mt-4 text-danger">{errorReporte}</div>;
-  if (errorBase)
-    return <div className="container mt-4 text-danger">{errorBase}</div>;
-  if (errorResumen)
-    return <div className="container mt-4 text-danger">{errorResumen}</div>;
-
-  if (!reporte)
-    return <div className="container mt-4">No hay datos del reporte.</div>;
-  if (!informeBase)
-    return (
-      <div className="container mt-4">
-        No hay plantilla de Informe Base disponible.
-      </div>
-    );
-  if (!resumenData)
-    return (
-      <div className="container mt-4">
-        No hay datos de resumen para este reporte.
-      </div>
-    );
-
+  if (loadingReporte || loadingBase || loadingResumen) return <div className="container mt-4">Cargando...</div>;
+  if (errorReporte) return <div className="container mt-4 text-danger">{errorReporte}</div>;
+  if (errorBase) return <div className="container mt-4 text-danger">{errorBase}</div>;
+  if (errorResumen) return <div className="container mt-4 text-danger">{errorResumen}</div>;
+  if (!reporte) return <div className="container mt-4">No hay datos del reporte.</div>;
+  if (!informeBase) return <div className="container mt-4">Plantilla no disponible.</div>;
+  if (!resumenData) return <div className="container mt-4">Datos de resumen no disponibles.</div>;
 
   return (
     <div className="container mt-4">
-      <h2 className="text-primary fw-bold">Informe de Actividad Curricular</h2>
+      
+      <AlertaFlotante 
+        show={alerta.show}
+        variant={alerta.variant}
+        message={alerta.message}
+        onClose={cerrarAlerta}
+        onExited={handleAlertExited}
+      />
 
-      {(alert.show || alert.exiting) && (
-        <div
-          className={`alert-float ${
-            alert.exiting ? "alert-float-hide" : "alert-float-show"
-          }`}
-        >
-          <Alert
-            show={alert.show}
-            variant={alert.variant}
-            dismissible
-            transition={false}
-            onClose={() =>
-              setAlert((a: any) => ({
-                ...a,
-                exiting: true,
-                show: false,
-              }))
-            }
-            className="shadow-lg"
-          >
-            {alert.message}
-          </Alert>
-        </div>
-      )}
+      <h2 className="text-primary fw-bold">Informe de Actividad Curricular</h2>
 
       <LayoutReporte
         asignatura={asignatura.nombre}
@@ -352,7 +266,6 @@ export default function InformeCurricular() {
         <Container className="mt-5 text-start">
           <Row>
             <Col lg={9} md={10} className="mx-auto">
-              
               <Form onSubmit={handleSubmit}>
                 
                 <Card className="border rounded shadow-sm mb-4 bg-white">
@@ -376,8 +289,11 @@ export default function InformeCurricular() {
                         <Form.Control
                           type="number"
                           value={cicloLectivo}
-                          plaintext
-                          readOnly
+                          onChange={(e) => setCicloLectivo(e.target.value === "" ? "" : Number(e.target.value))}
+                          placeholder="2025 (ejemplo)"
+                          min={2000}
+                          required
+                          disabled={saving}
                         />
                       </Col>
                     </Form.Group>
@@ -442,7 +358,6 @@ export default function InformeCurricular() {
                         />
                       </Col>
                     </Form.Group>
-
                   </Card.Body>
                 </Card>
 
@@ -474,17 +389,13 @@ export default function InformeCurricular() {
                           {Number(pregunta.id) === 35 && (
                             <div className="my-3">
                               {resumenVariablesFiltradas.length > 0 ? (
-                                
                                 <Row className="g-4">
                                   {resumenVariablesFiltradas.map(
                                     ({ codigo, resumen, nombreVar }) => (
-                                      
                                       <Col md={6} key={nombreVar}>
                                         <Card
                                           className="border rounded shadow-sm bg-white h-100"
-                                          style={{
-                                            fontSize: "0.9rem",
-                                          }}
+                                          style={{ fontSize: "0.9rem" }}
                                         >
                                           <Card.Body className="p-3">
                                             <div className="fw-semibold text-center mb-2 text-secondary">
@@ -497,7 +408,6 @@ export default function InformeCurricular() {
                                           </Card.Body>
                                         </Card>
                                       </Col>
-                                      
                                     )
                                   )}
                                 </Row>
