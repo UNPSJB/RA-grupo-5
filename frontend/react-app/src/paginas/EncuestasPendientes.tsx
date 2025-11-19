@@ -43,7 +43,7 @@ export default function EncuestasPendientes() {
       <Row>
         <Col md={10} lg={8} className="mx-auto">
           
-          <Card className="border rounded shadow-sm bg-white">
+          <Card className="border rounded shadow-sm ">
             
             <Card.Header as="h5" className="bg-primary text-white">
               Encuestas Pendientes

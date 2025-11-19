@@ -19,14 +19,13 @@ import Variable from '../componentes/Variable';
 import {
     construirEsquemaEncuesta,
     construirValoresPorDefecto,
-    obtenerNombreCampo // <-- Importado para la validación
+    obtenerNombreCampo 
 } from '../validaciones/Encuesta';
 
 type SurveyFormData = Record<string, any>;
 
 function ResponderEncuesta() {
-  
-    // --- 1. HOOKS (PARTE 1) ---
+
     const { id } = useParams<{ id: string }>();
     const idEncuesta = id ? Number(id) : null;
 
@@ -38,7 +37,6 @@ function ResponderEncuesta() {
         guardarRespuestas
     } = useResponderEncuesta(idEncuesta);
 
-    // --- 2. DATOS MEMORIZADOS ---
     const { defaultValues, schema } = useMemo(() => {
         if (!encuesta || !encuesta.variables) {
             return { defaultValues: {}, schema: undefined };
@@ -49,13 +47,12 @@ function ResponderEncuesta() {
         };
     }, [encuesta]);
 
-    // --- 3. HOOKS (PARTE 2) ---
     const {
         control,
         handleSubmit,
         formState: { errors, isSubmitting },
         reset,
-        trigger // <-- 1. Obtenemos 'trigger' de useForm
+        trigger 
     } = useForm<SurveyFormData>({
         defaultValues: defaultValues,
         resolver: schema ? zodResolver(schema) : undefined, 
@@ -63,21 +60,19 @@ function ResponderEncuesta() {
 
     const [activeTab, setActiveTab] = useState<string | null>(null);
 
-    // --- 4. useEffects (CORREGIDOS) ---
-    
-    // Efecto 1: Resetea el formulario SÓLO cuando los datos (defaultValues) cambian.
+
     useEffect(() => {
         reset(defaultValues); 
     }, [defaultValues, reset]);
 
-    // Efecto 2: Establece la pestaña inicial SÓLO una vez, cuando la data carga.
+
     useEffect(() => {
         if (encuesta && encuesta.variables && encuesta.variables.length > 0 && activeTab === null) {
             setActiveTab(encuesta.variables[0].id.toString());
         }
     }, [encuesta, activeTab]);
 
-    // --- 5. LÓGICA DE MANEJADORES ---
+
     const onSubmit = async (data: SurveyFormData) => {
         const idPersona = 1;
         const resultado = await guardarRespuestas(idPersona, data);
@@ -86,7 +81,7 @@ function ResponderEncuesta() {
         }
     };
 
-    // --- 6. ESTADOS DE CARGA / ERRORES (EARLY RETURNS) ---
+
     if (loading) {
         return ( <Container className="py-4 text-center">Cargando...</Container> );
     }
@@ -100,7 +95,7 @@ function ResponderEncuesta() {
         return ( <Container className="py-4 text-center">Iniciando...</Container> );
     }
 
-    // --- 7. LÓGICA DE RENDER (SEGURA) ---
+
     const activeTabIndex = encuesta.variables.findIndex(v => v.id.toString() === activeTab);
     
     if (activeTabIndex === -1) {
@@ -113,29 +108,25 @@ function ResponderEncuesta() {
         setActiveTab(previousTabKey);
     };
 
-    // --- 8. LÓGICA DE VALIDACIÓN (¡NUEVO!) ---
 
-    // Función reutilizable para validar la pestaña actual
     const validateCurrentTab = async () => {
-        // 2. Encontramos la variable (pestaña) actual
+
         const currentVariable = encuesta.variables[activeTabIndex];
         
-        // 3. Obtenemos los nombres de campo (ej: "pregunta_123") 
-        //    SÓLO de las preguntas obligatorias en esta pestaña
         const fieldsToValidate = currentVariable.preguntas
-            .filter(p => p.obligatoria && p.tipo === 'single_choice') // Solo validamos single_choice obligatorias
+            .filter(p => p.obligatoria && p.tipo === 'single_choice') 
             .map(p => obtenerNombreCampo(p.id));
         
         if (fieldsToValidate.length === 0) {
-            return true; // No hay nada que validar en esta pestaña
+            return true;
         }
 
-        // 4. Disparamos la validación SÓLO para esos campos
+
         const isValid = await trigger(fieldsToValidate);
         return isValid;
     };
 
-    // Actualizamos handleNext para que sea async y valide
+
     const handleNext = async () => {
         const isValid = await validateCurrentTab();
         
@@ -143,121 +134,116 @@ function ResponderEncuesta() {
             const nextTabKey = encuesta.variables[activeTabIndex + 1].id.toString();
             setActiveTab(nextTabKey);
         }
-        // Si no es válido, trigger() ya mostró los errores
     };
 
-    // Actualizamos onSelect para que valide si vamos hacia adelante
+
     const handleTabSelect = async (key: string | null) => {
         if (key === null || key === activeTab) return;
 
         const newTabIndex = encuesta.variables.findIndex(v => v.id.toString() === key);
         
-        // Si vamos hacia atrás (o a la misma pestaña), no validamos
+
         if (newTabIndex < activeTabIndex) {
             setActiveTab(key);
             return;
         }
 
-        // Si vamos hacia adelante (clic en una pestaña futura), validamos
         const isValid = await validateCurrentTab();
         if (isValid) {
             setActiveTab(key);
         }
-        // Si no es válido, nos quedamos en la pestaña actual
+
     };
-    // --- FIN DE LA LÓGICA DE VALIDACIÓN ---
 
-
-    // --- 9. RENDER (CON EL NUEVO 'onSelect') ---
     return (
         <Container className="py-4">
-          <Row>
-            <Col md={8} className="mx-auto">
-              <Card className="border rounded shadow-sm bg-white"> 
-                <Card.Header as="h4" className="bg-primary text-white text-center">
-                  {asignatura?.nombre}
-                </Card.Header>
-                <Card.Body className="p-4">
-                  <Form onSubmit={handleSubmit(onSubmit)}> 
-                    
-                    {error && <Alert variant="danger">Error: {error}</Alert>}
-                    
-                    <Tabs
-                      activeKey={activeTab}
-                      onSelect={handleTabSelect} // <-- USAMOS EL NUEVO HANDLER
-                      id="variable-tabs"
-                      className="mb-3"
-                    >
-                      {encuesta.variables.map(variable => (
-                        <Tab
-                          key={variable.id}
-                          eventKey={variable.id.toString()} 
-                          title={variable.codigo}
+            <Row>
+                <Col md={8} className="mx-auto">
+                <Card className="border rounded shadow-sm "> 
+                    <Card.Header as="h4" className="bg-primary text-white text-center">
+                    {asignatura?.nombre}
+                    </Card.Header>
+                    <Card.Body className="p-4">
+                    <Form onSubmit={handleSubmit(onSubmit)}> 
+                        
+                        {error && <Alert variant="danger">Error: {error}</Alert>}
+                        
+                        <Tabs
+                        activeKey={activeTab}
+                        onSelect={handleTabSelect}
+                        id="variable-tabs"
+                        className="mb-3"
                         >
-                          <div className="py-3">
-                            <Variable
-                                variable={variable}
-                                control={control}
-                                errors={errors}
-                            />
-                          </div>
-                        </Tab>
-                      ))}
-                    </Tabs>
+                        {encuesta.variables.map(variable => (
+                            <Tab
+                            key={variable.id}
+                            eventKey={variable.id.toString()} 
+                            title={variable.codigo}
+                            >
+                            <div className="py-3">
+                                <Variable
+                                    variable={variable}
+                                    control={control}
+                                    errors={errors}
+                                />
+                            </div>
+                            </Tab>
+                        ))}
+                        </Tabs>
 
-                    {Object.keys(errors).length > 0 && (
-                        <Alert variant="warning" className="mt-4">
-                            Debes completar <strong>{Object.keys(errors).length}</strong> preguntas obligatorias.
-                        </Alert>
-                    )}
+                        {Object.keys(errors).length > 0 && (
+                            <Alert variant="warning" className="mt-4">
+                                Debes completar <strong>{Object.keys(errors).length}</strong> preguntas obligatorias.
+                            </Alert>
+                        )}
 
-                    <div className="d-flex justify-content-between mt-4">
-                      <Button 
-                          variant="secondary" 
-                          onClick={handlePrevious}
-                          disabled={activeTabIndex === 0}
-                          type="button" 
-                      >
-                          Anterior
-                      </Button>
-
-                      {activeTabIndex === encuesta.variables.length - 1 ? (
-                        <Button
-                            variant="primary"
-                            type="submit"
-                            disabled={isSubmitting}
-                        >
-                            {isSubmitting ? (
-                                <>
-                                    <Spinner
-                                        as="span"
-                                        animation="border"
-                                        size="sm"
-                                        role="status"
-                                        aria-hidden="true"
-                                        className="me-2"
-                                    />
-                                    Guardando...
-                                </>
-                            ) : (
-                                'Guardar Respuestas'
-                            )}
-                        </Button>
-                      ) : (
+                        <div className="d-flex justify-content-between mt-4">
                         <Button 
-                            variant="primary" 
-                            onClick={handleNext} // <-- Usa el nuevo handler
+                            variant="secondary" 
+                            onClick={handlePrevious}
+                            disabled={activeTabIndex === 0}
                             type="button" 
                         >
-                            Siguiente
+                            Anterior
                         </Button>
-                      )}
-                    </div>
-                  </Form>
-                </Card.Body>
-              </Card>
-            </Col>  
-          </Row>
+
+                        {activeTabIndex === encuesta.variables.length - 1 ? (
+                            <Button
+                                variant="primary"
+                                type="submit"
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        <Spinner
+                                            as="span"
+                                            animation="border"
+                                            size="sm"
+                                            role="status"
+                                            aria-hidden="true"
+                                            className="me-2"
+                                        />
+                                        Guardando...
+                                    </>
+                                ) : (
+                                    'Guardar Respuestas'
+                                )}
+                            </Button>
+                        ) : (
+                            <Button 
+                                variant="primary" 
+                                onClick={handleNext} 
+                                type="button" 
+                            >
+                                Siguiente
+                            </Button>
+                        )}
+                        </div>
+                    </Form>
+                    </Card.Body>
+                </Card>
+                </Col>  
+            </Row>
         </Container>
     );
 }

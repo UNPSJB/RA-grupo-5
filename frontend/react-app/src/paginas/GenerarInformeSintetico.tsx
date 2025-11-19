@@ -14,16 +14,16 @@ import {
 } from "react-bootstrap";
 import type { Respuesta } from "../types/InformeSintetico";
 
-// ... (Todos tus imports de hooks se mantienen)
+
 import { useInformeSinteticoBase } from "../hook/useInformeSinteticoBase";
 import { useResponderInformeSintetico } from "../hook/useResponderInformeSintetico";
 import { useInformesParaSintetico } from "../hook/useInformesParaSintetico";
 import { useInformesSinteticos } from "../hook/useInformesSinteticos";
 
-import "../styles/informe.css"; // Reutilizamos los estilos del alert flotante
+import "../styles/informe.css"; 
 import { Cursado } from "../types/models/Cursado";
 
-// ... (Tu función helper findRespuestaPorPreguntaId se mantiene 100% igual)
+
 const findRespuestaPorPreguntaId = (
   preguntaId: number,
   respuesta: Respuesta | null
@@ -43,8 +43,7 @@ const findRespuestaPorPreguntaId = (
   return <em className="text-muted">Sin Respuesta</em>;
 };
 
-// --- ¡CORRECCIÓN AQUÍ! ---
-// 1. Definimos el tipo para el estado de la alerta
+
 type AlertState = {
   show: boolean;
   exiting: boolean;
@@ -54,7 +53,6 @@ type AlertState = {
 
 
 export default function GenerarInformeSintetico() {
-  // ... (Toda tu lógica de hooks y estado se mantiene 100% IGUAL)
   const { carreraId } = useParams<{ carreraId: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -64,10 +62,9 @@ export default function GenerarInformeSintetico() {
   const cuatrimestre = searchParams.get("cuatrimestre");
 
   const { fetchInformeSinteticoBaseActual } = useInformeSinteticoBase();
-  // Este hook nos trae los informes curriculares para las pestañas
   const { informesFiltrados, carrera, loading: loadingInformes } = useInformesParaSintetico(numCarreraId, numCiclo, cuatrimestre);
   
-  // --- 2. Hooks de FORMULARIO y GUARDADO ---
+
   const { crearInformeSinteticoCarrera } = useInformesSinteticos(numCiclo ?? 0, cuatrimestre ?? ""); // (el ciclo no se usa en la función create, pero el hook lo pide)
   const { answersByPreguntaOpcion, setTextoRespuesta, guardarRespuestaSintetico } = useResponderInformeSintetico();
   
@@ -77,7 +74,7 @@ export default function GenerarInformeSintetico() {
   const [integrantes, setIntegrantes] = useState("");
   const [saving, setSaving] = useState(false);
   
-  // 2. Usamos el tipo 'AlertState' en el useState
+
   const [alert, setAlert] = useState<AlertState>({ 
     show: false, 
     exiting: false, 
@@ -85,7 +82,7 @@ export default function GenerarInformeSintetico() {
     message: "" 
   });
 
-  // ... (Tus useEffects para cargar datos) ...
+
   useEffect(() => {
     fetchInformeSinteticoBaseActual()
       .then(setInformeBase)
@@ -93,10 +90,9 @@ export default function GenerarInformeSintetico() {
       .finally(() => setLoadingBase(false));
   }, [fetchInformeSinteticoBaseActual]);
 
-  // --- Lógica de Alerta (copiada de InformeCurricular.tsx) ---
+
   useEffect(() => {
     if (!alert.show || alert.exiting) return;
-    // 3. ¡Usamos el tipo 'AlertState' en el parámetro 'a'!
     const t = setTimeout(() => setAlert((a: AlertState) => ({ ...a, exiting: true, show: false })), 2500);
     return () => clearTimeout(t);
   }, [alert.show, alert.exiting]);
@@ -111,7 +107,7 @@ export default function GenerarInformeSintetico() {
     return () => clearTimeout(t);
   }, [alert.exiting, alert.variant, navigate]);
   
-  // ... (Tu handleSubmit se mantiene 100% igual y correcto) ...
+
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!carrera || !informeBase || !numCiclo || !cuatrimestre || !informesFiltrados ) return;
@@ -125,8 +121,8 @@ export default function GenerarInformeSintetico() {
         integrantes: integrantes,
         id_carrera: carrera.id,
         id_informe_sintetico_base: informeBase.id,
-        estado: "abierto" as const, // Se pone 'abierto'
-        informes_asignaturas: informesFiltrados.map(inf => inf.id), // IDs de los informes hijos
+        estado: "abierto" as const, 
+        informes_asignaturas: informesFiltrados.map(inf => inf.id), 
         cursado : cuatrimestre
       };
       const informeCreado = await crearInformeSinteticoCarrera(payloadCabecera);
@@ -146,13 +142,13 @@ export default function GenerarInformeSintetico() {
       setSaving(false);
     }
   }, [
-    carrera, informeBase, numCiclo, cuatrimestre, informesFiltrados, // Datos
-    comisionAsesora, integrantes, // Estado del form
-    crearInformeSinteticoCarrera, guardarRespuestaSintetico, // Acciones
+    carrera, informeBase, numCiclo, cuatrimestre, informesFiltrados, 
+    comisionAsesora, integrantes,
+    crearInformeSinteticoCarrera, guardarRespuestaSintetico,
     navigate
   ]);
 
-  // --- Renderizado ---
+
   if (loadingInformes || loadingBase) {
     return (
       <Container className="mt-4">
@@ -170,7 +166,7 @@ export default function GenerarInformeSintetico() {
     return <Container className="mt-4 alert alert-danger">Error: <b>informesFiltrados</b> es nulo.</Container>;
   }
   
-  // -------- 8. RENDER REFACTORIZADO CON TEMA --------
+
   return (
     <Container>
       {/* ALERT FLOTANTE */}
@@ -182,11 +178,11 @@ export default function GenerarInformeSintetico() {
         </div>
       )}
 
-      {/* Usamos un FORM que envuelve TODO */}
+
       <Form onSubmit={handleSubmit}>
         <Col md={10} lg={8} className="mx-auto my-4">
           
-          {/* 1. Cabecera (CONSISTENTE) */}
+
           <Card className="mb-4 border rounded shadow-sm">
             <Card.Header as="h4" className="bg-primary text-white">
               Generar Informe Sintético - {carrera.nombre}
@@ -236,7 +232,6 @@ export default function GenerarInformeSintetico() {
             </Card.Body>
           </Card>
 
-          {/* 2. Pestañas (Tabs) (CONSISTENTES) */}
           <Card className="mb-4 border rounded shadow-sm">
             <Card.Header as="h5" className="bg-primary text-white">
               Informes Curriculares incluídos ({informesFiltrados.length})
@@ -287,7 +282,7 @@ export default function GenerarInformeSintetico() {
             </Card.Body>
           </Card>
 
-          {/* 3. Formulario de Preguntas (CONSISTENTE) */}
+
           <Card className="border rounded shadow-sm mt-5">
             <Card.Header as="h5" className="bg-primary text-white">
               Análisis y Conclusiones del Departamento

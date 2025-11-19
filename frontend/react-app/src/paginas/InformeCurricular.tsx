@@ -65,7 +65,7 @@ export default function InformeCurricular() {
   useEffect(() => {
     if (!alert.show || alert.exiting) return;
     const t = setTimeout(() => {
-      setAlert((a) => ({ ...a, exiting: true, show: false }));
+      setAlert((a: any) => ({ ...a, exiting: true, show: false }));
     }, 2500);
     return () => clearTimeout(t);
   }, [alert.show, alert.exiting]);
@@ -99,7 +99,7 @@ export default function InformeCurricular() {
         setSede(asignatura?.sede || "");
         setDocente(asignatura?.nombre_docente || "");
         setCicloLectivo(
-          asignatura?.año ? Number(asignatura.año) : "" // <-- Respetamos tu cambio
+          asignatura?.año ? Number(asignatura.año) : "" 
         );
       } catch {
         setErrorReporte("Error cargando el reporte.");
@@ -143,13 +143,12 @@ export default function InformeCurricular() {
     cargarInformeBase();
   }, [fetchInformeBaseActual]);
 
-  // --- 5. LÓGICA DE SUBMIT (RESTAURADA) ---
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
       if (!reporte || !informeBase) return;
 
-      setSaving(true); // <-- LLAMADA FALTANTE
+      setSaving(true);
       try {
         const asignatura = reporte.encuesta_asignatura?.asignatura;
         const id_asignatura =
@@ -172,17 +171,13 @@ export default function InformeCurricular() {
           id_reporte: Number(reporteId),
         };
 
-        // 1) Crear cabecera
         const informeCreado = await crearInformeCurricular(payloadCabecera);
-
-        // 2) Enviar respuestas
-        const idDocente = 1; // TODO: id real del usuario
+        const idDocente = 1; 
         const result = await guardarRespuestasInforme(
           idDocente,
           informeCreado.id
         );
 
-        // 3) Manejo de resultado
         if (!result.ok && result.conflict) {
           setAlert({
             show: true,
@@ -200,7 +195,6 @@ export default function InformeCurricular() {
           );
         }
 
-        // Éxito
         setAlert({
           show: true,
           exiting: false,
@@ -216,7 +210,7 @@ export default function InformeCurricular() {
           message: err?.message || "No se pudo guardar el informe curricular.",
         });
       } finally {
-        setSaving(false); // <-- LLAMADA FALTANTE
+        setSaving(false);
       }
     },
     [
@@ -235,11 +229,10 @@ export default function InformeCurricular() {
     ]
   );
 
-  // --- 6. LÓGICA DE VARIABLES (useMemo es un hook) ---
+
   const asignatura = reporte?.encuesta_asignatura?.asignatura || {};
   
   const resumenVariablesFiltradas = useMemo(() => {
-    // ... (Toda tu lógica de 'resumenVariablesFiltradas' se mantiene igual)
     const resultados: Record<string, any> =
       resumenData?.resultados_por_pregunta ?? {};
     const resumenes: Record<string, any> =
@@ -281,7 +274,7 @@ export default function InformeCurricular() {
       );
   }, [resumenData]); 
 
-  // --- 7. ESTADOS DE CARGA / ERRORES (EARLY RETURNS) ---
+
   if (loadingReporte || loadingBase || loadingResumen)
     return <div className="container mt-4">Cargando...</div>;
 
@@ -307,13 +300,11 @@ export default function InformeCurricular() {
       </div>
     );
 
-  // -------- 8. RENDER REFACTORIZADO --------
+
   return (
     <div className="container mt-4">
-      {/* ¡CAMBIO AQUÍ! Título de la página con color primario */}
       <h2 className="text-primary fw-bold">Informe de Actividad Curricular</h2>
 
-      {/* Alerta flotante (depende de tu informe.css) */}
       {(alert.show || alert.exiting) && (
         <div
           className={`alert-float ${
@@ -326,7 +317,7 @@ export default function InformeCurricular() {
             dismissible
             transition={false}
             onClose={() =>
-              setAlert((a) => ({
+              setAlert((a: any) => ({
                 ...a,
                 exiting: true,
                 show: false,
@@ -351,14 +342,11 @@ export default function InformeCurricular() {
               
               <Form onSubmit={handleSubmit}>
                 
-                {/* --- Card de datos administrativos (CON TEMA) --- */}
-                <Card className="border rounded shadow-sm mb-4">
-                  {/* ¡CAMBIO AQUÍ! Encabezado temático */}
+                <Card className="border rounded shadow-sm mb-4 bg-white">
                   <Card.Header as="h5" className="bg-primary text-white">
                     Datos Administrativos
                   </Card.Header>
                   <Card.Body className="p-4">
-                    {/* ... (Todo tu Formulario Administrativo Refactorizado) ... */}
                     <Form.Group as={Row} className="mb-3" controlId="formSede">
                       <Form.Label column sm={4} className="fw-semibold">Sede</Form.Label>
                       <Col sm={8}>
@@ -383,8 +371,7 @@ export default function InformeCurricular() {
                         />
                       </Col>
                     </Form.Group>
-                    
-                    {/* ... (El resto de tus Form.Group de admin) ... */}
+
                     <Form.Group as={Row} className="mb-3" controlId="formDocente">
                       <Form.Label column sm={4} className="fw-semibold">Docente/s Responsable/s</Form.Label>
                       <Col sm={8}>
@@ -449,14 +436,11 @@ export default function InformeCurricular() {
                   </Card.Body>
                 </Card>
 
-                {/* --- Card de preguntas (CON TEMA) --- */}
-                <Card className="border rounded shadow-sm">
-                  {/* ¡CAMBIO AQUÍ! Encabezado temático */}
+                <Card className="border rounded shadow-sm bg-white">
                   <Card.Header as="h5" className="bg-primary text-white">
                     Responda
                   </Card.Header>
                   <Card.Body className="p-4">
-                    {/* El h5 que estaba aquí se movió al Card.Header */}
 
                     {informeBase.preguntas?.map((pregunta: any) => {
                       const primeraOpcion = pregunta.pregunta_opcion?.[0];
@@ -480,32 +464,33 @@ export default function InformeCurricular() {
                           {Number(pregunta.id) === 35 && (
                             <div className="my-3">
                               {resumenVariablesFiltradas.length > 0 ? (
-                                <div className="d-flex flex-wrap gap-3 mt-2 justify-content-center">
+                                
+                                <Row className="g-4">
                                   {resumenVariablesFiltradas.map(
                                     ({ codigo, resumen, nombreVar }) => (
-                                      <Card
-                                        key={nombreVar}
-                                        className="border rounded shadow-sm"
-                                        style={{
-                                          width: "260px",
-                                          flex: "0 0 auto",
-                                          fontSize: "0.9rem",
-                                        }}
-                                      >
-                                        <Card.Body className="p-3">
-                                          {/* Este text-secondary ahora será GRIS */}
-                                          <div className="fw-semibold text-center mb-2 text-secondary">
-                                            Variable {codigo}
-                                          </div>
-                                          <ResumenVariable
-                                            resumen={resumen}
-                                            variant="compact"
-                                          />
-                                        </Card.Body>
-                                      </Card>
+                                      
+                                      <Col md={6} key={nombreVar}>
+                                        <Card
+                                          className="border rounded shadow-sm bg-white h-100"
+                                          style={{
+                                            fontSize: "0.9rem",
+                                          }}
+                                        >
+                                          <Card.Body className="p-3">
+                                            <div className="fw-semibold text-center mb-2 text-secondary">
+                                              Variable {codigo}
+                                            </div>
+                                            <ResumenVariable
+                                              resumen={resumen}
+                                              variant="compact"
+                                            />
+                                          </Card.Body>
+                                        </Card>
+                                      </Col>
+                                      
                                     )
                                   )}
-                                </div>
+                                </Row>
                               ) : (
                                 <p className="text-muted small">
                                   No hay variables B, C, D o E para mostrar.
@@ -538,7 +523,6 @@ export default function InformeCurricular() {
                     })}
 
                     <div className="text-center mt-4">
-                      {/* ¡Este botón ahora será AZUL UNPSJB! */}
                       <Button
                         variant="primary"
                         type="submit"
@@ -546,19 +530,19 @@ export default function InformeCurricular() {
                         size="lg"
                       >
                         {saving ? (
-                           <>
-                             <Spinner
-                               as="span"
-                               animation="border"
-                               size="sm"
-                               role="status"
-                               aria-hidden="true"
-                               className="me-2"
-                             />
-                             Guardando...
-                           </>
-                        ) : (
-                           "Guardar Informe"
+                            <>
+                              <Spinner
+                                as="span"
+                                animation="border"
+                                size="sm"
+                                role="status"
+                                aria-hidden="true"
+                                className="me-2"
+                              />
+                              Guardando...
+                            </>
+                          ) : (
+                            "Guardar Informe"
                         )}
                       </Button>
                     </div>
