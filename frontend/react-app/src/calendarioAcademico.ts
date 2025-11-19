@@ -81,6 +81,49 @@ export function isRespuestaEncuestaActiva(cursado: string, today: Date): boolean
   return false;
 }
 
+const formatDate = (date: Date): string => {
+  return date.toLocaleDateString("es-AR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+
+};
+//Devuelve el rango de fechas formateado para ENCUESTAS 
+export function getRangoFechasEncuesta(cursado: string): string {
+  if (cursado === CUATRIMESTRE_1) {
+    return `${formatDate(ENCUESTA_C1_END)}`;
+  }
+  if (cursado === CUATRIMESTRE_2 || cursado === ANUAL) {
+    return `${formatDate(ENCUESTA_C2_END)}`;
+  }
+  return "Fechas no definidas";
+}
+
+//Devuelve el rango de fechas formateado para INFORMES CURRICULARES
+
+export function getRangoFechasInformeCurricular(cursado: string): string {
+  if (cursado === CUATRIMESTRE_1) {
+    return `${formatDate(IC_C1_END)}`;
+  }
+  if (cursado === CUATRIMESTRE_2 || cursado === ANUAL) {
+    return `${formatDate(IC_C2_END)}`;
+  }
+  return "Fechas no definidas";
+}
+
+ //Devuelve el rango de fechas formateado para INFORMES SINTÉTICOS
+
+export function getRangoFechasInformeSintetico(cursado: string): string {
+  if (cursado === CUATRIMESTRE_1) {
+    return `${formatDate(IS_C1_END)}`;
+  }
+  if (cursado === CUATRIMESTRE_2 || cursado === ANUAL) {
+    return `${formatDate(IS_C2_END)}`;
+  }
+  return "Fechas no definidas";
+}
+
 // (Opcional) Puedes añadir también una función para hardcodear la fecha de prueba
 export function getToday(): Date {
   return new Date(); //fecha actual

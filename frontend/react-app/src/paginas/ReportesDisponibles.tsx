@@ -9,12 +9,11 @@ import {
   Spinner, 
   Alert 
 } from "react-bootstrap";
-import { isGeneracionInformeCurricularActiva, getToday } from "../calendarioAcademico";
+import { isGeneracionInformeCurricularActiva, getToday, getRangoFechasInformeCurricular } from "../calendarioAcademico";
 
 export default function ReportesDisponibles() {
   const { reportes, loading, error } = useReportes();
   const today = getToday()
-  
 
   if (loading) {
     return (
@@ -43,7 +42,7 @@ export default function ReportesDisponibles() {
           <Card className="border rounded shadow-sm bg-white">
             
             <Card.Header as="h5" className="bg-primary text-white">
-              Reportes Disponibles
+              Reportes Generados
             </Card.Header>
             
             <ListGroup variant="flush">
@@ -55,24 +54,32 @@ export default function ReportesDisponibles() {
                 reportes.map((reporte) => {
                   const asignatura = reporte.encuesta_asignatura.asignatura;
                   const puedeGenerar = isGeneracionInformeCurricularActiva(asignatura.cursado, today);
-
+                  const fechaCierre = getRangoFechasInformeCurricular(asignatura.cursado);
                   return (
                     <ListGroup.Item 
                       key={reporte.id}
                       className="d-flex align-items-start"
                     >
                       <div className="me-3 flex-grow-1 text-start"> 
-                        <span className="fw-bold">{asignatura.nombre}</span>
+                        <span className="fw-bold fs-5">{asignatura.nombre}</span>
+                        {!reporte.has_respuesta && puedeGenerar && (
+                          <span className="text-danger fw-bold ms-3">
+                            Cierre: {fechaCierre}
+                          </span>
+                        )}
                         <br/>
                         <small className="d-block m-1">
                           <strong>Docente:</strong> {asignatura.nombre_docente}
                         </small>
-                        <small className="d-block m-1"> 
-                          <strong>Carrera:</strong> {`${asignatura.carrera.nombre} | Año: ${asignatura.año} | Cursado: ${asignatura.cursado}`}
+                        <small className="d-block m-1">
+                        <strong>Ciclo:</strong>{`${asignatura.año} | Cursado: ${asignatura.cursado}` }
+                        </small>
+                        <small className="d-block m-1">
+                          <strong>Carrera:</strong>{`${asignatura?.carrera?.nombre} ` }
                         </small>
                       </div>
 
-                      <div className="d-flex flex-column gap-2" style={{ minWidth: '130px' }}>                        
+                      <div className="d-flex flex-column gap-3" style={{ minWidth: '130px' }}>                        
                         <Link
                           to={`/docente/reportes/${reporte.id}`}
                           className="btn btn-secondary btn-sm"

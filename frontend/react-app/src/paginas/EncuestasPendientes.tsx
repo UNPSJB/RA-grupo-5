@@ -9,7 +9,7 @@ import {
   Spinner, 
   Alert 
 } from "react-bootstrap";
-import type { EncuestaAsignatura } from '../types/Encuesta'; // Importamos el tipo
+import {getRangoFechasEncuesta } from "../calendarioAcademico";
 
 export default function EncuestasPendientes() {
   const { encuestas, loading, error } = useEncuestas();
@@ -56,37 +56,43 @@ export default function EncuestasPendientes() {
                   <p className="text-muted mb-0">No hay encuestas pendientes.</p>
                 </ListGroup.Item>
               ) : (
-                Pendientes.map((encuesta: EncuestaAsignatura) => (
-                  <ListGroup.Item 
-                    key={encuesta.id}
-                    className="d-flex align-items-start" 
-                  >
-                    <div className="me-3 flex-grow-1 text-start">
-                      <span className="fw-bold">{encuesta.asignatura?.nombre}</span>
-                      <span className="text-danger fw-bold ms-3">
-                          Cierre: {encuesta.fecha_fin}
-                      </span>  
-                      
-                      <br /> 
-                      <small className="d-block m-1">
-                          <strong>Docente:</strong> {encuesta.asignatura.nombre_docente}
-                      </small>
-                      <small className="d-block m-1"> 
-                        <strong>Carrera:</strong> {`${encuesta.asignatura.carrera.nombre} | Año: ${encuesta.asignatura.año} | Cursado: ${encuesta.asignatura.cursado}`}
-                      </small>
-                        
-                    </div>
+                Pendientes.map(encuesta => {
+                  const fechaCierre = getRangoFechasEncuesta(encuesta.asignatura.cursado);
+                  return (
+                    <ListGroup.Item
+                      key={encuesta.id}
+                      className="d-flex align-items-start"
+                    > 
+                      <div className="me-3 flex-grow-1 text-start">
+                        <span className="fw-bold fs-5">{encuesta.asignatura?.nombre}</span>
+                        {/* implementar logica como en Reportes disponibles de que no tenga ya una respuesta: */}
+                        <span className="text-danger fw-bold ms-3">
+                          Cierre: {fechaCierre} 
+                        </span>
 
-                    <Link
-                      to={`/alumno/encuestas-pendientes/${encuesta.id}`}
-                      className="btn btn-primary btn-sm align-self-center"
-                      title="Responder la encuesta"
-                    >
-                      <i className="bi bi-pencil-square"></i>
-                      <span className="ms-2 d-none d-md-inline">Responder</span>
-                    </Link>
-                  </ListGroup.Item>
-                ))
+                        <br />
+                        <small className="d-block m-1">
+                          <strong>Docente:</strong> {encuesta.asignatura.nombre_docente}
+                        </small>
+                        <small className="d-block m-1">
+                          <strong>Ciclo:</strong>{`${encuesta.asignatura.año} | Cursado: ${encuesta.asignatura.cursado}`}
+                        </small>
+                        <small className="d-block m-1">
+                          <strong>Carrera:</strong>{`${encuesta.asignatura?.carrera?.nombre} `}
+                        </small>
+                      </div>
+
+                      <Link
+                        to={`/alumno/encuestas-pendientes/${encuesta.id}`}
+                        className="btn btn-primary btn-sm align-self-center"
+                        title="Responder la encuesta"
+                      >
+                        <i className="bi bi-pencil-square"></i>
+                        <span className="ms-2 d-none d-md-inline">Responder</span>
+                      </Link>
+                    </ListGroup.Item>
+                  );
+                })
               )}
             </ListGroup>
           </Card>

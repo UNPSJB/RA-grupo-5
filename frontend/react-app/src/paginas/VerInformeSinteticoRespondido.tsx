@@ -12,10 +12,9 @@ import {
   Row,
   Spinner
 } from "react-bootstrap";
-import { obtenerNombreCampo } from '../validaciones/Encuesta';
 import type { InformeSinteticoCarrera } from "../types/InformeSintetico";
 
-// --- HELPER PARA BUSCAR RESPUESTA (Igual que en GenerarInformeSintetico) ---
+// --- HELPER PARA BUSCAR RESPUESTA EN INFORMES CURRICULARES HIJOS ---
 const findRespuestaPorPreguntaId = (
   preguntaId: number,
   respuesta: any
@@ -40,11 +39,16 @@ export default function VerInformeSinteticoRespondido() {
   const navigate = useNavigate();
 
   const [informe, setInforme] = useState<InformeSinteticoCarrera | null>(null);
+  
+  // Estado separado para la base (donde están las preguntas)
+  const [informeBase, setInformeBase] = useState<any>(null);
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Estado simple para guardar las respuestas y mostrarlas en los inputs
+  // Estado para mapear las respuestas del DEPARTAMENTO (ID Pregunta -> Texto)
   const [respuestasVisualizacion, setRespuestasVisualizacion] = useState<Record<number, string>>({});
+
 
   useEffect(() => {
     if (!id) return;
@@ -52,20 +56,30 @@ export default function VerInformeSinteticoRespondido() {
     const cargarDatos = async () => {
       setLoading(true);
       try {
-        // 1. Cargar el informe COMPLETO desde el backend
-        // Este objeto ya trae la cabecera, los informes hijos y la respuesta del departamento
+        // 1. Cargar el informe COMPLETO (Datos, Hijos, Respuesta)
         const res = await fetch(`http://localhost:8000/informe-sintetico-carrera/${id}`);
         if (!res.ok) throw new Error("Error al cargar el informe sintético");
         const data: InformeSinteticoCarrera = await res.json();
         setInforme(data);
 
-        // 2. Procesar las respuestas del departamento para mostrarlas en los campos
+        // 2. Cargar la BASE DEL INFORME por separado para asegurar las preguntas
+        if (data.id_informe_sintetico_base) {
+             const resBase = await fetch(`http://localhost:8000/informes-sinteticos-base/${data.id_informe_sintetico_base}`);
+             if (resBase.ok) {
+                 const dataBase = await resBase.json();
+                 setInformeBase(dataBase);
+             } else {
+                 console.error("No se pudo cargar la base del informe");
+             }
+        }
+
+        // 4. Procesar las respuestas del departamento (Conclusiones)
         const respuestasMap: Record<number, string> = {};
         if (data.respuesta && data.respuesta.detalles) {
             data.respuesta.detalles.forEach((detalle: any) => {
-                // Usamos el ID de la PREGUNTA_OPCION como clave, igual que en el hook de responder
-                if (detalle.pregunta_opcion && detalle.pregunta_opcion.pregunta) {
-                    const idPregunta = detalle.pregunta_opcion.pregunta.id;
+                // Usamos 'pregunta_opcion.id_pregunta' que es seguro que viene en el schema 'PreguntaOpcionRead'
+                if (detalle.pregunta_opcion && detalle.pregunta_opcion.id_pregunta) {
+                    const idPregunta = detalle.pregunta_opcion.id_pregunta;
                     if (detalle.texto_respuesta_abierta) {
                         respuestasMap[idPregunta] = detalle.texto_respuesta_abierta;
                     }
@@ -75,6 +89,7 @@ export default function VerInformeSinteticoRespondido() {
         setRespuestasVisualizacion(respuestasMap);
 
       } catch (err: any) {
+        console.error(err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -92,46 +107,39 @@ export default function VerInformeSinteticoRespondido() {
   }
   if (!informe) return null;
 
-  // Recuperamos datos para renderizar fácil
-  const informeBase = informe.informe_sintetico_base;
   const informesHijos = informe.informes_asignaturas || [];
   const cursado = informe.informes_asignaturas[0].asignatura?.cursado;
 
   return (
     <Container>
-      {/* Título fuera de la tarjeta, estilo visualización */}
       <h2 className="text-primary fw-bold mt-4 mb-4">Informe Sintético Finalizado</h2>
 
       <Form>
         <Col md={10} lg={8} className="mx-auto my-4">
           
-          {/* 1. Cabecera (Igual estructura que Generar, pero ReadOnly) */}
+          {/* 1. Cabecera de Datos (Read-Only) */}
           <Card className="mb-4 border rounded shadow-sm">
-            {/* Cambiamos a bg-secondary para indicar que no es editable */}
             <Card.Header as="h4" className="bg-secondary text-white">
                {informe.carrera?.nombre}
             </Card.Header>
             <Card.Body className="p-4 bg-light">
+              {/* Usamos el título del informeBase cargado explícitamente */}
               <Card.Title as="h5" className="mb-3">
-                {informeBase?.titulo}
+                {informeBase?.titulo || "Informe Sintético"}
               </Card.Title>
-              <Row>
+              <Row className="mb-2">
                 <Col md={6}>
                   <p><strong>Ciclo Lectivo:</strong> {informe.ciclo_lectivo}</p>
-                  {/* Nota: El backend no guarda "cuatrimestre" explícito en el modelo, 
-                      pero se puede inferir o mostrar lo que hay */}
                   <p><strong>Sede:</strong> {informe.sede}</p>
                   <p><strong>Cursado:</strong> {cursado}</p>
-                  
                 </Col>
-                
                 <Col md={6}>
                   <Form.Group className="mb-3">
                     <Form.Label className="fw-semibold">Comisión Asesora</Form.Label>
                     <Form.Control
                       type="text"
                       value={informe.comision_asesora}
-                      disabled // Deshabilitado
+                      disabled
                       style={{ backgroundColor: '#e9ecef', cursor: 'default' }}
                     />
                   </Form.Group>
@@ -140,7 +148,7 @@ export default function VerInformeSinteticoRespondido() {
                     <Form.Control
                       type="text"
                       value={informe.integrantes}
-                      disabled // Deshabilitado
+                      disabled
                       style={{ backgroundColor: '#e9ecef', cursor: 'default' }}
                     />
                   </Form.Group>
@@ -149,7 +157,7 @@ export default function VerInformeSinteticoRespondido() {
             </Card.Body>
           </Card>
 
-          {/* 2. Pestañas (Tabs) con Informes Curriculares */}
+          {/* 2. Pestañas de Informes Curriculares Incluidos (Read-Only) */}
           <Card className="mb-4 border rounded shadow-sm">
             <Card.Header as="h5" className="bg-secondary text-white">
               Informes Curriculares incluídos ({informesHijos.length})
@@ -206,28 +214,38 @@ export default function VerInformeSinteticoRespondido() {
               Análisis y Conclusiones del Departamento
             </Card.Header>
             <Card.Body className="p-4">
-              {informeBase?.preguntas?.map((pregunta: any) => {
-                // Buscamos el texto en nuestro mapa usando el ID de la pregunta
-                const textoRespuesta = respuestasVisualizacion[pregunta.id] || "(Sin respuesta)";
+              {/* Iteramos sobre las preguntas del informeBASE que trajimos aparte */}
+              {informeBase?.preguntas?.length > 0 ? (
+                  informeBase.preguntas.map((pregunta: any) => {
+                    // Buscamos el texto en nuestro mapa usando el ID de la pregunta
+                    const textoRespuesta = respuestasVisualizacion[pregunta.id] || "(Sin respuesta registrada)";
+                    const primeraOpcion = pregunta.pregunta_opcion?.[0];
+                    const idHtml = `pregunta-${primeraOpcion?.id || pregunta.id}`;
 
-                return (
-                  <Form.Group 
-                    className="mb-3 text-start" 
-                    key={pregunta.id}
-                  >
-                    <Form.Label className="fw-bold">
-                      {pregunta.texto_pregunta}
-                    </Form.Label>
-                    <Form.Control
-                      as="textarea"
-                      rows={3}
-                      value={textoRespuesta}
-                      disabled // Deshabilitado
-                      style={{ minHeight: "100px", backgroundColor: '#e9ecef', cursor: 'default' }}
-                    />
-                  </Form.Group>
-                );
-              })}
+                    return (
+                      <Form.Group 
+                        className="mb-3 text-start" 
+                        key={pregunta.id}
+                        controlId={idHtml}
+                      >
+                        <Form.Label className="fw-bold">
+                          {pregunta.texto_pregunta}
+                        </Form.Label>
+                        <Form.Control
+                          as="textarea"
+                          rows={4} 
+                          value={textoRespuesta}
+                          disabled 
+                          style={{ minHeight: "100px", backgroundColor: '#e9ecef', cursor: 'default', resize: 'none' }}
+                        />
+                      </Form.Group>
+                    );
+                  })
+              ) : (
+                  <div className="text-muted text-center py-3">
+                      No se encontraron preguntas de conclusión en la plantilla base.
+                  </div>
+              )}
 
               <div className="d-flex justify-content-center mt-4">
                 <Button

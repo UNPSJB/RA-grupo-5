@@ -87,16 +87,17 @@ export default function InformesRespondidos() {
                     className="d-flex align-items-start"
                   >
                     <div className="me-3 flex-grow-1 text-start">
-                      <span className="fw-bold fs-5">{informe.asignatura?.nombre}</span>
+                      <span className="fw fs-5">{informe.asignatura?.nombre}</span>
                       <br/>
                       <small className="text-muted d-block mt-1">
                         Docente: {informe.docente}
                       </small>
-                      <small className="text-muted d-block">
-                        {`Carrera: ${informe.asignatura?.carrera?.nombre} | Año: ${informe.asignatura?.año} | Cursado: ${informe.asignatura?.cursado} | Ciclo: ${informe.ciclo_lectivo}`}
+                      <small className="text-muted">
+                        {`Ciclo: ${informe.asignatura.año} | Cursado: ${informe.asignatura.cursado}` }
                       </small>
-                      <small className="text-success fw-bold d-block mt-1">
-                         Estado: {informe.estado === 'cerrado' ? 'Finalizado' : 'Abierto'}
+                      <br />
+                      <small className="text-muted">
+                        {`Carrera: ${informe.asignatura?.carrera?.nombre} ` }
                       </small>
                     </div>
                     

@@ -8,7 +8,6 @@ import {
   ListGroup, 
   Badge, 
 } from "react-bootstrap";
-
 export default function EncuestasRespondidas() {
   const { encuestasRespondidas, loading, error } = useEncuestas();
 
@@ -47,15 +46,20 @@ export default function EncuestasRespondidas() {
                     className="d-flex align-items-start"
                   >
                     <div className="me-3 flex-grow-1 text-start">
-                      <span className="fw-bold">{encuesta.asignatura.nombre}</span>
+                      <span className="fw fs-5">{encuesta.asignatura.nombre}</span>
                       <br/>
                       <small className="text-muted">
                         {`Docente: ${encuesta.asignatura.nombre_docente}` }
                       </small>
                       <br />
                       <small className="text-muted">
-                        {`Carrera:${encuesta.asignatura.carrera.nombre} | Año: ${encuesta.asignatura.año} | Cursado: ${encuesta.asignatura.cursado} | Estado: ${encuesta.estado}` }
+                        {`Ciclo: ${encuesta.asignatura.año} | Cursado: ${encuesta.asignatura.cursado}` }
                       </small>
+                      <br />
+                      <small className="text-muted">
+                        {`Carrera: ${encuesta.asignatura?.carrera?.nombre} ` }
+                      </small>
+                    
                       
                     </div>
                     <Link 
