@@ -20,7 +20,7 @@ import VerEncuesta from "./paginas/VerEncuestaRespondida.tsx";
 import InformesCurricularesRespondidos from "./paginas/InformesCurricularesRespondidos.tsx";
 import VerInformeCurricularRespondido from "./paginas/VerInformeCurricularRespondido.tsx";
 import InformesSinteticosRespondidos from "./paginas/InformesSinteticosRespondidos.tsx";
-
+import VerInformeSinteticoRespondido from "./paginas/VerInformeSinteticoRespondido.tsx";
 
 function App() {
   return (
@@ -66,7 +66,7 @@ function App() {
 
         <Route path="informes-sinteticos-respondidos">
           <Route index element={<InformesSinteticosRespondidos />} />
-          <Route path=":id" element={< VerInformeCurricularRespondido />} />
+          <Route path=":id" element={< VerInformeSinteticoRespondido />} />
         </Route>
 
         <Route path="generar-informe/:carreraId" element={<GenerarInformeSintetico />}/>

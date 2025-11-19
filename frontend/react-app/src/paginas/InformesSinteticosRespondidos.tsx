@@ -17,14 +17,13 @@ export default function InformesSinteticosRespondidos() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // ID DEPARTAMENTO HARDCODEADO (Debe coincidir con el usado al guardar)
+  // ID DEPARTAMENTO HARDCODEADO
   const ID_DEPARTAMENTO = 1; 
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // --- URL ACTUALIZADA CON ID DEPARTAMENTO ---
         const res = await fetch(`http://localhost:8000/informe-sintetico-carrera/departamento/${ID_DEPARTAMENTO}`);
         
         if (!res.ok) throw new Error("Error al cargar informes sintéticos respondidos");
@@ -79,35 +78,42 @@ export default function InformesSinteticosRespondidos() {
                   No has enviado ningún informe sintético todavía.
                 </ListGroup.Item>
               ) : (
-                informes.map(informe => (
-                  <ListGroup.Item 
-                    key={informe.id} 
-                    className="d-flex align-items-start"
-                  >
-                    <div className="me-3 flex-grow-1 text-start">
-                      <span className="fw-bold fs-5">{informe.carrera?.nombre}</span>
-                      <br/>
-                      <small className="text-muted d-block mt-1">
-                        <strong>Sede:</strong> {informe.sede} | <strong>Ciclo:</strong> {informe.ciclo_lectivo}
-                      </small>
-                      <small className="text-muted d-block">
-                        <strong>Comisión:</strong> {informe.comision_asesora}
-                      </small>
-                      <small className="text-success fw-bold d-block mt-1">
-                         {/* Estado: {informe.estado === 'cerrado' ? 'Finalizado' : 'Enviado'} */}
-                      </small>
-                    </div>
-                    
-                    <Link 
-                      to={`/departamento/informes-sinteticos-respondidos/${informe.id}`} 
-                      className="btn btn-outline-primary btn-sm align-self-center"
-                      title="Ver Informe Completo"
+                informes.map(informe => {
+                  // Extraemos el cuatrimestre del primer informe curricular hijo
+                  const primerHijo = informe.informes_asignaturas?.[0];
+                  const cuatrimestre = primerHijo?.asignatura?.cursado || "";
+
+                  return (
+                    <ListGroup.Item 
+                      key={informe.id} 
+                      className="d-flex align-items-start"
                     >
-                      <i className="bi bi-file-earmark-text-fill me-2"></i>
-                      <span className="d-none d-md-inline">Ver</span>
-                    </Link>
-                  </ListGroup.Item>
-                ))
+                      <div className="me-3 flex-grow-1 text-start">
+                        <span className="fw-bold fs-5">{informe.carrera?.nombre}</span>
+                        <br/>
+                        <small className="text-muted d-block mt-1">
+                          <strong>Sede:</strong> {informe.sede} | <strong>Ciclo:</strong> {informe.ciclo_lectivo}
+                          {/* AQUI MOSTRAMOS EL CUATRIMESTRE */}
+                          {cuatrimestre && (
+                            <> | <strong>{cuatrimestre}</strong></>
+                          )}
+                        </small>
+                        <small className="text-muted d-block">
+                          <strong>Comisión:</strong> {informe.comision_asesora}
+                        </small>
+                      </div>
+                      
+                      <Link 
+                        to={`/departamento/informes-sinteticos-respondidos/${informe.id}`} 
+                        className="btn btn-outline-primary btn-sm align-self-center"
+                        title="Ver Informe Completo"
+                      >
+                        <i className="bi bi-file-earmark-text-fill me-2"></i>
+                        <span className="d-none d-md-inline">Ver</span>
+                      </Link>
+                    </ListGroup.Item>
+                  );
+                })
               )}
             </ListGroup>
           </Card>
