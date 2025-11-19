@@ -5,6 +5,7 @@ import { useInformesCurriculares } from "../hook/useInformesCurriculares";
 import { useInformeCurricularBase } from "../hook/useInformeCurricularBase";
 import { useResponderInforme } from "../hook/useResponderInforme";
 import LayoutReporte from "../componentes/LayoutReporte";
+import { IC_C1_START, IC_C1_END, IC_C2_START, IC_C2_END}from "../calendarioAcademico";
 import {
   Container,
   Card,
@@ -17,6 +18,15 @@ import {
 } from "react-bootstrap";
 import ResumenVariable from "../componentes/ResumenVariable";
 import "../styles/informe.css"; 
+
+//. FUNCIÓN AUXILIAR: Convierte Date a "YYYY-MM-DD"
+const formatearFecha = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 
 export default function InformeCurricular() {
   const { reporteId } = useParams();
@@ -155,10 +165,13 @@ export default function InformeCurricular() {
           asignatura?.id ||
           asignatura?.id_asignatura ||
           asignatura?.idAsignatura;
+        const cursado = asignatura?.cursado;
+        const fechaInicioObj = cursado === "cuatrimestre 1" ? IC_C1_START : IC_C2_START;
+        const fechaFinObj = cursado === "cuatrimestre 1" ? IC_C1_END : IC_C2_END;
 
         const payloadCabecera = {
-          fecha_inicio: "2025-03-01",
-          fecha_fin: "2025-07-30",
+          fecha_inicio: formatearFecha(fechaInicioObj),
+          fecha_fin: formatearFecha(fechaFinObj),
           estado: "abierto",
           sede,
           ciclo_lectivo: Number(cicloLectivo),
@@ -363,11 +376,8 @@ export default function InformeCurricular() {
                         <Form.Control
                           type="number"
                           value={cicloLectivo}
-                          onChange={(e) => setCicloLectivo(e.target.value === "" ? "" : Number(e.target.value))}
-                          placeholder="2025 (ejemplo)"
-                          min={2000}
-                          required
-                          disabled={saving}
+                          plaintext
+                          readOnly
                         />
                       </Col>
                     </Form.Group>

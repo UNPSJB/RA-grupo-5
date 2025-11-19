@@ -9,9 +9,12 @@ import {
   Spinner, 
   Alert 
 } from "react-bootstrap";
+import { isGeneracionInformeCurricularActiva, getToday } from "../calendarioAcademico";
 
 export default function ReportesDisponibles() {
   const { reportes, loading, error } = useReportes();
+  const today = getToday()
+  
 
   if (loading) {
     return (
@@ -51,6 +54,12 @@ export default function ReportesDisponibles() {
               ) : (
                 reportes.map((reporte) => {
                   const asignatura = reporte.encuesta_asignatura.asignatura;
+                  const fechaInicio = reporte.encuesta_asignatura.fecha_inicio;
+                const cicloLectivo = fechaInicio 
+                 ? new Date(fechaInicio).getFullYear() 
+                   : 'N/A';
+                  const puedeGenerar = isGeneracionInformeCurricularActiva(asignatura.cursado, today);
+
                   return (
                     <ListGroup.Item 
                       key={reporte.id}
@@ -64,6 +73,8 @@ export default function ReportesDisponibles() {
                         </small>
                         <small className="d-block m-1">
                           <strong>Carrera:</strong> {`${asignatura.carrera.nombre} | Año: ${asignatura.año} | Cursado: ${asignatura.cursado}`}
+                        <small className="d-block m-1"></small>  
+                          <strong>Ciclo:</strong> {cicloLectivo} {/* <-- FORMATO FINAL */}
                         </small>
                       </div>
 
@@ -86,7 +97,8 @@ export default function ReportesDisponibles() {
                             <i className="bi bi-file-earmark-text-fill"></i>
                             <span className="ms-2 d-none d-md-inline">Ver Informe</span>
                           </Link>
-                        ) : (
+                        ) : puedeGenerar ? (
+                          //  Si NO hay respuesta y ESTÁ EN FECHA, mostramos "Nuevo Informe"
                           <Link
                             to={`/docente/nuevo-informe/${reporte.id}`}
                             className="btn btn-primary btn-sm"
@@ -95,7 +107,28 @@ export default function ReportesDisponibles() {
                             <i className="bi bi-plus-circle-fill"></i>
                             <span className="ms-2 d-none d-md-inline">Nuevo Informe</span>
                           </Link>
+                        ) : (
+                          // Si NO hay respuesta y ESTÁ FUERA DE FECHA, mostramos el botón deshabilitado
+                          <button
+                            className="btn btn-outline-secondary btn-sm" // Cambié a 'outline-secondary'
+                            disabled
+                            title="El período para generar este informe ha finalizado."
+                            style={{cursor: 'not-allowed'}} // Estilo extra para claridad
+                          >
+                            <i className="bi bi-x-circle-fill"></i>
+                            <span className="ms-2 d-none d-md-inline">Fuera de termino</span>
+                          </button>
                         )}
+                         {}
+<Link
+  to={`/docente/estadisticas/${reporte.id}`}
+  className="btn btn-outline-success btn-sm"
+  title="Ver Estadísticas"
+>
+  <i className="bi bi-graph-up-arrow"></i>
+  <span className="ms-2 d-none d-md-inline">Ver Estadísticas</span>
+</Link>
+
                       </div>
                     </ListGroup.Item>
                   );

@@ -24,8 +24,6 @@ class InformeAsignatura(ModeloBase):
     cant_alumnos_insc: Mapped[int] = mapped_column(Integer, index=True)
     cant_comisiones_teoricas: Mapped[int] = mapped_column(Integer, index=True)
     cant_comisiones_practicas: Mapped[int] = mapped_column(Integer, index=True)
-    fecha_inicio: Mapped[date] = mapped_column(Date, index=True)
-    fecha_fin: Mapped[date] = mapped_column(Date, index=True)
     estado: Mapped[EstadoInforme] = mapped_column(SQLEnum(EstadoInforme), nullable=False, default=EstadoInforme.abierto)
 
     id_informe_curricular_base: Mapped[int] = mapped_column(ForeignKey("informes_curriculares_base.id"), nullable=False)
