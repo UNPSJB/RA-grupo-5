@@ -1,4 +1,4 @@
-import Table from "react-bootstrap/Table";
+import Form from "react-bootstrap/Form";
 import Pregunta from "./Pregunta";
 import type { Variable as ApiVariable } from "../types/Encuesta";
 import type { Control, FieldErrors } from 'react-hook-form';
@@ -29,22 +29,19 @@ export default function Variable({
   }
 
   return (
-    <div className="container mt-4">
-      <h3>
-        {variable.codigo}: {variable.nombre}
-      </h3>
-      <Table striped bordered>
-        <tbody>
-          {preguntasLimpias.map((pregunta) => (
-            <Pregunta
-              key={pregunta.id}
-              pregunta={pregunta}
-              control={control}
-              errors={errors}
-            />
-          ))}
-        </tbody>
-      </Table>
-    </div>
+    <Form.Group as="fieldset" className="border p-3 mt-4 rounded">
+      <legend className="h5 w-auto px-2">
+        {variable.nombre}
+      </legend>
+
+      {preguntasLimpias.map((pregunta) => (
+        <Pregunta
+          key={pregunta.id}
+          pregunta={pregunta}
+          control={control}
+          errors={errors}
+        />
+      ))}
+    </Form.Group>
   );
 }

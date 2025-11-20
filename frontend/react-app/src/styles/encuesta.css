@@ -1,0 +1,58 @@
+/* Contenedor flotante para la alerta */
+.alert-float {
+  position: fixed;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+  z-index: 3000;
+  min-width: 320px;
+  max-width: 90vw;
+  opacity: 0;
+  pointer-events: none; /* evita bloquear clics cuando no es visible */
+}
+
+/* Estado visible con animación de entrada */
+.alert-float-show {
+  animation: slideUp 0.5s ease-out forwards;
+}
+
+/* Estado oculto con animación de salida */
+.alert-float-hide {
+  animation: slideDown 0.5s ease-in forwards;
+}
+
+/* Animaciones */
+@keyframes slideUp {
+  0% {
+    transform: translate(-50%, 100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  0% {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, 100%);
+    opacity: 0;
+  }
+}
+
+/* Opcional: sombra y bordes redondeados */
+.alert-float .alert {
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.alert-float {
+  pointer-events: none;
+}
+.alert-float .alert {
+  pointer-events: auto;
+}

@@ -5,6 +5,8 @@ from fastapi import FastAPI
 from src.database import engine
 from src import models
 
+import logging
+from src.jobs import start_scheduler, shutdown_scheduler 
 
 from src.personas.router import router as personas_router 
 from src.encuestas_base.router import router as encuestas_base_router
@@ -31,11 +33,22 @@ load_dotenv()
 ENV = os.getenv("ENV")
 ROOT_PATH = os.getenv(f"ROOT_PATH_{ENV.upper()}")
 
+# --- CONFIGURACIÓN DE LOGGING y PROGRAMADOR DE TAREAS---
+logging.basicConfig(
+    level=logging.INFO, 
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+log = logging.getLogger(__name__)
+
+logging.getLogger('apscheduler').setLevel(logging.INFO)
+logging.getLogger('src.jobs').setLevel(logging.INFO)
 
 @asynccontextmanager
 async def db_creation_lifespan(app: FastAPI):
     models.ModeloBase.metadata.create_all(bind=engine)
+    start_scheduler()
     yield
+    shutdown_scheduler()
 
 
 app = FastAPI(root_path=ROOT_PATH, lifespan=db_creation_lifespan)

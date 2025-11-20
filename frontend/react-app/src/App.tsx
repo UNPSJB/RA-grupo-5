@@ -15,7 +15,8 @@ import InformesSinteticosDisponibles from "./paginas/InformesSinteticosDisponibl
 import InformeSintetico from "./paginas/InformeSintetico.tsx";
 import VerInformeCurricular from "./paginas/VerInformeCurricular.tsx";
 import EstadisticasDepartamentoPage from "./paginas/EstadisticasDepartamentoPage.tsx";
-
+import GenerarInformeSintetico from "./paginas/GenerarInformeSintetico.tsx";
+import EstadisticasDocentePage from "./paginas/EstadisticasDocentePage.tsx";
 
 function App() {
   return (
@@ -45,8 +46,10 @@ function App() {
           <Route index element={<ReportesDisponibles />} />
         </Route>
         <Route path="informes">
-          {/* <Route path=":id" element={<VerInformeCurricular />} /> */}
+          <Route path=":id" element={<VerInformeCurricular />} />
         </Route>
+          {/* Nueva ruta para estadísticas */}
+      <Route path="estadisticas/:id" element={<EstadisticasDocentePage />} />
       </Route>
 
 
@@ -56,15 +59,13 @@ function App() {
         <Route path="informe-sintetico">
           <Route path=":id" element={<InformeSintetico/>} />
         </Route>
-
-        <Route path="informes" element={<InformesCurricularesDisponibles />} />
-
-        <Route
-          path="informes-sinteticos"
-          element={<InformesSinteticosDisponibles />}
-        />
+        <Route path="generar-informe/:carreraId" element={<GenerarInformeSintetico />}/>
+        <Route path="informes">
+            <Route index element={<InformesCurricularesDisponibles />} />
+            <Route path=":id" element={<VerInformeCurricular />} />
+        </Route>
+        <Route path="informes-sinteticos" element={<InformesSinteticosDisponibles />}/>
         <Route path="estadisticas" element={<EstadisticasDepartamentoPage />} />
-
       </Route>
     </Routes>
   );

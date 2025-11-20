@@ -1,21 +1,37 @@
-/* Hace que el layout ocupe toda la pantalla y acomoda footer al final */
 .layout {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /*Hace que la altura minima sea el 100%*/
+  min-height: 100vh; 
 }
 
-/* Contenedor principal */
 .layout .container {
-  flex: 1; /* ocupa todo el espacio disponible entre navbar y footer */
+  flex: 1; 
 }
 
-/* Footer */
 .footer {
   background-color: #222;
   color: #ccc;
   font-size: 0.9rem;
   text-align: center;
   padding: 1rem;
-  margin-top: auto; /* hace que quede pegado abajo */
+  margin-top: auto; 
+}
+
+
+/* ... (tus otros estilos de .layout y .footer) ... */
+
+.home-icon {
+  /* ¡Un tamaño mucho más grande! */
+  font-size: 6rem; 
+  
+  /* Un margen inferior para separarlo del botón */
+  margin-bottom: 1.5rem; 
+
+  /* Transición suave para el efecto hover */
+  transition: transform 0.2s ease-in-out;
+}
+
+.home-icon:hover {
+  /* Al pasar el mouse, el ícono se agranda un 10% */
+  transform: scale(1.1);
 }

@@ -3,17 +3,17 @@ import {
   Row,
   Col,
   Card,
-  ListGroup,
   ProgressBar,
   Tabs,
   Tab,
 } from "react-bootstrap";
 import { useReportes } from "../hook/useReportes";
-import { useEffect, useState } from "react";
+// 1. ¡Añadimos useMemo al import!
+import { useEffect, useState, useMemo } from "react"; 
 import { useParams, Link } from "react-router-dom";
 import LayoutReporte from "../componentes/LayoutReporte.tsx";
 import ResumenVariable from "../componentes/ResumenVariable";
-import "../styles/Resumen-reporte.css";
+import "../styles/Resumen-reporte.css"; 
 
 export default function ResumenReporte() {
   const { id } = useParams();
@@ -26,14 +26,12 @@ export default function ResumenReporte() {
     null
   );
 
-  // Trae el resumen del reporte desde el back segun el id
+  // ... (Tus useEffects para cargar datos se mantienen igual) ...
   useEffect(() => {
     if (!isNaN(idReporte)) {
       const cargarResumen = async () => {
         const data = await fetchResumenByReporteId(idReporte);
         setReporte(data);
-
-        // Establecer la primera variable como activa por defecto
         if (data && data.resultados_por_pregunta && !activeVariableKey) {
           const firstKey = Object.keys(data.resultados_por_pregunta)[0];
           if (firstKey) {
@@ -53,63 +51,61 @@ export default function ResumenReporte() {
     cargarReporte();
   }, [idReporte, fetchReporteById]);
 
+  // --- 2. ¡CORRECCIÓN! MOVEMOS useMemo AQUÍ ---
+  // Lo ponemos ANTES de los 'return' condicionales
+  const tabsData = useMemo(() => {
+    if (!reporte || !reporte.resultados_por_pregunta) {
+      return [];
+    }
+    return Object.entries(reporte.resultados_por_pregunta).map(
+      ([nombreVariable, variableData]: [string, any]) => ({
+        key: nombreVariable,
+        title: nombreVariable,
+        cod: variableData.codigo,
+        content: (
+          <div>
+            {variableData.preguntas.map((pregunta: any, j: number) => (
+              <div key={j} className={j > 0 ? "pregunta-block mt-2" : "pt-2"}>
+                <h6 className="fw-bold mb-3">
+                  {pregunta.pregunta_texto}
+                </h6>
+                {pregunta.opciones.map((opcion: any, k: number) => (
+                  <div key={k} className="mb-3"> 
+                    <div className="d-flex justify-content-between align-items-center mb-1">
+                      <span className="text-muted">{opcion.opcion_texto}</span>
+                      <span className="fw-bold small">{opcion.porcentaje}%</span>
+                    </div>
+                    <ProgressBar
+                      now={opcion.porcentaje}
+                      label={`${opcion.porcentaje}%`}
+                      variant="primary" 
+                      className="progress-compact"
+                    />
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        ),
+      })
+    );
+  }, [reporte]); // Se recalcula solo si 'reporte' cambia
+
+  // --- 3. AHORA SÍ, LOS 'return' DE CARGA ---
   if (loading) return <p>Cargando resumen...</p>;
   if (error) return <p>Error: {error}</p>;
-
   if (
     !reporte ||
     !reporteCompleto ||
     !reporte.resultados_por_pregunta ||
     !reporte.resumen_por_variable ||
-    !activeVariableKey // <-- Nos aseguramos de que la key activa exista
+    !activeVariableKey
   ) {
     return <p>No hay datos disponibles</p>;
   }
 
-  // Los tabs ahora son solo los datos, no el componente
-  const tabsData = Object.entries(reporte.resultados_por_pregunta).map(
-    ([nombreVariable, variableData]: [string, any]) => ({
-      key: nombreVariable,
-      title: nombreVariable,
-      cod: variableData.codigo,
-      // Este es el JSX que irá dentro de cada Tab
-      content: (
-        <Card className="mb-4 border-0">
-          <Card.Title className="mb-4 text-center">
-            <h3>
-              {variableData.codigo}: {nombreVariable}
-            </h3>
-          </Card.Title>
-          {variableData.preguntas.map((pregunta: any, j: number) => (
-            <Card key={j} className="mb-3 border-0">
-              <Card.Subtitle className="mb-3 mt-2 fw-bold">
-                {pregunta.pregunta_texto}
-              </Card.Subtitle>
-              <ListGroup variant="flush">
-                {pregunta.opciones.map((opcion: any, k: number) => (
-                  <ListGroup.Item key={k}>
-                    <div className="d-flex justify-content-between align-items-center mb-1">
-                      <span>{opcion.opcion_texto}</span>
-                      <span className="fw-bold">{opcion.porcentaje}%</span>
-                    </div>
-                    <ProgressBar
-                      now={opcion.porcentaje}
-                      label={`${opcion.porcentaje}%`}
-                      variant="info"
-                      style={{ height: "15px" }}
-                    />
-                  </ListGroup.Item>
-                ))}
-              </ListGroup>
-            </Card>
-          ))}
-        </Card>
-      ),
-    })
-  );
-
+  // ... (El resto de la lógica y el return se mantienen igual)
   const activeVariableSummary = reporte.resumen_por_variable[activeVariableKey];
-
   const Datosasignatura = reporteCompleto.encuesta_asignatura.asignatura;
 
   return (
@@ -121,10 +117,14 @@ export default function ResumenReporte() {
     >
       <Container className="my-4">
         <Row className="g-4">
-          {/* IZQUIERDA: TABS / CONTENIDO */}
+          
+          {/* --- IZQUIERDA: TABS / CONTENIDO (CON TEMA) --- */}
           <Col xs={12} md={8} lg={8}>
-            <Card className="flat-card">
-              <Card.Body className="p-3 p-lg-4">
+            <Card className="border rounded shadow-sm">
+              <Card.Header as="h5" className="bg-primary text-white">
+                Análisis de Respuestas por Variable
+              </Card.Header>
+              <Card.Body className="p-4">
                 <Tabs
                   id="variable-tabs"
                   activeKey={activeVariableKey}
@@ -135,13 +135,11 @@ export default function ResumenReporte() {
                 >
                   {tabsData.map((tab) => (
                     <Tab key={tab.key} eventKey={tab.key} title={tab.cod}>
-                      <div className="mb-3 text-center">
+                      <div className="mb-4 text-center">
                         <h5 className="mb-0">
                           {tab.cod}: {tab.title}
                         </h5>
                       </div>
-
-                      {/* contenido de cada variable */}
                       {tab.content}
                     </Tab>
                   ))}
@@ -150,16 +148,18 @@ export default function ResumenReporte() {
             </Card>
           </Col>
 
-          {/* DERECHA: RESUMEN + BOTÓN */}
+          {/* --- DERECHA: RESUMEN + BOTÓN (CON TEMA) --- */}
           <Col xs={12} md={4} lg={4}>
             <aside className="right-rail">
-              {/* Resumen arriba (plano, sin sombra) */}
-              <div className="flat-card p-0 mb-3">
+              
+              <Card className="border rounded shadow-sm mb-3 bg-white">
+                <Card.Header as="h6" className="bg-primary text-white">
+                  Resumen de la Variable
+                </Card.Header>
                 <ResumenVariable resumen={activeVariableSummary} />
-              </div>
+              </Card>
 
-              {/* Botón en el borde derecho (sticky en desktop, abajo en mobile) */}
-              <div className="right-cta">
+              <div className="right-cta mb-3">
                 {reporteCompleto?.has_respuesta ? (
                   <Link
                     to={`/docente/informes/${reporteCompleto.informe_id}`}
@@ -176,35 +176,26 @@ export default function ResumenReporte() {
                   </Link>
                 )}
               </div>
-              {/* Métricas secundarias (opcional) */}
-              <Card className="lite-card mt-3" style={{ fontSize: "0.9rem" }}>
+              
+              <Card className="border rounded shadow-sm">
+                <Card.Header as="h6" className="bg-primary text-white">
+                  Métricas de la Encuesta
+                </Card.Header>
                 <Card.Body className="p-3">
                   <div className="d-flex justify-content-between align-items-center mb-2">
-                    <span
-                      className="text-muted fw-semibold"
-                      style={{ fontSize: "0.8rem" }}
-                    >
+                    <span className="text-muted fw-semibold small">
                       Total inscriptos
                     </span>
-                    <span
-                      className="text-dark fw-bold"
-                      style={{ fontSize: "0.9rem" }}
-                    >
+                    <span className="text-dark fw-bold">
                       25
                     </span>
                   </div>
 
                   <div className="d-flex justify-content-between align-items-center">
-                    <span
-                      className="text-muted fw-semibold"
-                      style={{ fontSize: "0.8rem" }}
-                    >
+                    <span className="text-muted fw-semibold small">
                       Encuestas procesadas
                     </span>
-                    <span
-                      className="text-primary fw-bold"
-                      style={{ fontSize: "0.9rem" }}
-                    >
+                    <span className="text-primary fw-bold">
                       {reporteCompleto.encuesta_asignatura.respuestas.length}
                     </span>
                   </div>

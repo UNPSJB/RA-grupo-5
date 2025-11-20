@@ -1,39 +1,91 @@
 import { useInformesCurriculares } from "../hook/useInformesCurriculares";
-import Accordion from "react-bootstrap/Accordion";
-import { InformeGrupo } from "../componentes/InformeGrupo";
-
+import { Link } from "react-router-dom";
+import { 
+  Container, 
+  Row, 
+  Col, 
+  Card, 
+  ListGroup, 
+  Badge, 
+  Spinner, 
+  Alert 
+} from "react-bootstrap";
 
 export default function InformesCurricularesDisponibles() {
   const { informesCurriculares, loading, error } = useInformesCurriculares();
 
-  if (loading) return <p>Cargando informes...</p>;
-  if (error) return <p>Error: {error}</p>;
+  // ... (Estados de carga y error consistentes)
+  if (loading) {
+    return (
+      <Container className="my-4 text-center">
+        <Spinner animation="border" variant="primary" />
+        <p className="mt-2">Cargando informes...</p>
+      </Container>
+    );
+  }
+  if (error) {
+    return (
+      <Container className="my-4">
+        <Row>
+          <Col md={10} lg={8} className="mx-auto">
+            <Alert variant="danger">Error: {error}</Alert>
+          </Col>
+        </Row>
+      </Container>
+    );
+  }
 
   const cerrados = informesCurriculares.filter((informe) => informe.estado === "cerrado");
-  const abiertos = informesCurriculares.filter((informe) => informe.estado === "abierto");
-
-const mapInforme = (i: any) => {
-  console.log("Informe recibido:", i); //  Esto te muestra el objeto completo en consola
-
-  return {
-    id: i.id,
-    asignatura: i.asignatura.nombre, // si es un objeto
-    sede: i.sede,
-    fechaFin: i.fecha_fin,
-    docente: i.docente,       // si es un objeto
-    estado: i.estado,
-  };
-};
-
 
   return (
-    
-    <div className="container mt-4">
-      <h2 className="mb-4">Gestión de Informes Curriculares</h2>
-      <Accordion defaultActiveKey={null} flush>
-        <InformeGrupo titulo="INFORMES ABIERTOS" eventKey="0" informes={abiertos.map(mapInforme)} />
-        <InformeGrupo titulo="INFORMES CERRADOS" eventKey="1" informes={cerrados.map(mapInforme)} />
-      </Accordion>
-    </div>
+    <Container className="my-4">
+      <Row>
+        <Col md={10} lg={8} className="mx-auto">
+
+          <Card className="border rounded shadow-sm bg-white">
+            
+            <Card.Header 
+              as="h5" 
+              className="bg-light d-flex justify-content-between align-items-center"
+            >
+              Informes Cerrados
+              <Badge bg="secondary" pill>
+                {cerrados.length}
+              </Badge>
+            </Card.Header>
+            
+            <ListGroup variant="flush">
+              {cerrados.length === 0 ? (
+                <ListGroup.Item>No hay informes cerrados.</ListGroup.Item>
+              ) : (
+                cerrados.map(informe => (
+                  <ListGroup.Item 
+                    key={informe.id} 
+                    className="d-flex align-items-start"
+                  >
+                    <div className="me-3 flex-grow-1 text-start">
+                      <span className="fw-bold">{informe.asignatura.nombre}</span>
+                      <br/>
+                      <small className="text-muted">
+                        {`Docente: ${informe.docente} | Fecha Fin: ${informe.fecha_fin}`}
+                      </small>
+                    </div>
+                    <Link 
+                      to={`/departamento/informes/${informe.id}`} 
+                      className="btn btn-outline-primary btn-sm align-self-center"
+                      title="Ver Informe"
+                    >
+                      <i className="bi bi-file-earmark-text-fill"></i>
+                      <span className="ms-2 d-none d-md-inline">Ver</span>
+                    </Link>
+                  </ListGroup.Item>
+                ))
+              )}
+            </ListGroup>
+          </Card>
+          
+        </Col>
+      </Row>
+    </Container>
   );
 }
