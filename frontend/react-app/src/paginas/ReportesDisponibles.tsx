@@ -123,6 +123,16 @@ export default function ReportesDisponibles() {
                             <span className="ms-2 d-none d-md-inline">Fuera de termino</span>
                           </button>
                         )}
+                         {}
+<Link
+  to={`/docente/estadisticas/${reporte.id}`}
+  className="btn btn-outline-success btn-sm"
+  title="Ver Estadísticas"
+>
+  <i className="bi bi-graph-up-arrow"></i>
+  <span className="ms-2 d-none d-md-inline">Ver Estadísticas</span>
+</Link>
+
                       </div>
                     </ListGroup.Item>
                   );

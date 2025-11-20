@@ -21,6 +21,7 @@ import InformesCurricularesRespondidos from "./paginas/InformesCurricularesRespo
 import VerInformeCurricularRespondido from "./paginas/VerInformeCurricularRespondido.tsx";
 import InformesSinteticosRespondidos from "./paginas/InformesSinteticosRespondidos.tsx";
 import VerInformeSinteticoRespondido from "./paginas/VerInformeSinteticoRespondido.tsx";
+import EstadisticasDocentePage from "./paginas/EstadisticasDocentePage.tsx";
 
 function App() {
   return (
@@ -56,6 +57,8 @@ function App() {
           <Route index element={<InformesCurricularesRespondidos />} />
           <Route path=":id" element={< VerInformeCurricularRespondido />} />
         </Route>
+          {/* Nueva ruta para estadísticas */}
+      <Route path="estadisticas/:id" element={<EstadisticasDocentePage />} />
       </Route>
 
 

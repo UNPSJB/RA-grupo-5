@@ -9,12 +9,13 @@ type Flags = {
   informe_id: number | null;
 };
 
+
+
 export function useReportes() {
   const [reportes, setReportes] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fusiona el array "full" con los flags por id
   const mergeWithFlags = (full: any[], flags: Flags[]) => {
     const flagsById = new Map(flags.map((f) => [f.id, f]));
     return full.map((r) => ({
@@ -32,7 +33,6 @@ export function useReportes() {
       setLoading(true);
       setError(null);
 
-      // Traemos ambos en paralelo
       const [resFull, resFlags] = await Promise.all([
         fetch(`${API_URL}/reportes`),
         fetch(`${API_URL}/reportes/disponibles`),
@@ -43,8 +43,8 @@ export function useReportes() {
       if (!resFlags.ok)
         throw new Error("No se pudieron obtener los flags de reportes");
 
-      const full = await resFull.json(); // reportes con encuesta_asignatura/asignatura
-      const flags = (await resFlags.json()) as Flags[]; // {id, has_informe, has_respuesta, informe_id}
+      const full = await resFull.json(); 
+      const flags = (await resFlags.json()) as Flags[]; 
 
       setReportes(mergeWithFlags(full, flags));
     } catch (err: any) {
@@ -86,8 +86,6 @@ export function useReportes() {
     }
   }, []);
 
-  // Nota: este setLoading afecta al estado global del hook; si querés un loading independiente para el resumen,
-  // movelo al componente que lo consuma. Por ahora lo dejamos igual a como lo tenías.
   const fetchResumenByReporteId = useCallback(async (id: number) => {
     try {
       setLoading(true);
@@ -102,6 +100,34 @@ export function useReportes() {
     }
   }, []);
 
+    const fetchResumenComparativo = useCallback(async (idReporte: string | number, anio: number): Promise<Record<string, number> | null> => {
+        const rid = Number(idReporte);
+        // Retorna null si el año actual es el seleccionado (se compara contra sí mismo)
+        if (anio >= new Date().getFullYear()) { 
+             return null;
+        }
+
+        try {
+            const res = await fetch(`${API_URL}/reportes/${rid}/comparativa/${anio}`);
+            
+            if (!res.ok) {
+                 throw new Error(`Error ${res.status} al obtener resumen comparativo para ${anio}`);
+            }
+            
+            const data = await res.json();
+            
+            // Si el backend devuelve un objeto vacío, significa que no hay datos para ese año.
+            if (Object.keys(data).length === 0) return {}; 
+            
+            return data; 
+
+        } catch (err) {
+            console.error(`Error fetching comparative summary for ${anio}:`, err);
+            return null;
+        }
+    }, []);
+
+
   useEffect(() => {
     fetchReportes();
   }, [fetchReportes]);
@@ -113,5 +139,6 @@ export function useReportes() {
     refetch: fetchReportes,
     fetchReporteById,
     fetchResumenByReporteId,
+    fetchResumenComparativo, 
   };
 }
