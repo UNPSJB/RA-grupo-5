@@ -1,37 +1,22 @@
+
 .layout {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; 
+  min-height: 100vh;
 }
 
-.layout .container {
-  flex: 1; 
+.content {
+  flex-grow: 1;
+  padding-bottom: 5rem;
 }
 
-.footer {
-  background-color: #222;
-  color: #ccc;
-  font-size: 0.9rem;
-  text-align: center;
-  padding: 1rem;
-  margin-top: auto; 
-}
-
-
-/* ... (tus otros estilos de .layout y .footer) ... */
 
 .home-icon {
-  /* ¡Un tamaño mucho más grande! */
   font-size: 6rem; 
-  
-  /* Un margen inferior para separarlo del botón */
   margin-bottom: 1.5rem; 
-
-  /* Transición suave para el efecto hover */
   transition: transform 0.2s ease-in-out;
 }
 
 .home-icon:hover {
-  /* Al pasar el mouse, el ícono se agranda un 10% */
   transform: scale(1.1);
 }

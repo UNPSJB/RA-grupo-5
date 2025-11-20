@@ -75,7 +75,7 @@ function App() {
         <Route path="generar-informe/:carreraId" element={<GenerarInformeSintetico />}/>
         <Route path="informes">
             <Route index element={<InformesCurricularesDisponibles />} />
-            <Route path=":id" element={<VerInformeCurricular />} />
+            <Route path=":id" element={<VerInformeCurricularRespondido />} />
         </Route>
         <Route path="informes-sinteticos" element={<InformesSinteticosDisponibles />}/>
         <Route path="estadisticas" element={<EstadisticasDepartamentoPage />} />

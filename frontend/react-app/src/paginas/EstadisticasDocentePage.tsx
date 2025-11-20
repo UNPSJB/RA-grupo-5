@@ -13,8 +13,7 @@ type PreguntaPonderada = { texto: string; valor: number; variableNombre: string 
 type VariableProcesada = { nombre: string; color: string; promedio: number; preguntas: PreguntaPonderada[] };
 type RawSummaryVariableData = { opciones?: Opcion[] };
 
-// --- CONSTANTES Y FUNCIÓN DE PONDERACIÓN ---
-// Tabla de pesos para cada opción de respuesta
+
 const WEIGHTS: Record<string, number> = {
   'si': 100, 'no': 0, 'npo | no puedo opinar': 50,
   'suficientes': 100, 'escasos': 0,
@@ -23,7 +22,7 @@ const WEIGHTS: Record<string, number> = {
   'una': 50, 'más de una': 50,
 };
 
-// Calcula el score ponderado de una lista de opciones
+
 function calcularScorePorOpciones(opciones: Opcion[]): number {
   let weightedSum = 0;
   for (const op of opciones) {
@@ -34,8 +33,7 @@ function calcularScorePorOpciones(opciones: Opcion[]): number {
   return Math.round(weightedSum / 100);
 }
 
-// --- ADAPTADOR DE RESUMEN ---
-// Transforma el resumen bruto en variables procesadas con promedio y preguntas
+
 function transformarResumenEnVariables(resumen: {
   resumen_por_variable: Record<string, VariableResumen>;
   resultados_por_pregunta: Record<string, ResultadoPorPregunta>;
