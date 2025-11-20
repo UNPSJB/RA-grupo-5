@@ -7,12 +7,14 @@ interface Props {
   variable: ApiVariable;
   control: Control<any>;
   errors: FieldErrors;
+  disabled?: boolean;
 }
 
 export default function Variable({
   variable,
   control,
   errors,
+  disabled = false
 }: Props) { 
 
 
@@ -29,7 +31,7 @@ export default function Variable({
   }
 
   return (
-    <Form.Group as="fieldset" className="border p-3 mt-4 rounded">
+    <Form.Group as="fieldset" className="border p-3 mt-4 rounded" disabled={disabled}>
       <legend className="h5 w-auto px-2">
         {variable.nombre}
       </legend>
@@ -40,6 +42,7 @@ export default function Variable({
           pregunta={pregunta}
           control={control}
           errors={errors}
+          disabled={disabled} 
         />
       ))}
     </Form.Group>

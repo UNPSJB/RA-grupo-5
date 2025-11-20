@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 from src.database import get_db
 from src.reportes import schemas, services
 
-# permissions
 from src.seguridad.deps import require_permissions
 from src.seguridad.models import PermissionName
 
@@ -82,3 +81,18 @@ def update_reporte(
 )
 def resumir_variable(reporte_id: int, db: Session = Depends(get_db)):
     return services.generar_resumen_variable(db, reporte_id)
+# Endpoint para la comparativa anual
+@router.get("/{reporte_id}/comparativa/{ciclo_lectivo_comparar}", response_model=dict | None)
+def read_resumen_comparativo(reporte_id: int, ciclo_lectivo_comparar: int, db: Session = Depends(get_db)):
+    """
+    Obtiene el resumen por variable para la EncuestaAsignatura del mismo ID de Asignatura/EncuestaBase
+    correspondiente a un ciclo lectivo anterior.
+    """
+    # Llama a la nueva función REAL que busca en la BD
+    resumen_comparativo = services.generar_resumen_comparativo_real(db, reporte_id, ciclo_lectivo_comparar)
+    
+    if resumen_comparativo is None:
+        return None
+    
+    # Devuelve un diccionario vacío si no hay datos de comparación para ese año/asignatura
+    return resumen_comparativo

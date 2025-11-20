@@ -8,7 +8,6 @@ import {
   Tab,
 } from "react-bootstrap";
 import { useReportes } from "../hook/useReportes";
-// 1. ¡Añadimos useMemo al import!
 import { useEffect, useState, useMemo } from "react"; 
 import { useParams, Link } from "react-router-dom";
 import LayoutReporte from "../componentes/LayoutReporte.tsx";
@@ -26,7 +25,7 @@ export default function ResumenReporte() {
     null
   );
 
-  // ... (Tus useEffects para cargar datos se mantienen igual) ...
+
   useEffect(() => {
     if (!isNaN(idReporte)) {
       const cargarResumen = async () => {
@@ -89,9 +88,9 @@ export default function ResumenReporte() {
         ),
       })
     );
-  }, [reporte]); // Se recalcula solo si 'reporte' cambia
+  }, [reporte]); 
 
-  // --- 3. AHORA SÍ, LOS 'return' DE CARGA ---
+
   if (loading) return <p>Cargando resumen...</p>;
   if (error) return <p>Error: {error}</p>;
   if (
@@ -104,7 +103,7 @@ export default function ResumenReporte() {
     return <p>No hay datos disponibles</p>;
   }
 
-  // ... (El resto de la lógica y el return se mantienen igual)
+
   const activeVariableSummary = reporte.resumen_por_variable[activeVariableKey];
   const Datosasignatura = reporteCompleto.encuesta_asignatura.asignatura;
 
@@ -118,7 +117,7 @@ export default function ResumenReporte() {
       <Container className="my-4">
         <Row className="g-4">
           
-          {/* --- IZQUIERDA: TABS / CONTENIDO (CON TEMA) --- */}
+          
           <Col xs={12} md={8} lg={8}>
             <Card className="border rounded shadow-sm">
               <Card.Header as="h5" className="bg-primary text-white">
@@ -148,11 +147,11 @@ export default function ResumenReporte() {
             </Card>
           </Col>
 
-          {/* --- DERECHA: RESUMEN + BOTÓN (CON TEMA) --- */}
+          
           <Col xs={12} md={4} lg={4}>
             <aside className="right-rail">
               
-              <Card className="border rounded shadow-sm mb-3 bg-white">
+              <Card className="border rounded shadow-sm mb-3 ">
                 <Card.Header as="h6" className="bg-primary text-white">
                   Resumen de la Variable
                 </Card.Header>

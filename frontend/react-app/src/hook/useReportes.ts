@@ -42,8 +42,8 @@ export function useReportes() {
         throw new Error("No se pudieron obtener los flags de reportes");
       }
 
-      const full = await resFull.json(); // reportes completos
-      const flags = (await resFlags.json()) as Flags[]; // {id, has_informe, has_respuesta, informe_id}
+      const full = await resFull.json();
+      const flags = (await resFlags.json()) as Flags[];
 
       setReportes(mergeWithFlags(full, flags));
     } catch (err: any) {
@@ -102,6 +102,41 @@ export function useReportes() {
     }
   }, []);
 
+  const fetchResumenComparativo = useCallback(
+    async (
+      idReporte: string | number,
+      anio: number
+    ): Promise<Record<string, number> | null> => {
+      const rid = Number(idReporte);
+
+      // Retorna null si el año actual es el seleccionado (se compara contra sí mismo)
+      if (anio >= new Date().getFullYear()) {
+        return null;
+      }
+
+      try {
+        const res = await apiFetch(`/reportes/${rid}/comparativa/${anio}`);
+
+        if (!res.ok) {
+          throw new Error(
+            `Error ${res.status} al obtener resumen comparativo para ${anio}`
+          );
+        }
+
+        const data = await res.json();
+
+        // Si el backend devuelve un objeto vacío => no hay datos para ese año.
+        if (Object.keys(data).length === 0) return {};
+
+        return data;
+      } catch (err) {
+        console.error(`Error fetching comparative summary for ${anio}:`, err);
+        return null;
+      }
+    },
+    []
+  );
+
   useEffect(() => {
     fetchReportes();
   }, [fetchReportes]);
@@ -113,5 +148,6 @@ export function useReportes() {
     refetch: fetchReportes,
     fetchReporteById,
     fetchResumenByReporteId,
+    fetchResumenComparativo,
   };
 }

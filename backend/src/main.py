@@ -6,7 +6,10 @@ from src.database import engine
 from src import models
 from sqlalchemy.orm import sessionmaker
 
-from src.personas.router import router as personas_router
+import logging
+from src.jobs import start_scheduler, shutdown_scheduler 
+
+from src.personas.router import router as personas_router 
 from src.encuestas_base.router import router as encuestas_base_router
 from src.informes_curriculares_base.router import router as informes_curriculares_base_router
 from src.reportes.router import router as reportes_router
@@ -46,12 +49,23 @@ def run_seed_once() -> None:
         SeguridadService(db).seed()
 
 # ---------- LIFESPAN: crea tablas y luego hace seed ----------
+# --- CONFIGURACIÓN DE LOGGING y PROGRAMADOR DE TAREAS---
+logging.basicConfig(
+    level=logging.INFO, 
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+log = logging.getLogger(__name__)
+
+logging.getLogger('apscheduler').setLevel(logging.INFO)
+logging.getLogger('src.jobs').setLevel(logging.INFO)
 
 @asynccontextmanager
 async def db_creation_lifespan(app: FastAPI):
     models.ModeloBase.metadata.create_all(bind=engine)
     run_seed_once()
+    start_scheduler()
     yield
+    shutdown_scheduler()
 
 # ---------- APP FASTAPI ----------
 
@@ -73,9 +87,8 @@ app.add_middleware(
 
 # ---------- ROUTERS (auth primero) ----------
 
-app.include_router(auth_router)          # 👈 LOGIN /auth/login
-app.include_router(seguridad_router)     # 👈 /seguridad/... (usa get_current_persona)
-
+app.include_router(auth_router)          
+app.include_router(seguridad_router)     
 app.include_router(personas_router)
 app.include_router(encuestas_base_router)
 app.include_router(variables_router)

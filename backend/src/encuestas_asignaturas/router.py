@@ -40,6 +40,11 @@ def read_encuesta_asignatura(
     return services.leer_encuesta_asignatura(db, encuesta_id)
 
 
+@router.get("/alumno/{persona_id}", response_model=list[schemas.EncuestaAsignaturaRead])
+def read_encuestas_respondidas_alumno(persona_id: int, db:Session = Depends(get_db)):
+    return services.listar_encuestas_respondidas_alumno(db, persona_id)
+
+
 @router.put("/{encuesta_id}", response_model=schemas.EncuestaAsignaturaRead)
 def update_encuesta_asignatura(
     encuesta_id: int,

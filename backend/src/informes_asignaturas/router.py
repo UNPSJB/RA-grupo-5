@@ -84,6 +84,11 @@ def read_informe_asignatura(
     "/{informe_id}/confirmar",
     dependencies=[Depends(require_permissions(PermissionName.RESPONDER_INFORME_CURRICULAR))],
 )
+@router.get("/docente/{persona_id}", response_model=list[schemas.InformeAsignaturaRead])
+def read_informes_respondidos_docente(persona_id: int, db:Session = Depends(get_db)):
+    return services.listar_informes_respondidos_docente(db, persona_id)
+
+@router.post("/{informe_id}/confirmar")
 def confirmar_informe_asignatura(informe_id: int):
     # lógica para confirmar el informe
     return {"status": "ok", "mensaje": f"Informe {informe_id} confirmado"}
