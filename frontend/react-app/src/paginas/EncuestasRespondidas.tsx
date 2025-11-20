@@ -53,11 +53,11 @@ export default function EncuestasRespondidas() {
                       </small>
                       <br />
                       <small className="text-muted">
-                        {`Ciclo: ${encuesta.asignatura.año} | Cursado: ${encuesta.asignatura.cursado}` }
+                        {`Ciclo lectivo: ${encuesta.ciclo_lectivo} | Cursado: ${encuesta.asignatura.cursado}` }
                       </small>
                       <br />
                       <small className="text-muted">
-                        {`Carrera: ${encuesta.asignatura?.carrera?.nombre} ` }
+                        {`Docente: ${encuesta.asignatura?.carrera?.nombre}` }
                       </small>
                     
                       

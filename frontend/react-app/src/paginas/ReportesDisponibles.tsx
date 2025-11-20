@@ -14,6 +14,7 @@ import { isGeneracionInformeCurricularActiva, getToday, getRangoFechasInformeCur
 export default function ReportesDisponibles() {
   const { reportes, loading, error } = useReportes();
   const today = getToday()
+  const currentYear = today.getFullYear(); // Obtenemos el año actual (ej: 2025)
 
   if (loading) {
     return (
@@ -53,7 +54,8 @@ export default function ReportesDisponibles() {
               ) : (
                 reportes.map((reporte) => {
                   const asignatura = reporte.encuesta_asignatura.asignatura;
-                  const puedeGenerar = isGeneracionInformeCurricularActiva(asignatura.cursado, today);
+                  const cicloLectivo = reporte.encuesta_asignatura.ciclo_lectivo;
+                  const puedeGenerar = ((cicloLectivo === currentYear) || (cicloLectivo === currentYear + 1)) && isGeneracionInformeCurricularActiva(asignatura.cursado, today);
                   const fechaCierre = getRangoFechasInformeCurricular(asignatura.cursado);
                   return (
                     <ListGroup.Item 
@@ -69,14 +71,15 @@ export default function ReportesDisponibles() {
                         )}
                         <br/>
                         <small className="d-block m-1">
-                          <strong>Docente:</strong> {asignatura.nombre_docente}
+                          <strong>Docente: </strong> {asignatura.nombre_docente}
                         </small>
                         <small className="d-block m-1">
-                        <strong>Ciclo:</strong>{`${asignatura.año} | Cursado: ${asignatura.cursado}` }
+                        <strong>Ciclo lectivo: </strong>{`${reporte.encuesta_asignatura.ciclo_lectivo} | Cursado: ${asignatura.cursado}` }
                         </small>
                         <small className="d-block m-1">
-                          <strong>Carrera:</strong>{`${asignatura?.carrera?.nombre} ` }
+                          <strong>Carrera: </strong>{`${asignatura?.carrera?.nombre} ` }
                         </small>
+                        
                       </div>
 
                       <div className="d-flex flex-column gap-3" style={{ minWidth: '130px' }}>                        

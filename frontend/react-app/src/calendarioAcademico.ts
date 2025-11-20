@@ -129,7 +129,7 @@ export function getToday(): Date {
   return new Date(); //fecha actual
   
   // Opción B: Fecha Fija para Pruebas (descomenta la que necesites)
-  // return new Date(2025, 7, 15); // Simula Agosto 2025 (Permite IC C1)
+  //return new Date(2026, 7, 15); // Simula Agosto 2026 (Permite IC C1)
   // return new Date(2025, 11, 15); // Simula Diciembre 2025 (Permite IC C2 e IS C1)
   // return new Date(2025, 4, 15); // Simula Mayo 2025 (No permite nada)
 }

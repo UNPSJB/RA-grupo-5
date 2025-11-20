@@ -49,7 +49,7 @@ export default function TablaInformeSintetico() {
 
 
   const cursadoDBValue = cuatrimestre === "1° cuatrimestre" ? "cuatrimestre 1" : "cuatrimestre 2";
-  const puedeGenerar = (cicloLectivo === currentYear) && isGeneracionInformeSinteticoActivo(cursadoDBValue, today)
+  const puedeGenerar = ((cicloLectivo === currentYear) || (cicloLectivo === currentYear + 1)) && isGeneracionInformeSinteticoActivo(cursadoDBValue, today)
 
 
   return (

@@ -66,14 +66,17 @@ export default function InformesCurricularesDisponibles() {
                     className="d-flex align-items-start"
                   >
                     <div className="me-3 flex-grow-1 text-start">
-                      <span className="fw-bold">{informe.asignatura.nombre}</span>
+                      <span className="fw fs-5">{informe.asignatura?.nombre}</span>
                       <br/>
+                      <small className="text-muted d-block mt-1">
+                        Docente: {informe.docente}
+                      </small>
                       <small className="text-muted">
-                          <strong>Docente:</strong> {informe.asignatura.nombre_docente}
+                        {`Ciclo lectivo: ${informe.ciclo_lectivo} | Cursado: ${informe.asignatura.cursado}` }
                       </small>
                       <br />
-                      <small className="text-muted"> 
-                          <strong>Carrera:</strong> {`${informe.asignatura.carrera.nombre} | Año: ${informe.asignatura.año} | Cursado: ${informe.asignatura.cursado}`}
+                      <small className="text-muted">
+                        {`Carrera: ${informe.asignatura?.carrera?.nombre} ` }
                       </small>
                     </div>
                     <Link 

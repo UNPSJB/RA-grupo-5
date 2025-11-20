@@ -101,7 +101,7 @@ export default function InformeCurricular() {
         setSede(asignatura?.sede || "");
         setDocente(asignatura?.nombre_docente || "");
         setCicloLectivo(
-          asignatura?.año ? Number(asignatura.año) : "" // <-- Respetamos tu cambio
+          data.encuesta_asignatura?.ciclo_lectivo ? Number(data.encuesta_asignatura?.ciclo_lectivo) : "" // <-- Respetamos tu cambio
         );
       } catch {
         setErrorReporte("Error cargando el reporte.");

@@ -72,13 +72,13 @@ export default function EncuestasPendientes() {
 
                         <br />
                         <small className="d-block m-1">
-                          <strong>Docente:</strong> {encuesta.asignatura.nombre_docente}
+                          <strong>Docente: </strong> {encuesta.asignatura.nombre_docente}
                         </small>
                         <small className="d-block m-1">
-                          <strong>Ciclo:</strong>{`${encuesta.asignatura.año} | Cursado: ${encuesta.asignatura.cursado}`}
+                          <strong>Ciclo lectivo: </strong>{`${encuesta.ciclo_lectivo} | Cursado: ${encuesta.asignatura.cursado}`}
                         </small>
                         <small className="d-block m-1">
-                          <strong>Carrera:</strong>{`${encuesta.asignatura?.carrera?.nombre} `}
+                          <strong>Carrera: </strong>{`${encuesta.asignatura?.carrera?.nombre} `}
                         </small>
                       </div>
 

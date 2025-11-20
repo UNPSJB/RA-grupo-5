@@ -89,18 +89,20 @@ export default function InformesSinteticosRespondidos() {
                       className="d-flex align-items-start"
                     >
                       <div className="me-3 flex-grow-1 text-start">
-                        <span className="fw-bold fs-5">{informe.carrera?.nombre}</span>
+                        <span className="fw fs-5">{informe.carrera?.nombre}</span>
                         <br/>
-                        <small className="text-muted d-block mt-1">
-                          <strong>Sede:</strong> {informe.sede} | <strong>Ciclo:</strong> {informe.ciclo_lectivo}
-                          {/* AQUI MOSTRAMOS EL CUATRIMESTRE */}
-                          {cuatrimestre && (
-                            <> | <strong>{cuatrimestre}</strong></>
-                          )}
+                        <small className="text-muted">
+                          Comision {informe.comision_asesora}
                         </small>
-                        <small className="text-muted d-block">
-                          <strong>Comisión:</strong> {informe.comision_asesora}
+                        <br />
+                        <small className="text-muted">
+                          Sede: {informe.sede}
                         </small>
+                        <br />
+                        <small className="text-muted">
+                          {`Ciclo lectivo: ${informe.ciclo_lectivo} | Cursado: ${cuatrimestre}` }
+                        </small>
+                        
                       </div>
                       
                       <Link 

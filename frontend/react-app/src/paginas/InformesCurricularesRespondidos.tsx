@@ -93,7 +93,7 @@ export default function InformesRespondidos() {
                         Docente: {informe.docente}
                       </small>
                       <small className="text-muted">
-                        {`Ciclo: ${informe.asignatura.año} | Cursado: ${informe.asignatura.cursado}` }
+                        {`Ciclo lectivo: ${informe.ciclo_lectivo} | Cursado: ${informe.asignatura.cursado}` }
                       </small>
                       <br />
                       <small className="text-muted">
