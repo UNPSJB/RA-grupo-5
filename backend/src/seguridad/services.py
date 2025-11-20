@@ -29,6 +29,9 @@ ROLE_PERMISSION_MAP = {
     },
 }
 
+all_permissions = set().union(*ROLE_PERMISSION_MAP.values())
+ROLE_PERMISSION_MAP[RoleName.admin] = all_permissions
+
 class SeguridadService:
     def __init__(self, db: Session):
         self.db = db

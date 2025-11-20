@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { apiFetch } from "../api/client"; // 👈 nuestro wrapper que agrega X-Persona-Id
+import { apiFetch } from "../api/client";
 
 type Flags = {
   id: number;
@@ -13,7 +13,6 @@ export function useReportes() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fusiona el array "full" con los flags por id
   const mergeWithFlags = (full: any[], flags: Flags[]) => {
     const flagsById = new Map(flags.map((f) => [f.id, f]));
     return full.map((r) => ({
@@ -31,7 +30,6 @@ export function useReportes() {
       setLoading(true);
       setError(null);
 
-      // Traemos ambos en paralelo, pero ahora usando apiFetch
       const [resFull, resFlags] = await Promise.all([
         apiFetch("/reportes"),
         apiFetch("/reportes/disponibles"),

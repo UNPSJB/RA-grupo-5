@@ -8,7 +8,7 @@ import type {
 } from "../types/Encuesta";
 
 import { obtenerNombreCampo } from "../validaciones/Encuesta";
-import { apiFetch } from "../api/client"; // ⬅️ IMPORTANTE
+import { apiFetch } from "../api/client";
 
 export function useResponderEncuesta(idEncuestaAsignatura: number | null) {
   const [encuesta, setEncuesta] = useState<EncuestaBase | null>(null);
@@ -129,7 +129,6 @@ export function useResponderEncuesta(idEncuestaAsignatura: number | null) {
         detalles: detalles,
       };
 
-      // *** USAMOS apiFetch ***
       const response = await apiFetch("/respuestas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

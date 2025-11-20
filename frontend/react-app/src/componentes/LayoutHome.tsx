@@ -7,12 +7,19 @@ import { useAuth } from "../context/AuthContext";
 
 export default function LayoutHome() {
   const navigate = useNavigate();
-  const { roles, logout, token } = useAuth();
+  const { roles = [], logout, token } = useAuth();
 
   function handleLogout() {
     logout();
     navigate("/login");
   }
+
+  // Función de ayuda para permisos:
+  // - Devuelve true si el usuario es admin
+  // - O si tiene explícitamente el rol pedido
+  const can = (role: string) => {
+    return roles.includes("admin") || roles.includes(role);
+  };
 
   return (
     <div className="layout">
@@ -53,7 +60,7 @@ export default function LayoutHome() {
           {/* BOTONES SEGÚN ROL */}
           {token && (
             <Row className="text-center mt-5 g-5">
-              {roles.includes("alumno") && (
+              {can("alumno") && (
                 <Col md={4} className="d-flex flex-column align-items-center">
                   <i className="bi bi-mortarboard-fill home-icon text-primary"></i>
                   <Link to="/alumno" className="btn btn-secondary btn-lg">
@@ -62,7 +69,7 @@ export default function LayoutHome() {
                 </Col>
               )}
 
-              {roles.includes("docente") && (
+              {can("docente") && (
                 <Col md={4} className="d-flex flex-column align-items-center">
                   <i className="bi bi-briefcase-fill home-icon text-primary"></i>
                   <Link to="/docente" className="btn btn-secondary btn-lg">
@@ -71,7 +78,7 @@ export default function LayoutHome() {
                 </Col>
               )}
 
-              {roles.includes("departamento") && (
+              {can("departamento") && (
                 <Col md={4} className="d-flex flex-column align-items-center">
                   <i className="bi bi-building home-icon text-primary"></i>
                   <Link to="/departamento" className="btn btn-secondary btn-lg">

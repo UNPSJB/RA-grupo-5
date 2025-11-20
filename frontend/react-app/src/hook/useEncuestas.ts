@@ -7,7 +7,6 @@ export function useEncuestas() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Ojo: ahora usamos ruta relativa, el base está en apiFetch
   const API_PATH = "/encuestas-asignaturas/";
 
   const fetchEncuestas = async () => {

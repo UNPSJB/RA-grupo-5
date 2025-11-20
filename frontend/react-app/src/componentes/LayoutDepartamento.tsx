@@ -6,14 +6,29 @@ import { useAuth } from "../context/AuthContext";
 
 export default function LayoutDepartamento() {
   const navigate = useNavigate();
-  const { roles, logout } = useAuth();
+  const { roles, logout, token } = useAuth();
 
-  // Seguridad básica: si no tiene rol de departamento, no debería estar acá
-  if (!roles.includes("departamento")) {
+  // Función de permiso: admin siempre puede entrar
+  const can = (role: string) => roles.includes("admin") || roles.includes(role);
+
+  // Si no está logueado
+  if (!token) {
     return (
       <div className="mt-5 text-center">
         <h4>No autorizado</h4>
-        <p>Iniciá sesión con un usuario de tipo departamento.</p>
+        <p>Iniciá sesión para acceder.</p>
+      </div>
+    );
+  }
+
+  // Si no tiene rol de departamento (ni es admin)
+  if (!can("departamento")) {
+    return (
+      <div className="mt-5 text-center">
+        <h4>No autorizado</h4>
+        <p>
+          Solo usuarios con rol departamento o admin pueden ver esta sección.
+        </p>
       </div>
     );
   }

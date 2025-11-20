@@ -1,5 +1,5 @@
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 import jwt
 
@@ -7,11 +7,21 @@ from src.database import get_db
 from src.personas import services as persona_services
 from src.auth.services import SECRET, ALGORITHM  # usamos los valores reales del módulo auth
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+# Esquema de seguridad tipo Bearer (Authorization: Bearer <token>)
+oauth2_scheme = HTTPBearer()
+
+
+def get_current_token(
+    credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme),
+) -> str:
+    """
+    Devuelve solo el string del token (sin el 'Bearer ').
+    """
+    return credentials.credentials
 
 
 def get_current_persona(
-    token: str = Depends(oauth2_scheme),
+    token: str = Depends(get_current_token),
     db: Session = Depends(get_db),
 ):
     """

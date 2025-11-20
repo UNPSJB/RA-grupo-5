@@ -8,7 +8,6 @@ export const useInformeSinteticoCarrera = (id: number | null) => {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    // No hacer nada si no hay ID
     if (!id) {
       setLoading(false);
       return;

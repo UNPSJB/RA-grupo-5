@@ -6,14 +6,27 @@ import { useAuth } from "../context/AuthContext";
 
 export default function LayoutAlumno() {
   const navigate = useNavigate();
-  const { roles, logout } = useAuth();
+  const { roles, logout, token } = useAuth();
 
-  // Si no tiene rol de alumno, no debería estar acá
-  if (!roles.includes("alumno")) {
+  // Función de permiso: admin siempre entra
+  const can = (role: string) => roles.includes("admin") || roles.includes(role);
+
+  // Si no está logueado
+  if (!token) {
     return (
       <div className="mt-5 text-center">
         <h4>No autorizado</h4>
-        <p>Iniciá sesión con un usuario de tipo alumno.</p>
+        <p>Iniciá sesión para acceder.</p>
+      </div>
+    );
+  }
+
+  // Si no tiene permisos para alumno (ni es admin)
+  if (!can("alumno")) {
+    return (
+      <div className="mt-5 text-center">
+        <h4>No autorizado</h4>
+        <p>Solo usuarios con rol de alumno o admin pueden ver esta sección.</p>
       </div>
     );
   }

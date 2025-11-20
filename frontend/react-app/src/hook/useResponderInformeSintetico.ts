@@ -35,7 +35,7 @@ export function useResponderInformeSintetico() {
 
       const res = await apiFetch("/respuestas/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" }, // ← ★★★ FALTABA ESTO ★★★
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
