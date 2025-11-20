@@ -10,6 +10,7 @@ from src.preguntas.models import Pregunta
 from src.pregunta_opcion.models import PreguntaOpcion
 from src.opciones_respuesta.models import OpcionRespuesta
 from src.asignaturas.models import Asignatura
+from src.respuestas.models import Respuesta
 
 from src.encuestas_asignaturas import schemas
 
@@ -39,6 +40,17 @@ def listar_encuestas_asignaturas(db:Session):
         .all()
     )
 
+def listar_encuestas_respondidas_alumno(db: Session, persona_id: int) -> List[EncuestaAsignatura]:
+    query = (
+        db.query(EncuestaAsignatura)
+        .join(Respuesta, EncuestaAsignatura.respuestas)
+        .filter(Respuesta.id_persona == persona_id)
+        .options(
+            joinedload(EncuestaAsignatura.asignatura),
+            joinedload(EncuestaAsignatura.encuesta_base)
+        )
+    )
+    return query.all()
 
 def crear_encuesta_asignatura(db: Session, encuesta: schemas.EncuestaAsignaturaCreate) -> EncuestaAsignatura:
     _encuesta = EncuestaAsignatura(**encuesta.model_dump())

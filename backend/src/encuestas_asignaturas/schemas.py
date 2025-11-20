@@ -9,6 +9,7 @@ from datetime import date
 class EncuestaAsignaturaBase(BaseModel):
     fecha_inicio: date = date(2025, 7, 1)
     fecha_fin: date = date(2025,12,31)
+    ciclo_lectivo: int
     estado: EstadoEncuesta
 
 class EncuestaAsignaturaCreate(EncuestaAsignaturaBase):

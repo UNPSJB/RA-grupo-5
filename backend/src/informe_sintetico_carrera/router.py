@@ -16,3 +16,7 @@ def create_informe_sintetico_carrera(informe: schemas.InformeSinteticoCarreraCre
 @router.get("/{informe_id}", response_model=schemas.InformeSinteticoCarreraRead)
 def read_informe_sintetico_carrera(informe_id: int, db:Session = Depends(get_db)):
     return services.leer_informe_sintetico_carrera(db, informe_id)
+
+@router.get("/departamento/{persona_id}", response_model=list[schemas.InformeSinteticoCarreraRead])
+def read_informes_respondidos_departamento(persona_id: int, db: Session = Depends(get_db)):
+    return services.listar_informes_respondidos_departamento(db, persona_id)
