@@ -20,6 +20,9 @@ export default function LayoutDocente() {
           <Nav.Link as={Link} to="/docente/reportes">
             Listado de reportes disponibles
           </Nav.Link>
+          <Nav.Link as={Link} to="/docente/informes-curriculares-respondidos">
+              Mis Informes Enviados
+          </Nav.Link>
         </Nav>
       </Navbar>
 

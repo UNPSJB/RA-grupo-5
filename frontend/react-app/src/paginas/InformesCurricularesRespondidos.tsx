@@ -1,21 +1,42 @@
-import { useInformesCurriculares } from "../hook/useInformesCurriculares";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { IC_C1_START, IC_C1_END, IC_C2_START, IC_C2_END}from "../calendarioAcademico";
 import { 
   Container, 
-  Row, 
   Col, 
+  Row, 
   Card, 
   ListGroup, 
   Badge, 
   Spinner, 
   Alert 
 } from "react-bootstrap";
+import type { InformeCurricular } from "../types/models/InformeCurricular";
 
-export default function InformesCurricularesDisponibles() {
-  const { informesCurriculares, loading, error } = useInformesCurriculares();
+export default function InformesRespondidos() {
+  const [informes, setInformes] = useState<InformeCurricular[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // ID DOCENTE HARDCODEADO
+  const ID_DOCENTE = 1; 
 
-  // ... (Estados de carga y error consistentes)
+  useEffect(() => {
+    const fetchRespondidos = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`http://localhost:8000/informes-asignaturas/docente/${ID_DOCENTE}`);
+        if (!res.ok) throw new Error("Error al cargar informes respondidos");
+        const data = await res.json();
+        setInformes(data);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRespondidos();
+  }, []);
+
   if (loading) {
     return (
       <Container className="my-4 text-center">
@@ -24,6 +45,7 @@ export default function InformesCurricularesDisponibles() {
       </Container>
     );
   }
+
   if (error) {
     return (
       <Container className="my-4">
@@ -36,10 +58,8 @@ export default function InformesCurricularesDisponibles() {
     );
   }
 
-  const cerrados = informesCurriculares.filter((informe) => informe.estado === "cerrado");
-
   return (
-    <Container className="my-4">
+     <Container className="my-4">
       <Row>
         <Col md={10} lg={8} className="mx-auto">
 
@@ -49,18 +69,19 @@ export default function InformesCurricularesDisponibles() {
               as="h5" 
               className="bg-light d-flex justify-content-between align-items-center"
             >
-              Informes Cerrados
+              Informes Curriculares Respondidos
               <Badge bg="secondary" pill>
-                {cerrados.length}
+                {informes.length}
               </Badge>
             </Card.Header>
             
             <ListGroup variant="flush">
-              {cerrados.length === 0 ? (
-                <ListGroup.Item>No hay informes cerrados.</ListGroup.Item>
+              {informes.length === 0 ? (
+                <ListGroup.Item className="text-muted text-center py-3">
+                  No hay informes respondidos.
+                </ListGroup.Item>
               ) : (
-                cerrados.map(informe => (
-                 
+                informes.map(informe => (
                   <ListGroup.Item 
                     key={informe.id} 
                     className="d-flex align-items-start"
@@ -79,13 +100,14 @@ export default function InformesCurricularesDisponibles() {
                         {`Carrera: ${informe.asignatura?.carrera?.nombre} ` }
                       </small>
                     </div>
+                    
                     <Link 
-                      to={`/departamento/informes/${informe.id}`} 
+                      to={`/docente/informes-curriculares-respondidos/${informe.id}`} 
                       className="btn btn-outline-primary btn-sm align-self-center"
-                      title="Ver Informe"
+                      title="Ver Informe Completo"
                     >
-                      <i className="bi bi-file-earmark-text-fill"></i>
-                      <span className="ms-2 d-none d-md-inline">Ver</span>
+                      <i className="bi bi-file-earmark-text-fill me-2"></i>
+                      <span className="d-none d-md-inline">Ver</span>
                     </Link>
                   </ListGroup.Item>
                 ))

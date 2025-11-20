@@ -47,6 +47,7 @@ export interface EncuestaAsignatura {
   id_asignatura: number;
   fecha_inicio: string; 
   fecha_fin: string; 
+  ciclo_lectivo: number;
   estado: "abierta" | "cerrada"; 
   asignatura: Asignatura; 
 }
