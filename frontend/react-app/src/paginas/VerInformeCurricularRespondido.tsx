@@ -43,9 +43,6 @@ export default function VerInformeCurricularRespondido() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // ID DOCENTE HARDCODEADO (luego lo podremos reemplazar por el ID real del token)
-  const ID_DOCENTE = 1;
-
   const {
     control,
     formState: { errors },
@@ -63,7 +60,6 @@ export default function VerInformeCurricularRespondido() {
         if (!resInforme.ok)
           throw new Error("Error al cargar el informe curricular");
 
-        // 👇 Cast a intersección para que TS sepa que puede venir id_informe_curricular_base
         const dataInforme = (await resInforme.json()) as InformeCurricular & {
           id_informe_curricular_base?: number;
         };
@@ -83,9 +79,9 @@ export default function VerInformeCurricularRespondido() {
         if (!resBase.ok) throw new Error("Error al cargar la plantilla base");
         const dataBase: InformeBase = await resBase.json();
 
-        // 3) Traer las respuestas del docente para este informe
+        // 3) Traer las respuestas del DOCENTE LOGUEADO (backend usa token)
         const resRespuestas = await apiFetch(
-          `/respuestas/?persona_id=${ID_DOCENTE}&informe_asignatura_id=${id}`
+          `/respuestas/?informe_asignatura_id=${id}`
         );
         if (!resRespuestas.ok)
           throw new Error("Error al cargar las respuestas");
@@ -112,6 +108,7 @@ export default function VerInformeCurricularRespondido() {
         setInforme(dataInforme);
         setInformeBase(dataBase);
         reset(valoresIniciales);
+        setError(null);
       } catch (err: any) {
         console.error(err);
         setError(err.message ?? "Error desconocido");

@@ -48,9 +48,6 @@ export default function VerEncuesta() {
 
   const [activeTab, setActiveTab] = useState<string | null>(null);
 
-  // ❌ Eliminamos el ID_ALUMNO hardcodeado
-  // const ID_ALUMNO = 1;
-
   // Hook del formulario (sin validación)
   const {
     control,

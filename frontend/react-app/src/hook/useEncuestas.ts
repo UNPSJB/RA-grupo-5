@@ -2,17 +2,31 @@ import { useState, useEffect } from "react";
 import type { EncuestaAsignatura } from "../types/Encuesta";
 import { apiFetch } from "../api/client";
 
+// Helper local para sacar persona_id del JWT
+function getPersonaIdFromToken(): number | null {
+  const token = localStorage.getItem("token");
+  if (!token) return null;
+
+  try {
+    const payloadBase64 = token.split(".")[1];
+    const payloadJson = atob(payloadBase64);
+    const payload = JSON.parse(payloadJson);
+    return typeof payload.persona_id === "number" ? payload.persona_id : null;
+  } catch (e) {
+    console.error("No se pudo decodificar el token JWT", e);
+    return null;
+  }
+}
+
 export function useEncuestas() {
   const [encuestas, setEncuestas] = useState<EncuestaAsignatura[]>([]);
-  const [encuestasRespondidas, setEncuestasRespondidas] = useState<EncuestaAsignatura[]>([]);
+  const [encuestasRespondidas, setEncuestasRespondidas] = useState<
+    EncuestaAsignatura[]
+  >([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   const API_PATH = "/encuestas-asignaturas/";
-
-    // ID HARDCODEADO POR AHORA (hasta tener login)
-  const ID_ALUMNO = 1; 
-
 
   const fetchEncuestas = async () => {
     try {
@@ -34,18 +48,32 @@ export function useEncuestas() {
   };
 
   const fetchRespondidas = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`http://localhost:8000/encuestas-asignaturas/alumno/${ID_ALUMNO}`);
-        if (!response.ok) throw new Error("Error al cargar encuestas respondidas");
-        const data = await response.json();
-        setEncuestasRespondidas(data);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+    try {
+      setLoading(true);
+
+      const personaId = getPersonaIdFromToken();
+      if (personaId == null) {
+        throw new Error(
+          "No se pudo determinar la persona logueada a partir del token"
+        );
       }
-    };
+
+      const response = await apiFetch(
+        `/encuestas-asignaturas/alumno/${personaId}`
+      );
+      if (!response.ok) {
+        throw new Error("Error al cargar encuestas respondidas");
+      }
+
+      const data = await response.json();
+      setEncuestasRespondidas(data);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message ?? "Error desconocido");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchEncuestas();
@@ -58,6 +86,5 @@ export function useEncuestas() {
     error,
     refetch: fetchEncuestas,
     encuestasRespondidas,
-
   };
 }
