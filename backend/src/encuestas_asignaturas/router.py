@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from src.seguridad.deps_auth import get_current_persona
 from src.database import get_db
 from src.encuestas_asignaturas import schemas, services
 from src.seguridad.deps import require_permissions
@@ -41,8 +42,15 @@ def read_encuesta_asignatura(
 
 
 @router.get("/alumno/{persona_id}", response_model=list[schemas.EncuestaAsignaturaRead])
-def read_encuestas_respondidas_alumno(persona_id: int, db:Session = Depends(get_db)):
-    return services.listar_encuestas_respondidas_alumno(db, persona_id)
+def read_encuestas_respondidas_alumno(
+    persona_id: int,
+    db: Session = Depends(get_db),
+    persona_actual = Depends(get_current_persona),
+):
+    if persona_id != persona_actual.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="No puede ver encuestas de otra persona")
+    return services.listar_encuestas_respondidas_alumno(db, persona_actual.id)
 
 
 @router.put("/{encuesta_id}", response_model=schemas.EncuestaAsignaturaRead)
