@@ -15,7 +15,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-
 import { useResponderEncuesta } from '../hook/useResponderEncuesta';
 import Variable from '../componentes/Variable';
 import {
@@ -23,7 +22,6 @@ import {
     construirValoresPorDefecto,
     obtenerNombreCampo
 } from '../validaciones/Encuesta';
-
 
 import { useAlertaFlotante } from '../hook/useAlertaFlotante';
 import AlertaFlotante from '../componentes/AlertaFlotante';
@@ -34,7 +32,6 @@ function ResponderEncuesta() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const idEncuesta = id ? Number(id) : null;
-
 
     const {
         encuesta,
@@ -70,7 +67,8 @@ function ResponderEncuesta() {
         trigger
     } = useForm<SurveyFormData>({
         defaultValues: defaultValues,
-        resolver: schema ? zodResolver(schema) : undefined, 
+        resolver: schema ? zodResolver(schema) : undefined,
+        mode: 'onChange' 
     });
 
     const [activeTab, setActiveTab] = useState<string | null>(null);
@@ -84,6 +82,12 @@ function ResponderEncuesta() {
             setActiveTab(encuesta.variables[0].id.toString());
         }
     }, [encuesta, activeTab]);
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') {
+            e.preventDefault();
+        }
+    };
 
     const onSubmit = async (data: SurveyFormData) => {
         try {
@@ -103,21 +107,21 @@ function ResponderEncuesta() {
         }
     };
 
-    // --- Estados de Carga / Error ---
     if (loading) return <Container className="py-4 text-center"><Spinner animation="border" /></Container>;
     if (!encuesta || !encuesta.variables) return <Container className="py-4 text-center"><Alert variant="danger">Error al cargar.</Alert></Container>;
     if (encuesta.variables.length === 0) return <Container className="py-4 text-center"><Alert variant="info">No hay preguntas.</Alert></Container>;
     if (activeTab === null) return <Container className="py-4 text-center">Iniciando...</Container>;
 
-    // --- Lógica de Navegación de Pestañas ---
     const activeTabIndex = encuesta.variables.findIndex(v => v.id.toString() === activeTab);
+    const isLastTab = activeTabIndex === encuesta.variables.length - 1;
     
     if (activeTabIndex === -1) {
         setActiveTab(encuesta.variables[0].id.toString());
         return null;
     }
 
-    const handlePrevious = () => {
+    const handlePrevious = (e: React.MouseEvent) => {
+        e.preventDefault(); 
         const previousTabKey = encuesta.variables[activeTabIndex - 1].id.toString();
         setActiveTab(previousTabKey);
     };
@@ -132,7 +136,10 @@ function ResponderEncuesta() {
         return await trigger(fieldsToValidate);
     };
 
-    const handleNext = async () => {
+    const handleNext = async (e: React.MouseEvent) => {
+        e.preventDefault(); 
+        e.stopPropagation();
+        
         const isValid = await validateCurrentTab();
         if (isValid) {
             const nextTabKey = encuesta.variables[activeTabIndex + 1].id.toString();
@@ -143,6 +150,7 @@ function ResponderEncuesta() {
     const handleTabSelect = async (key: string | null) => {
         if (key === null || key === activeTab) return;
         const newTabIndex = encuesta.variables.findIndex(v => v.id.toString() === key);
+        
         if (newTabIndex < activeTabIndex) {
             setActiveTab(key);
             return;
@@ -155,101 +163,97 @@ function ResponderEncuesta() {
 
     return (
         <Container className="py-4">
-            <AlertaFlotante 
-                show={alerta.show}
-                variant={alerta.variant}
-                message={alerta.message}
-                onClose={cerrarAlerta}
-                onExited={handleAlertExited}
-            />
+          
+          <AlertaFlotante 
+            show={alerta.show}
+            variant={alerta.variant}
+            message={alerta.message}
+            onClose={cerrarAlerta}
+            onExited={handleAlertExited}
+          />
 
-            <Row>
-                <Col md={8} className="mx-auto">
-                <Card className="border rounded shadow-sm bg-white">
-                    <Card.Header as="h4" className="bg-primary text-white text-center">
-                    {asignatura?.nombre}
-                    </Card.Header>
-                    <Card.Body className="p-4">
-                    <Form onSubmit={handleSubmit(onSubmit)}> 
-                        
-                        {error && <Alert variant="danger" className="mb-3">Error: {error}</Alert>}
-                        
-                        <Tabs
-                        activeKey={activeTab}
-                        onSelect={handleTabSelect} 
-                        id="variable-tabs"
-                        className="mb-3"
+          <Row>
+            <Col md={8} className="mx-auto">
+              <Card className="border rounded shadow-sm bg-white">
+                <Card.Header as="h4" className="bg-primary text-white text-center">
+                  {asignatura?.nombre}
+                </Card.Header>
+                <Card.Body className="p-4">
+                  <Form onSubmit={handleSubmit(onSubmit)} onKeyDown={handleKeyDown}> 
+                    
+                    {error && <Alert variant="danger" className="mb-3">Error: {error}</Alert>}
+                    
+                    <Tabs
+                      activeKey={activeTab}
+                      onSelect={handleTabSelect} 
+                      id="variable-tabs"
+                      className="mb-3"
+                    >
+                      {encuesta.variables.map(variable => (
+                        <Tab
+                          key={variable.id}
+                          eventKey={variable.id.toString()} 
+                          title={variable.codigo}
                         >
-                        {encuesta.variables.map(variable => (
-                            <Tab
-                            key={variable.id}
-                            eventKey={variable.id.toString()} 
-                            title={variable.codigo}
-                            >
-                            <div className="py-3">
-                                <Variable
-                                    variable={variable}
-                                    control={control}
-                                    errors={errors}
-                                />
-                            </div>
-                            </Tab>
-                        ))}
-                        </Tabs>
+                          <div className="py-3">
+                            <Variable
+                                variable={variable}
+                                control={control}
+                                errors={errors}
+                            />
+                          </div>
+                        </Tab>
+                      ))}
+                    </Tabs>
 
-                        {Object.keys(errors).length > 0 && (
-                            <Alert variant="warning" className="mt-4">
-                                Debes completar <strong>{Object.keys(errors).length}</strong> preguntas obligatorias.
-                            </Alert>
-                        )}
+                    {Object.keys(errors).length > 0 && (
+                        <Alert variant="warning" className="mt-4">
+                            Debes completar <strong>{Object.keys(errors).length}</strong> preguntas obligatorias marcadas en rojo.
+                        </Alert>
+                    )}
 
-                        <div className="d-flex justify-content-between mt-4">
-                        <Button 
-                            variant="secondary" 
-                            onClick={handlePrevious}
-                            disabled={activeTabIndex === 0}
-                            type="button" 
-                        >
-                            Anterior
-                        </Button>
+                    <div className="d-flex justify-content-between mt-4">
+                      <Button 
+                          variant="secondary" 
+                          onClick={handlePrevious}
+                          disabled={activeTabIndex === 0}
+                          type="button"
+                      >
+                          Anterior
+                      </Button>
 
-                        {activeTabIndex === encuesta.variables.length - 1 ? (
-                            <Button
-                                variant="primary"
-                                type="submit"
-                                disabled={isSubmitting}
-                            >
-                                {isSubmitting ? (
-                                    <>
-                                        <Spinner
-                                            as="span"
-                                            animation="border"
-                                            size="sm"
-                                            role="status"
-                                            aria-hidden="true"
-                                            className="me-2"
-                                        />
-                                        Guardando...
-                                    </>
-                                ) : (
-                                    'Guardar Respuestas'
-                                )}
-                            </Button>
+                      <Button
+                        variant="primary"
+                        type={isLastTab ? "submit" : "button"}
+                        onClick={isLastTab ? undefined : handleNext}
+                        disabled={isSubmitting}
+                      >
+                        {isLastTab ? (
+                            isSubmitting ? (
+                                <>
+                                    <Spinner
+                                        as="span"
+                                        animation="border"
+                                        size="sm"
+                                        role="status"
+                                        aria-hidden="true"
+                                        className="me-2"
+                                    />
+                                    Guardando...
+                                </>
+                            ) : (
+                                'Guardar Respuestas'
+                            )
                         ) : (
-                            <Button 
-                                variant="primary" 
-                                onClick={handleNext} 
-                                type="button" 
-                            >
-                                Siguiente
-                            </Button>
+                            "Siguiente"
                         )}
-                        </div>
-                    </Form>
-                    </Card.Body>
-                </Card>
-                </Col>  
-            </Row>
+                      </Button>
+                    </div>
+                  </Form>
+                </Card.Body>
+              </Card>
+            </Col>  
+          </Row>
         </Container>
     );
 }

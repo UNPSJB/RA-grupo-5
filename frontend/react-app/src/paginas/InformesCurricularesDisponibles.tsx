@@ -1,6 +1,5 @@
 import { useInformesCurriculares } from "../hook/useInformesCurriculares";
 import { Link } from "react-router-dom";
-import { IC_C1_START, IC_C1_END, IC_C2_START, IC_C2_END}from "../calendarioAcademico";
 import { 
   Container, 
   Row, 
