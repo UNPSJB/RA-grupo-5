@@ -24,5 +24,4 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
   return res;
 }
 
-// 👇 export default para que LoginPage.tsx pueda hacer `import apiFetch from ...`
 export default apiFetch;

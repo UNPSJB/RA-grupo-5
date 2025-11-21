@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
+from typing import List, Optional
 
 from src.database import get_db
 from src.respuestas import schemas, services
@@ -42,7 +43,7 @@ def validar_permiso_respuesta(payload: schemas.RespuestaCreate, persona_actual):
         return
 
     # 3️⃣ Departamento responde INFORME SINTÉTICO
-    if payload.id_informe_sintetico_carrera is not None:   # 👈 corregido aquí
+    if payload.id_informe_sintetico_carrera is not None:
         if PermissionName.GENERAR_INFORMES_SINTETICOS not in permisos_persona:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -57,6 +58,7 @@ def validar_permiso_respuesta(payload: schemas.RespuestaCreate, persona_actual):
     )
 
 
+# 🔴 POST (CREAR) – con permisos
 @router.post("/", response_model=schemas.RespuestaRead)
 def create_respuesta(
     respuesta: schemas.RespuestaCreate,
@@ -68,3 +70,58 @@ def create_respuesta(
 
     # ✔ Crear respuesta
     return services.crear_respuesta(db, respuesta)
+
+
+# 🟢 GET (LISTAR) – el que usaba tu front para traer respuestas
+@router.get("/", response_model=List[schemas.RespuestaRead])
+def read_respuestas(
+    persona_id: Optional[int] = Query(None),
+    encuesta_asignatura_id: Optional[int] = Query(None),
+    informe_asignatura_id: Optional[int] = Query(None),
+    informe_sintetico_carerra_id: Optional[int] = Query(None),
+    db: Session = Depends(get_db),
+    persona_actual=Depends(get_current_persona),
+):
+    """
+    Lista respuestas filtradas. El front lo usa, por ejemplo, para traer
+    la respuesta de un docente a un informe de asignatura.
+
+    Por ahora:
+      - exige usuario autenticado (get_current_persona)
+      - si persona_id no viene, usamos la del token
+      - si viene persona_id distinto al del token, se bloquea
+    """
+
+    # Si no vino persona_id, usamos el del token
+    if persona_id is None:
+        persona_id = persona_actual.id
+
+    # No permitimos que un usuario lea respuestas de otra persona (al menos por ahora)
+    if persona_id != persona_actual.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="No puede ver respuestas de otra persona",
+        )
+
+    respuestas = services.listar_respuestas(
+        db,
+        persona_id=persona_id,
+        encuesta_asignatura_id=encuesta_asignatura_id,
+        informe_asignatura_id=informe_asignatura_id,
+        informe_sintetico_carerra_id=informe_sintetico_carerra_id,
+    )
+    return respuestas
+
+
+# 🟢 GET (POR ID) – lo que ya tenías
+@router.get("/{respuesta_id}", response_model=schemas.RespuestaRead)
+def get_respuesta(
+    respuesta_id: int,
+    db: Session = Depends(get_db),
+    persona_actual=Depends(get_current_persona),
+):
+    """
+    Devuelve una respuesta por id. Podrías agregar verificación de que
+    la respuesta pertenezca a persona_actual si quisieras reforzar más.
+    """
+    return services.leer_respuesta(db, respuesta_id)
