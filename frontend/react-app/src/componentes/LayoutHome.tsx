@@ -1,21 +1,14 @@
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 import { Container, Col, Navbar, Row, Card, Nav } from "react-bootstrap";
 import "../styles/Layout.css";
 import logoUnpsjb from "../assets/escudo_tranparente_sinletras.png";
 import { useAuth } from "../context/AuthContext";
+import UserMenu from "../componentes/UserMenu";
 
 export default function LayoutHome() {
-  const navigate = useNavigate();
-  const { roles = [], logout, token } = useAuth();
+  const { roles = [], token } = useAuth();
 
-  function handleLogout() {
-    logout();
-    navigate("/login");
-  }
-
-  // Función de ayuda para permisos:
-  // - Devuelve true si el usuario es admin
-  // - O si tiene explícitamente el rol pedido
+  // Permisos: admin siempre entra
   const can = (role: string) => {
     return roles.includes("admin") || roles.includes(role);
   };
@@ -39,21 +32,20 @@ export default function LayoutHome() {
           />
         </Navbar.Brand>
 
-        <div className="ms-auto me-4">
-          {!token ? (
-            <Link to="/login" className="btn btn-outline-light">
-              Iniciar sesión
-            </Link>
-          ) : (
-            <button className="btn btn-outline-danger" onClick={handleLogout}>
-              Cerrar sesión
-            </button>
-          )}
-        </div>
-
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
+
         <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="ms-auto me-3"></Nav>
+          <Nav className="me-auto"></Nav>
+
+          <div className="ms-auto me-3">
+            {!token ? (
+              <Link to="/login" className="btn btn-outline-light">
+                Iniciar sesión
+              </Link>
+            ) : (
+              <UserMenu />
+            )}
+          </div>
         </Navbar.Collapse>
       </Navbar>
 
