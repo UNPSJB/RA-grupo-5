@@ -1,23 +1,25 @@
 import React from 'react';
 import type { Carrera } from '../types/models/Carrera';
-import {Card, Row, Col } from 'react-bootstrap';
+import {Card, Row, Col, Form } from 'react-bootstrap';
 
 interface Props {
-  asignatura: string;
-  anio: number;
-  docente: string;
+  asignatura?: string;
+  anio?: number;
+  docente?: string;
   carrera: Carrera;
-  ciclo_lectivo: number;
-  sede: string;
-  // OPCIONALES
+  ciclo_lectivo?: number;
+  sede?: string;
   cant_alumnos_insc?: number;
   cant_comisiones_practicas?: number;
   cant_comisiones_teoricas?: number;
-  children: React.ReactNode;
+  comision_asesora?: string;
+  cursado?: string;
+  integrantes?: string;
+  children?: React.ReactNode;
 }
 
 
-const LayoutReporte: React.FC<Props> = ({ asignatura, anio, docente, carrera, ciclo_lectivo, sede, cant_alumnos_insc, cant_comisiones_practicas, cant_comisiones_teoricas, children }) => {
+const EncabezadoCurricular: React.FC<Props> = ({ asignatura, anio, docente, carrera, ciclo_lectivo, sede, cant_alumnos_insc, cant_comisiones_practicas, cant_comisiones_teoricas, children }) => {
   return (
     <div style={{ padding: '2rem', textAlign: "left" }}>
         <Card className="border rounded shadow-sm mb-4">
@@ -71,7 +73,7 @@ const LayoutReporte: React.FC<Props> = ({ asignatura, anio, docente, carrera, ci
 };
 
 
-const LayoutReporte2: React.FC<Props> = ({
+const EncabezadoReporte: React.FC<Props> = ({
   asignatura,
   anio,
   docente,
@@ -126,6 +128,60 @@ const LayoutReporte2: React.FC<Props> = ({
   );
 };
 
+const EncabezadoSintetico: React.FC<Props> = ({
+  carrera,
+  ciclo_lectivo,
+  sede,
+  cursado,
+  comision_asesora,
+  integrantes,
+  children
+}) => {
+  return (
+    <Card className="mb-4 border rounded shadow-sm">
+      <Card.Header as="h5" className="bg-secondary text-white" style={{ textAlign: "left" }}>
+        
+        Datos Administrativos Registrados
+      </Card.Header>
 
-export { LayoutReporte, LayoutReporte2 };
+      <Card.Body className="p-4 bg-light">
+
+        <Row className="mb-2" style={{ textAlign: "left" }}>
+          <Col md={6}>
+            <p><strong>Carrera:</strong> {carrera.nombre}</p>
+            <p><strong>Ciclo Lectivo:</strong> {ciclo_lectivo}</p>
+            <p><strong>Cursado:</strong> {cursado}</p>
+            <p><strong>Sede:</strong> {sede}</p>
+
+          </Col>
+
+          <Col md={6}>
+            <Form.Group className="mb-3">
+              <Form.Label className="fw-semibold">Comisión Asesora</Form.Label>
+              <Form.Control
+                type="text"
+                value={comision_asesora}
+                disabled
+                style={{ backgroundColor: "#e9ecef", cursor: "default" }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label className="fw-semibold">Integrantes</Form.Label>
+              <Form.Control
+                type="text"
+                value={integrantes}
+                disabled
+                style={{ backgroundColor: "#e9ecef", cursor: "default" }}
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+
+      </Card.Body>
+    </Card>
+  );
+};
+
+export { EncabezadoReporte, EncabezadoCurricular, EncabezadoSintetico};
 

@@ -15,6 +15,7 @@ import {
 import type { InformeSinteticoCarrera } from "../types/InformeSintetico";
 import {useDescargarPdf} from '../hook/useDescargarPdf';       
 import { BotonDescargar } from '../componentes/BotonDescargar';
+import {EncabezadoSintetico} from "../componentes/LayoutEncabezados";
 
 // --- HELPER PARA BUSCAR RESPUESTA EN INFORMES CURRICULARES HIJOS ---
 const findRespuestaPorPreguntaId = (
@@ -54,7 +55,7 @@ export default function VerInformeSinteticoRespondido() {
   const pdfRef = useRef<HTMLDivElement>(null);
   const { downloadPdf, isGenerating } = useDescargarPdf();
   const handleDescargar = () => {
-      downloadPdf(pdfRef.current, `Informe_Curricular`);
+      downloadPdf(pdfRef.current, `Informe_Sintetico`);
   };
 
 
@@ -127,46 +128,18 @@ export default function VerInformeSinteticoRespondido() {
       <div ref={pdfRef} className="bg-white p-4 border rounded">
         <Form>
           <Col md={10} lg={8} className="mx-auto my-4">
-            
-            {/* 1. Cabecera de Datos (Read-Only) */}
-            <Card className="mb-4 border rounded shadow-sm">
-              <Card.Header as="h4" className="bg-secondary text-white">
-                  {informe.carrera?.nombre}
-              </Card.Header>
-              <Card.Body className="p-4 bg-light">
-                <Row className="mb-2">
-                  <Col md={6}>
-                    <p><strong>Ciclo Lectivo:</strong> {informe.ciclo_lectivo}</p>
-                    <p><strong>Sede:</strong> {informe.sede}</p>
-                    <p><strong>Cursado:</strong> {cursado}</p>
-                  </Col>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label className="fw-semibold">Comisión Asesora</Form.Label>
-                      <Form.Control
-                        type="text"
-                        value={informe.comision_asesora}
-                        disabled
-                        style={{ backgroundColor: '#e9ecef', cursor: 'default' }}
-                      />
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                      <Form.Label className="fw-semibold">Integrantes</Form.Label>
-                      <Form.Control
-                        type="text"
-                        value={informe.integrantes}
-                        disabled
-                        style={{ backgroundColor: '#e9ecef', cursor: 'default' }}
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
-              </Card.Body>
-            </Card>
+            <EncabezadoSintetico
+              carrera={informe.carrera}
+              ciclo_lectivo= {informe.ciclo_lectivo as unknown as number}
+              sede={informe.sede}
+              cursado={cursado}
+              comision_asesora={informe.comision_asesora}
+              integrantes={informe.integrantes}
+            />
 
             {/* 2. Pestañas de Informes Curriculares Incluidos (Read-Only) */}
             <Card className="mb-4 border rounded shadow-sm">
-              <Card.Header as="h5" className="bg-secondary text-white">
+              <Card.Header as="h5" className="bg-secondary text-white" style={{ textAlign: "left" }}>
                 Informes Curriculares incluídos ({informesHijos.length})
               </Card.Header>
               <Card.Body className="p-4">
@@ -217,7 +190,7 @@ export default function VerInformeSinteticoRespondido() {
 
             {/* 3. Conclusiones del Departamento (Opinion Final) - ReadOnly */}
             <Card className="border rounded shadow-sm mt-5">
-              <Card.Header as="h5" className="bg-secondary text-white">
+              <Card.Header as="h5" className="bg-secondary text-white" style={{ textAlign: "left" }}>
                 Análisis y Conclusiones del Departamento
               </Card.Header>
               <Card.Body className="p-4">

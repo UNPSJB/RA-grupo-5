@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Container, Form, Button, Alert, Card, Spinner, Row, Col } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import {LayoutReporte, LayoutReporte2 } from "../componentes/LayoutReporte";
+import {EncabezadoCurricular } from "../componentes/LayoutEncabezados";
 import Variable from '../componentes/Variable';
 import { obtenerNombreCampo } from '../validaciones/Encuesta';
 import type { InformeCurricular } from '../types/models/InformeCurricular';
@@ -116,7 +116,7 @@ export default function VerInformeRespondido() {
             </div>
             <div ref={pdfRef} className="bg-white p-4 border rounded">
                 
-                <LayoutReporte
+                <EncabezadoCurricular
                     asignatura={asignatura.nombre}
                     anio={asignatura.año}
                     docente={asignatura.nombre_docente}
@@ -151,17 +151,16 @@ export default function VerInformeRespondido() {
                                             />
                                         </div>
                                     ))}
-
-                                    <div className="text-center mt-4">
-                                        <Button variant="primary" onClick={() => navigate('/docente/informes-curriculares-respondidos')}>
-                                            Volver al listado
-                                        </Button>
-                                    </div>
                                 </Card.Body>
                             </Card>
                         </Form>
                     </Container>
-                </LayoutReporte>
+                </EncabezadoCurricular>
+            </div>
+            <div className="text-center mt-4">
+                <Button variant="primary" onClick={() => navigate('/docente/informes-curriculares-respondidos')}>
+                    Volver al listado
+                </Button>
             </div>
         </Container>
     );

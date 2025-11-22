@@ -10,7 +10,7 @@ import {
 import { useReportes } from "../hook/useReportes";
 import { useEffect, useState, useMemo } from "react"; 
 import { useParams, Link } from "react-router-dom";
-import {LayoutReporte2 } from "../componentes/LayoutReporte";
+import {EncabezadoReporte } from "../componentes/LayoutEncabezados";
 import ResumenVariable from "../componentes/ResumenVariable";
 import "../styles/Resumen-reporte.css"; 
 
@@ -108,7 +108,7 @@ export default function ResumenReporte() {
   const Datosasignatura = reporteCompleto.encuesta_asignatura.asignatura;
 
   return (
-    <LayoutReporte2
+    <EncabezadoReporte
       asignatura={Datosasignatura.nombre}
       anio={Datosasignatura.año}
       docente={Datosasignatura.nombre_docente}
@@ -206,6 +206,6 @@ export default function ResumenReporte() {
           </Col>
         </Row>
       </Container>
-    </LayoutReporte2>
+    </EncabezadoReporte>
   );
 }
