@@ -25,15 +25,12 @@ from src.informes_asignaturas.router import router as informes_asignaturas_route
 from src.informes_sinteticos_base.router import router as informes_sinteticos_base_router
 from src.carreras.router import router as carreras_router
 from src.informe_sintetico_carrera.router import router as informe_sintetico_carrera_router
-<<<<<<< HEAD
 from src.estadisticas.router import router as estadisticas_router
 
-=======
 from src.seguridad.router import router as seguridad_router
 from src.auth.router import router as auth_router
 
 from src.seguridad.services import SeguridadService
->>>>>>> dev
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -110,7 +107,4 @@ app.include_router(informes_asignaturas_router)
 app.include_router(informes_sinteticos_base_router)
 app.include_router(carreras_router)
 app.include_router(informe_sintetico_carrera_router)
-<<<<<<< HEAD
 app.include_router(estadisticas_router)
-=======
->>>>>>> dev

@@ -11,14 +11,17 @@ router = APIRouter(
     tags=["encuestas-asignaturas"],
 )
 
-
 @router.get(
     "/",
-    response_model=list[schemas.EncuestaAsignaturaRead],
-    dependencies=[Depends(require_permissions(PermissionName.RESPONDER_ENCUESTA))],
+    response_model=list[schemas.EncuestaListado], # <-- Usamos el nuevo Schema
+    # dependencies=[Depends(require_permissions(PermissionName.RESPONDER_ENCUESTA))],
 )
-def read_encuestas_asignaturas(db: Session = Depends(get_db)):
-    return services.listar_encuestas_asignaturas(db)
+def read_encuestas_asignaturas(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_persona) # <-- Obtenemos el usuario logueado
+):
+    # Llamamos al servicio nuevo
+    return services.listar_encuestas_para_usuario(db, current_user.id)
 
 
 @router.post("/", response_model=schemas.EncuestaAsignaturaRead)
