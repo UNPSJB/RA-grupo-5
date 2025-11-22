@@ -129,23 +129,20 @@ export default function VerEncuesta() {
     );
   if (!encuesta) return null;
 
-  return (
-    <Container className="my-4">
-      {/* Título fuera de la Card, estilo consistente con Informes */}
-      <h2 className="text-primary fw-bold mb-4">Encuesta Respondida</h2>
+    return (
+        <Container className="my-4">
+          <div className="d-flex justify-content-between align-items-center mb-4">
+              <h2 className="text-primary fw-bold m-0">Respuesta Registrada - {asignatura?.nombre} </h2>
+          </div>
+          
+          <Card className="border rounded shadow-sm bg-white"> 
 
-      <Card className="border rounded shadow-sm bg-white">
-        {/* Cabecera Gris (Secondary) para indicar "Solo Lectura" */}
-        <Card.Header as="h5" className="bg-secondary text-white">
-          Respuesta Registrada: {asignatura?.nombre}
-        </Card.Header>
-
-        <Card.Body className="p-4">
-          <Alert variant="info" className="mb-4">
-            <i className="bi bi-info-circle-fill me-2"></i>
-            Estás viendo las respuestas que enviaste. No se pueden realizar
-            cambios.
-          </Alert>
+            <Card.Body className="p-4">
+              
+              <Alert variant="info" className="mb-4">
+                <i className="bi bi-info-circle-fill me-2"></i>
+                No se pueden realizar cambios.
+              </Alert>
 
           <Form>
             <Tabs

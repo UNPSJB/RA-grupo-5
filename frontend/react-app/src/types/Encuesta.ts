@@ -1,5 +1,4 @@
-import type { Carrera } from './models/Carrera'; // Asegúrate que esta ruta sea correcta
-
+import type {Carrera} from "./models/Carrera";
 export interface OpcionRespuesta {
   id: number;
   texto_opcion: string;
@@ -39,7 +38,7 @@ export interface Asignatura {
   año: number; 
   nombre_docente: string; // ✅ Correcto
   cursado: string;
-  carrera: Carrera;       // ✅ Correcto (es un objeto)
+  carrera: Carrera;
   sede: string;
 }
 

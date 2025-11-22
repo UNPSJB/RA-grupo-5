@@ -1,8 +1,9 @@
-import { Link, Outlet, NavLink, useNavigate } from "react-router-dom";
-import { Container, Navbar, Nav, Button } from "react-bootstrap";
+import { Link, Outlet, NavLink } from "react-router-dom";
+import { Container, Navbar, Nav } from "react-bootstrap";
 import "../styles/Layout.css";
 import logoUnpsjb from "../assets/escudo_tranparente_sinletras.png";
 import { useAuth } from "../context/AuthContext";
+import UserMenu from "../componentes/UserMenu";
 
 type NavLinkItem = {
   to: string;
@@ -16,8 +17,7 @@ type Props = {
 };
 
 export default function LayoutPrincipal({ links, requiredRole }: Props) {
-  const navigate = useNavigate();
-  const { roles = [], logout, token } = useAuth();
+  const { roles = [], token } = useAuth();
 
   // Permisos: admin siempre tiene acceso
   const can = (role: string) => roles.includes("admin") || roles.includes(role);
@@ -45,11 +45,6 @@ export default function LayoutPrincipal({ links, requiredRole }: Props) {
     );
   }
 
-  function handleLogout() {
-    logout();
-    navigate("/login");
-  }
-
   return (
     <div className="layout">
       <Navbar
@@ -59,14 +54,16 @@ export default function LayoutPrincipal({ links, requiredRole }: Props) {
         sticky="top"
         className="shadow-sm"
       >
-        <Navbar.Brand className="ms-3" as={Link} to="/">
-          <img
-            src={logoUnpsjb}
-            width="50"
-            height="60"
-            className="d-inline-block align-top ms-3"
-            alt="Logo UNPSJB"
-          />
+        <Navbar.Brand
+          as={Link}
+          to="/"
+          className="ms-3 d-flex flex-column align-items-center text-decoration-none"
+        >
+          <div className="logo-oval-container">
+            <img src={logoUnpsjb} className="logo-img" alt="Ir al inicio" />
+          </div>
+
+          <span className="logo-text mt-1">Inicio</span>
         </Navbar.Brand>
 
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -85,13 +82,9 @@ export default function LayoutPrincipal({ links, requiredRole }: Props) {
             ))}
           </Nav>
 
-          <Button
-            variant="outline-light"
-            className="me-3"
-            onClick={handleLogout}
-          >
-            Cerrar sesión
-          </Button>
+          <div className="ms-auto me-3">
+            <UserMenu />
+          </div>
         </Navbar.Collapse>
       </Navbar>
 

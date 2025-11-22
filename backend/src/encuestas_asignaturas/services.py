@@ -39,6 +39,16 @@ def listar_encuestas_asignaturas(db: Session):
         )
         .all()
     )
+    
+def listar_encuestas_asignaturas_cortas(db:Session):
+    return (
+        db.query(EncuestaAsignatura)
+        .options(
+            joinedload(EncuestaAsignatura.asignatura),
+            joinedload(EncuestaAsignatura.encuesta_base)
+        )
+        .all()
+    )
 
 # --- NUEVA FUNCIÓN PARA EL LISTADO CON ESTADO ---
 def listar_encuestas_para_usuario(db: Session, persona_id: int):
