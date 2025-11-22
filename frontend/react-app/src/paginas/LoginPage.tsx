@@ -53,7 +53,11 @@ export default function LoginPage() {
       const permData = await permRes.json();
       const roles: string[] = permData.roles ?? [];
 
-      login(token, roles);
+      const apellido: string = permData.apellido ?? "";
+      const nombres: string = permData.nombres ?? "";
+      const userName = `${nombres} ${apellido}`.trim();
+
+      login(token, roles, userName);
 
       if (roles.includes("docente")) navigate("/docente");
       else if (roles.includes("alumno")) navigate("/alumno");

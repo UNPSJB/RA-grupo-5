@@ -1,8 +1,9 @@
-import { Link, Outlet, NavLink, useNavigate } from "react-router-dom";
-import { Container, Navbar, Nav, Button } from "react-bootstrap";
+import { Link, Outlet, NavLink } from "react-router-dom";
+import { Container, Navbar, Nav } from "react-bootstrap";
 import "../styles/Layout.css";
 import logoUnpsjb from "../assets/escudo_tranparente_sinletras.png";
 import { useAuth } from "../context/AuthContext";
+import UserMenu from "../componentes/UserMenu";
 
 type NavLinkItem = {
   to: string;
@@ -16,8 +17,7 @@ type Props = {
 };
 
 export default function LayoutPrincipal({ links, requiredRole }: Props) {
-  const navigate = useNavigate();
-  const { roles = [], logout, token } = useAuth();
+  const { roles = [], token } = useAuth();
 
   // Permisos: admin siempre tiene acceso
   const can = (role: string) => roles.includes("admin") || roles.includes(role);
@@ -43,11 +43,6 @@ export default function LayoutPrincipal({ links, requiredRole }: Props) {
         </p>
       </div>
     );
-  }
-
-  function handleLogout() {
-    logout();
-    navigate("/login");
   }
 
   return (
@@ -84,14 +79,9 @@ export default function LayoutPrincipal({ links, requiredRole }: Props) {
               </Nav.Link>
             ))}
           </Nav>
-
-          <Button
-            variant="outline-light"
-            className="me-3"
-            onClick={handleLogout}
-          >
-            Cerrar sesión
-          </Button>
+          <div className="ms-auto me-3">
+            <UserMenu />
+          </div>
         </Navbar.Collapse>
       </Navbar>
 
