@@ -49,9 +49,6 @@ export default function InformeSintetico() {
             Informe Sintético - {informe.carrera.nombre}
           </Card.Header>
           <Card.Body className="p-4 ">
-            <Card.Title as="h4" className="m-2">
-              {informe.informe_sintetico_base.titulo}
-            </Card.Title>
             <Card.Text as="div" className="text-start">
               <p>
                 <strong>Ciclo Lectivo:</strong> {informe.ciclo_lectivo}

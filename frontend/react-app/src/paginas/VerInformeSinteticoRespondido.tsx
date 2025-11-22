@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Container,
@@ -13,6 +13,9 @@ import {
   Spinner,
 } from "react-bootstrap";
 import type { InformeSinteticoCarrera } from "../types/InformeSintetico";
+import {useDescargarPdf} from '../hook/useDescargarPdf';       
+import { BotonDescargar } from '../componentes/BotonDescargar';
+import {EncabezadoSintetico} from "../componentes/LayoutEncabezados";
 import apiFetch from "../api/client";
 
 // --- HELPER PARA BUSCAR RESPUESTA EN INFORMES CURRICULARES HIJOS ---
@@ -48,9 +51,14 @@ export default function VerInformeSinteticoRespondido() {
   const [error, setError] = useState<string | null>(null);
 
   // Estado para mapear las respuestas del DEPARTAMENTO (ID Pregunta -> Texto)
-  const [respuestasVisualizacion, setRespuestasVisualizacion] = useState<
-    Record<number, string>
-  >({});
+  const [respuestasVisualizacion, setRespuestasVisualizacion] = useState<Record<number, string>>({});
+  
+  const pdfRef = useRef<HTMLDivElement>(null);
+  const { downloadPdf, isGenerating } = useDescargarPdf();
+  const handleDescargar = () => {
+      downloadPdf(pdfRef.current, `Informe_Sintetico`);
+  };
+
 
   useEffect(() => {
     if (!id) return;
@@ -125,185 +133,126 @@ export default function VerInformeSinteticoRespondido() {
 
   return (
     <Container>
-      <h2 className="text-primary fw-bold mt-4 mb-4">
-        Informe Sintético Finalizado
-      </h2>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+          <h2 className="text-primary fw-bold m-0">Informe Sintetico enviado</h2>
+          <BotonDescargar onClick={handleDescargar} isGenerating={isGenerating} />
+      </div>
+      <div ref={pdfRef} className="bg-white p-4 border rounded">
+        <Form>
+          <Col md={10} lg={8} className="mx-auto my-4">
+            <EncabezadoSintetico
+              carrera={informe.carrera}
+              ciclo_lectivo= {informe.ciclo_lectivo as unknown as number}
+              sede={informe.sede}
+              cursado={cursado}
+              comision_asesora={informe.comision_asesora}
+              integrantes={informe.integrantes}
+            />
 
-      <Form>
-        <Col md={10} lg={8} className="mx-auto my-4">
-          {/* 1. Cabecera de Datos (Read-Only) */}
-          <Card className="mb-4 border rounded shadow-sm">
-            <Card.Header as="h4" className="bg-secondary text-white">
-              {informe.carrera?.nombre}
-            </Card.Header>
-            <Card.Body className="p-4 bg-light">
-              <Card.Title as="h5" className="mb-3">
-                {informeBase?.titulo || "Informe Sintético"}
-              </Card.Title>
-              <Row className="mb-2">
-                <Col md={6}>
-                  <p>
-                    <strong>Ciclo Lectivo:</strong> {informe.ciclo_lectivo}
-                  </p>
-                  <p>
-                    <strong>Sede:</strong> {informe.sede}
-                  </p>
-                  <p>
-                    <strong>Cursado:</strong> {cursado}
-                  </p>
-                </Col>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label className="fw-semibold">
-                      Comisión Asesora
-                    </Form.Label>
-                    <Form.Control
-                      type="text"
-                      value={informe.comision_asesora}
-                      disabled
-                      style={{ backgroundColor: "#e9ecef", cursor: "default" }}
-                    />
-                  </Form.Group>
-                  <Form.Group className="mb-3">
-                    <Form.Label className="fw-semibold">Integrantes</Form.Label>
-                    <Form.Control
-                      type="text"
-                      value={informe.integrantes}
-                      disabled
-                      style={{ backgroundColor: "#e9ecef", cursor: "default" }}
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-            </Card.Body>
-          </Card>
-
-          {/* 2. Pestañas de Informes Curriculares Incluidos (Read-Only) */}
-          <Card className="mb-4 border rounded shadow-sm">
-            <Card.Header as="h5" className="bg-secondary text-white">
-              Informes Curriculares incluídos ({informesHijos.length})
-            </Card.Header>
-            <Card.Body className="p-4">
-              <Tabs
-                defaultActiveKey={informesHijos[0]?.id?.toString()}
-                id="informes-tabs-read"
-                className="mb-3"
-                justify
-              >
-                {informesHijos.map((informeAsignatura: any) => {
-                  const preguntas =
-                    informeAsignatura.informe_curricular_base?.preguntas || [];
-                  return (
-                    <Tab
-                      key={informeAsignatura.id}
-                      eventKey={informeAsignatura.id.toString()}
-                      title={
-                        informeAsignatura.asignatura?.nombre || "Asignatura"
-                      }
-                    >
-                      <div className="py-3">
-                        <div className="p-3 bg-white border rounded mb-3">
-                          <strong>Docente:</strong> {informeAsignatura.docente}{" "}
-                          | <strong> Año:</strong>{" "}
-                          {informeAsignatura.asignatura?.año} |{" "}
-                          <strong> Alumnos:</strong>{" "}
-                          {informeAsignatura.cant_alumnos_insc}
-                        </div>
-                        {preguntas.length > 0 ? (
-                          preguntas.map((pregunta: any) => (
-                            <div
-                              key={pregunta.id}
-                              className="border-top py-3 text-start"
-                            >
-                              <h6 className="fw-bold">
-                                {pregunta.texto_pregunta}
-                              </h6>
-                              <div
-                                className="ps-3 text-muted"
-                                style={{ whiteSpace: "pre-wrap" }}
-                              >
-                                {findRespuestaPorPreguntaId(
-                                  pregunta.id,
-                                  informeAsignatura.respuesta
-                                )}
-                              </div>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="py-3">
-                            <p className="text-muted">
-                              No hay preguntas definidas.
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </Tab>
-                  );
-                })}
-              </Tabs>
-            </Card.Body>
-          </Card>
-
-          {/* 3. Conclusiones del Departamento (Opinión Final) - ReadOnly */}
-          <Card className="border rounded shadow-sm mt-5">
-            <Card.Header as="h5" className="bg-secondary text-white">
-              Análisis y Conclusiones del Departamento
-            </Card.Header>
-            <Card.Body className="p-4">
-              {informeBase?.preguntas?.length > 0 ? (
-                informeBase.preguntas.map((pregunta: any) => {
-                  const textoRespuesta =
-                    respuestasVisualizacion[pregunta.id] ||
-                    "(Sin respuesta registrada)";
-                  const primeraOpcion = pregunta.pregunta_opcion?.[0];
-                  const idHtml = `pregunta-${primeraOpcion?.id || pregunta.id}`;
-
-                  return (
-                    <Form.Group
-                      className="mb-3 text-start"
-                      key={pregunta.id}
-                      controlId={idHtml}
-                    >
-                      <Form.Label className="fw-bold">
-                        {pregunta.texto_pregunta}
-                      </Form.Label>
-                      <Form.Control
-                        as="textarea"
-                        rows={4}
-                        value={textoRespuesta}
-                        disabled
-                        style={{
-                          minHeight: "100px",
-                          backgroundColor: "#e9ecef",
-                          cursor: "default",
-                          resize: "none",
-                        }}
-                      />
-                    </Form.Group>
-                  );
-                })
-              ) : (
-                <div className="text-muted text-center py-3">
-                  No se encontraron preguntas de conclusión en la plantilla
-                  base.
-                </div>
-              )}
-
-              <div className="d-flex justify-content-center mt-4">
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  onClick={() =>
-                    navigate("/departamento/informes-sinteticos-respondidos")
-                  }
+            {/* 2. Pestañas de Informes Curriculares Incluidos (Read-Only) */}
+            <Card className="mb-4 border rounded shadow-sm">
+              <Card.Header as="h5" className="bg-secondary text-white" style={{ textAlign: "left" }}>
+                Informes Curriculares incluídos ({informesHijos.length})
+              </Card.Header>
+              <Card.Body className="p-4">
+                <Tabs
+                  defaultActiveKey={informesHijos[0]?.id?.toString()}
+                  id="informes-tabs-read"
+                  className="mb-3"
+                  justify
                 >
-                  Volver al Listado
-                </Button>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Form>
+                  {informesHijos.map((informeAsignatura: any) => {
+                    const preguntas = informeAsignatura.informe_curricular_base?.preguntas || [];
+                    return (
+                      <Tab
+                        key={informeAsignatura.id}
+                        eventKey={informeAsignatura.id.toString()}
+                        title={informeAsignatura.asignatura?.nombre || "Asignatura"}
+                      >
+                        <div className="py-3">
+                          <div className="p-3 bg-white border rounded mb-3">
+                            <strong>Docente:</strong> {informeAsignatura.docente} | 
+                            <strong> Año:</strong> {informeAsignatura.asignatura?.año} | 
+                            <strong> Alumnos:</strong> {informeAsignatura.cant_alumnos_insc}
+                          </div>
+                          {preguntas.length > 0 ? (
+                            preguntas.map((pregunta: any) => (
+                              <div key={pregunta.id} className="border-top py-3 text-start">
+                                <h6 className="fw-bold">
+                                  {pregunta.texto_pregunta}
+                                </h6>
+                                <div className="ps-3 text-muted" style={{ whiteSpace: 'pre-wrap' }}>
+                                  {findRespuestaPorPreguntaId(
+                                    pregunta.id,
+                                    informeAsignatura.respuesta
+                                  )}
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="py-3"><p className="text-muted">No hay preguntas definidas.</p></div>
+                          )}
+                        </div>
+                      </Tab>
+                    );
+                  })}
+                </Tabs>
+              </Card.Body>
+            </Card>
+
+            {/* 3. Conclusiones del Departamento (Opinion Final) - ReadOnly */}
+            <Card className="border rounded shadow-sm mt-5">
+              <Card.Header as="h5" className="bg-secondary text-white" style={{ textAlign: "left" }}>
+                Análisis y Conclusiones del Departamento
+              </Card.Header>
+              <Card.Body className="p-4">
+                {/* Iteramos sobre las preguntas del informeBASE que trajimos aparte */}
+                {informeBase?.preguntas?.length > 0 ? (
+                    informeBase.preguntas.map((pregunta: any) => {
+                      // Buscamos el texto en nuestro mapa usando el ID de la pregunta
+                      const textoRespuesta = respuestasVisualizacion[pregunta.id] || "(Sin respuesta registrada)";
+                      const primeraOpcion = pregunta.pregunta_opcion?.[0];
+                      const idHtml = `pregunta-${primeraOpcion?.id || pregunta.id}`;
+
+                      return (
+                        <Form.Group 
+                          className="mb-3 text-start" 
+                          key={pregunta.id}
+                          controlId={idHtml}
+                        >
+                          <Form.Label className="fw-bold">
+                            {pregunta.texto_pregunta}
+                          </Form.Label>
+                          <Form.Control
+                            as="textarea"
+                            rows={4} 
+                            value={textoRespuesta}
+                            disabled 
+                            style={{ minHeight: "100px", backgroundColor: '#e9ecef', cursor: 'default', resize: 'none' }}
+                          />
+                        </Form.Group>
+                      );
+                    })
+                ) : (
+                    <div className="text-muted text-center py-3">
+                        No se encontraron preguntas de conclusión en la plantilla base.
+                    </div>
+                )}
+              </Card.Body>
+            </Card>
+            
+          </Col>
+        </Form>
+      </div>
+      <div className="d-flex justify-content-center mt-4">
+        <Button
+          variant="secondary"
+          size="lg"
+          onClick={() => navigate("/departamento/informes-sinteticos-respondidos")}
+        >
+          Volver al Listado
+        </Button>
+      </div>
     </Container>
   );
 }
