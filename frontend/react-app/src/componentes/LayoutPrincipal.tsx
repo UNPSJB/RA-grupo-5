@@ -54,14 +54,16 @@ export default function LayoutPrincipal({ links, requiredRole }: Props) {
         sticky="top"
         className="shadow-sm"
       >
-        <Navbar.Brand className="ms-3" as={Link} to="/">
-          <img
-            src={logoUnpsjb}
-            width="50"
-            height="60"
-            className="d-inline-block align-top ms-3"
-            alt="Logo UNPSJB"
-          />
+        <Navbar.Brand
+          as={Link}
+          to="/"
+          className="ms-3 d-flex flex-column align-items-center text-decoration-none"
+        >
+          <div className="logo-oval-container">
+            <img src={logoUnpsjb} className="logo-img" alt="Ir al inicio" />
+          </div>
+
+          <span className="logo-text mt-1">Inicio</span>
         </Navbar.Brand>
 
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -79,6 +81,7 @@ export default function LayoutPrincipal({ links, requiredRole }: Props) {
               </Nav.Link>
             ))}
           </Nav>
+
           <div className="ms-auto me-3">
             <UserMenu />
           </div>
