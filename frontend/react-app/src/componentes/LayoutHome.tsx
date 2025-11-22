@@ -1,20 +1,34 @@
-import { Link, Outlet } from "react-router-dom";
-import { Container, Col, Navbar, Row, Card, Nav } from "react-bootstrap"; 
-import "../styles/Layout.css"; 
+import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Container, Col, Navbar, Row, Card, Nav } from "react-bootstrap";
+import "../styles/Layout.css";
 import logoUnpsjb from "../assets/escudo_tranparente_sinletras.png";
+import { useAuth } from "../context/AuthContext";
 
 export default function LayoutHome() {
+  const navigate = useNavigate();
+  const { roles = [], logout, token } = useAuth();
+
+  function handleLogout() {
+    logout();
+    navigate("/login");
+  }
+
+  // Función de ayuda para permisos:
+  // - Devuelve true si el usuario es admin
+  // - O si tiene explícitamente el rol pedido
+  const can = (role: string) => {
+    return roles.includes("admin") || roles.includes(role);
+  };
+
   return (
     <div className="layout">
-      
-      <Navbar 
-        bg="primary" 
-        variant="dark" 
+      <Navbar
+        bg="primary"
+        variant="dark"
         expand="lg"
-        sticky="top" 
-        className="shadow-sm" 
+        sticky="top"
+        className="shadow-sm"
       >
-        
         <Navbar.Brand className="ms-3" href="/">
           <img
             src={logoUnpsjb}
@@ -24,22 +38,30 @@ export default function LayoutHome() {
             alt="Logo UNPSJB"
           />
         </Navbar.Brand>
-        
+
+        <div className="ms-auto me-4">
+          {!token ? (
+            <Link to="/login" className="btn btn-outline-light">
+              Iniciar sesión
+            </Link>
+          ) : (
+            <button className="btn btn-outline-danger" onClick={handleLogout}>
+              Cerrar sesión
+            </button>
+          )}
+        </div>
+
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
-          
-          <Nav className="ms-auto me-3"> 
-          </Nav>
+          <Nav className="ms-auto me-3"></Nav>
         </Navbar.Collapse>
       </Navbar>
 
       <main className="content flex-grow-1 pb-5">
-        <Container className="py-4"> 
-          
+        <Container className="py-4">
           <Row>
             <Col lg={9} md={10} className="mx-auto">
               <Card className="border rounded shadow-sm bg-white text-center">
-                
                 <Card.Header as="h4" className="bg-primary text-white">
                   Plataforma de Gestión Académica
                 </Card.Header>
@@ -49,51 +71,61 @@ export default function LayoutHome() {
                   <p className="lead text-muted">
                     Por favor, seleccione su rol para ingresar.
                   </p>
-                  
+
                   <hr className="my-4" />
 
-                  <Row className="text-center g-4">
-                    
-                    <Col md={4}>
-                      <Card 
-                        as={Link} 
-                        to="/alumno" 
-                        className="border rounded shadow-sm bg-white text-center h-100 text-decoration-none text-dark" 
-                      >
-                        <Card.Body className="p-4 d-flex flex-column justify-content-center align-items-center">
-                          <i className="bi bi-mortarboard-fill home-icon text-primary"></i>
-                          <h5 className="mt-3 mb-0">Alumno</h5> 
-                        </Card.Body>
-                      </Card>
-                    </Col>
+                  {token ? (
+                    <Row className="text-center g-4">
+                      {can("alumno") && (
+                        <Col md={4}>
+                          <Card
+                            as={Link}
+                            to="/alumno"
+                            className="border rounded shadow-sm bg-white text-center h-100 text-decoration-none text-dark"
+                          >
+                            <Card.Body className="p-4 d-flex flex-column justify-content-center align-items-center">
+                              <i className="bi bi-mortarboard-fill home-icon text-primary"></i>
+                              <h5 className="mt-3 mb-0">Alumno</h5>
+                            </Card.Body>
+                          </Card>
+                        </Col>
+                      )}
 
-                    <Col md={4}>
-                      <Card 
-                        as={Link} 
-                        to="/docente" 
-                        className="border rounded shadow-sm bg-white text-center h-100 text-decoration-none text-dark" 
-                      >
-                        <Card.Body className="p-4 d-flex flex-column justify-content-center align-items-center">
-                          <i className="bi bi-briefcase-fill home-icon text-primary"></i>
-                          <h5 className="mt-3 mb-0">Docente</h5> 
-                        </Card.Body>
-                      </Card>
-                    </Col>
+                      {can("docente") && (
+                        <Col md={4}>
+                          <Card
+                            as={Link}
+                            to="/docente"
+                            className="border rounded shadow-sm bg-white text-center h-100 text-decoration-none text-dark"
+                          >
+                            <Card.Body className="p-4 d-flex flex-column justify-content-center align-items-center">
+                              <i className="bi bi-briefcase-fill home-icon text-primary"></i>
+                              <h5 className="mt-3 mb-0">Docente</h5>
+                            </Card.Body>
+                          </Card>
+                        </Col>
+                      )}
 
-                    <Col md={4}>
-                      <Card 
-                        as={Link} 
-                        to="/departamento" 
-                        className="border rounded shadow-sm bg-white text-center h-100 text-decoration-none text-dark" 
-                      >
-                        <Card.Body className="p-4 d-flex flex-column justify-content-center align-items-center">
-                          <i className="bi bi-building home-icon text-primary"></i>
-                          <h5 className="mt-3 mb-0">Departamento</h5> 
-                        </Card.Body>
-                      </Card>
-                    </Col>
-                    
-                  </Row>
+                      {can("departamento") && (
+                        <Col md={4}>
+                          <Card
+                            as={Link}
+                            to="/departamento"
+                            className="border rounded shadow-sm bg-white text-center h-100 text-decoration-none text-dark"
+                          >
+                            <Card.Body className="p-4 d-flex flex-column justify-content-center align-items-center">
+                              <i className="bi bi-building home-icon text-primary"></i>
+                              <h5 className="mt-3 mb-0">Departamento</h5>
+                            </Card.Body>
+                          </Card>
+                        </Col>
+                      )}
+                    </Row>
+                  ) : (
+                    <p className="mt-4 text-muted">
+                      Inicia sesión para acceder a tu panel.
+                    </p>
+                  )}
                 </Card.Body>
               </Card>
             </Col>
