@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Container, Form, Button, Alert, Card, Spinner, Row, Col } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import LayoutReporte from "../componentes/LayoutReporte";
+import {LayoutReporte, LayoutReporte2 } from "../componentes/LayoutReporte";
 import Variable from '../componentes/Variable';
 import { obtenerNombreCampo } from '../validaciones/Encuesta';
 import type { InformeCurricular } from '../types/models/InformeCurricular';
 import type { InformeBase } from '../types/models/InformeBase';
+import {useDescargarPdf} from '../hook/useDescargarPdf';       
+import { BotonDescargar } from '../componentes/BotonDescargar';
 
 interface DetalleRespuesta {
   id: number;
@@ -37,6 +39,11 @@ export default function VerInformeRespondido() {
     const ID_DOCENTE = 1;
 
     const { control, formState: { errors }, reset } = useForm();
+    const pdfRef = useRef<HTMLDivElement>(null);
+    const { downloadPdf, isGenerating } = useDescargarPdf();
+    const handleDescargar = () => {
+        downloadPdf(pdfRef.current, `Informe_Sintetico`);
+    };
 
     useEffect(() => {
         if (!id) return;
@@ -99,76 +106,63 @@ export default function VerInformeRespondido() {
     if (!informe || !informeBase) return null;
 
     // Variables administrativas para mostrar (read-only)
-    const { asignatura, ciclo_lectivo, sede, docente, cant_alumnos_insc } = informe;
+    const { asignatura, ciclo_lectivo, sede, docente, cant_alumnos_insc, cant_comisiones_practicas, cant_comisiones_teoricas } = informe;
 
     return (
         <Container className="my-4">
-            {/* Título cambiado a primary para consistencia general, o secondary si prefieres */}
-            <h2 className="text-primary fw-bold mb-4">Informe Enviado</h2>
-            
-            <LayoutReporte
-                asignatura={asignatura.nombre}
-                anio={asignatura.año}
-                docente={asignatura.nombre_docente}
-                carrera={asignatura.carrera}
-            >
-                 <Container className="mt-4 text-start">
-                    <Form>
-                         {/* --- Datos Administrativos (Solo lectura) --- */}
-                         <Card className="border rounded shadow-sm mb-4">
-                            {/* CAMBIO DE COLOR: bg-success -> bg-secondary */}
-                            <Card.Header as="h5" className="bg-secondary text-white">
-                                Datos Administrativos Registrados
-                            </Card.Header>
-                            <Card.Body className="p-4 bg-light">
-                                <Row className="mb-2">
-                                    <Col sm={6}><strong>Ciclo Lectivo:</strong> {ciclo_lectivo}</Col>
-                                    <Col sm={6}><strong>Sede:</strong> {sede}</Col>
-                                </Row>
-                                <Row className="mb-2">
-                                    <Col sm={6}><strong>Docente:</strong> {docente}</Col>
-                                    <Col sm={6}><strong>Alumnos Inscriptos:</strong> {cant_alumnos_insc}</Col>
-                                </Row>
-                                <Row>
-                                    <Col sm={6}><strong>Comisiones Teóricas:</strong> {informe.cant_comisiones_teoricas}</Col>
-                                    <Col sm={6}><strong>Comisiones Prácticas:</strong> {informe.cant_comisiones_practicas}</Col>
-                                </Row>
-                            </Card.Body>
-                        </Card>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <h2 className="text-primary fw-bold m-0">Informe Curricular enviado</h2>
+                <BotonDescargar onClick={handleDescargar} isGenerating={isGenerating} />
+            </div>
+            <div ref={pdfRef} className="bg-white p-4 border rounded">
+                
+                <LayoutReporte
+                    asignatura={asignatura.nombre}
+                    anio={asignatura.año}
+                    docente={asignatura.nombre_docente}
+                    carrera={asignatura.carrera}
+                    ciclo_lectivo={ciclo_lectivo}
+                    sede={sede}
+                    cant_alumnos_insc={cant_alumnos_insc}
+                    cant_comisiones_practicas={cant_comisiones_practicas}
+                    cant_comisiones_teoricas={cant_comisiones_teoricas}
+                >
+                    <Container className="mt-4 text-start">
+                        <Form>
+                            {/* --- Respuestas --- */}
+                            <Card className="border rounded shadow-sm">
+                                {/* CAMBIO DE COLOR: bg-success -> bg-secondary */}
+                                <Card.Header as="h5" className="bg-secondary text-white">
+                                    Respuestas Enviadas
+                                </Card.Header>
+                                <Card.Body className="p-4">
+                                    {informeBase.preguntas.map(pregunta => (
+                                        <div key={pregunta.id} className="mb-3">
+                                            <Variable 
+                                                variable={{
+                                                    id: 0, 
+                                                    // nombre: "Cuerpo del Informe", 
+                                                    codigo: "INF", 
+                                                    preguntas: [pregunta]
+                                                } as any}
+                                                control={control}
+                                                errors={errors}
+                                                disabled={true}
+                                            />
+                                        </div>
+                                    ))}
 
-                        {/* --- Respuestas --- */}
-                        <Card className="border rounded shadow-sm">
-                            {/* CAMBIO DE COLOR: bg-success -> bg-secondary */}
-                            <Card.Header as="h5" className="bg-secondary text-white">
-                                Respuestas Enviadas
-                            </Card.Header>
-                            <Card.Body className="p-4">
-                                {informeBase.preguntas.map(pregunta => (
-                                    <div key={pregunta.id} className="mb-3">
-                                        <Variable 
-                                            variable={{
-                                                id: 0, 
-                                                nombre: "Cuerpo del Informe", 
-                                                codigo: "INF", 
-                                                preguntas: [pregunta]
-                                            } as any}
-                                            control={control}
-                                            errors={errors}
-                                            disabled={true}
-                                        />
+                                    <div className="text-center mt-4">
+                                        <Button variant="primary" onClick={() => navigate('/docente/informes-curriculares-respondidos')}>
+                                            Volver al listado
+                                        </Button>
                                     </div>
-                                ))}
-
-                                <div className="text-center mt-4">
-                                    <Button variant="primary" onClick={() => navigate('/docente/informes-curriculares-respondidos')}>
-                                        Volver al listado
-                                    </Button>
-                                </div>
-                            </Card.Body>
-                        </Card>
-                    </Form>
-                 </Container>
-            </LayoutReporte>
+                                </Card.Body>
+                            </Card>
+                        </Form>
+                    </Container>
+                </LayoutReporte>
+            </div>
         </Container>
     );
 }

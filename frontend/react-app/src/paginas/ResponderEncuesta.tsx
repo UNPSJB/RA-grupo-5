@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
     Container,
     Form,      
@@ -167,7 +167,7 @@ function ResponderEncuesta() {
                 <Col md={8} className="mx-auto">
                 <Card className="border rounded shadow-sm bg-white">
                     <Card.Header as="h4" className="bg-primary text-white text-center">
-                    {asignatura?.nombre}
+                     Encuesta {asignatura?.nombre}
                     </Card.Header>
                     <Card.Body className="p-4">
                     <Form onSubmit={handleSubmit(onSubmit)}> 

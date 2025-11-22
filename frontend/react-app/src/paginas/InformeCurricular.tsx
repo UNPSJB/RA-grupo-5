@@ -4,7 +4,7 @@ import { useReportes } from "../hook/useReportes";
 import { useInformesCurriculares } from "../hook/useInformesCurriculares";
 import { useInformeCurricularBase } from "../hook/useInformeCurricularBase";
 import { useResponderInforme } from "../hook/useResponderInforme";
-import LayoutReporte from "../componentes/LayoutReporte";
+import {LayoutReporte2 } from "../componentes/LayoutReporte";
 import {
   Container,
   Card,
@@ -257,11 +257,13 @@ export default function InformeCurricular() {
 
       <h2 className="text-primary fw-bold">Informe de Actividad Curricular</h2>
 
-      <LayoutReporte
+      <LayoutReporte2
         asignatura={asignatura.nombre}
         anio={asignatura.año}
         docente={asignatura.nombre_docente}
         carrera={asignatura.carrera}
+        ciclo_lectivo={cicloLectivo as number}
+        sede={sede}
       >
         <Container className="mt-5 text-start">
           <Row>
@@ -473,7 +475,7 @@ export default function InformeCurricular() {
             </Col>
           </Row>
         </Container>
-      </LayoutReporte>
+      </LayoutReporte2>
     </div>
   );
 }

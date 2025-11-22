@@ -10,7 +10,7 @@ import {
 import { useReportes } from "../hook/useReportes";
 import { useEffect, useState, useMemo } from "react"; 
 import { useParams, Link } from "react-router-dom";
-import LayoutReporte from "../componentes/LayoutReporte.tsx";
+import {LayoutReporte2 } from "../componentes/LayoutReporte";
 import ResumenVariable from "../componentes/ResumenVariable";
 import "../styles/Resumen-reporte.css"; 
 
@@ -108,11 +108,13 @@ export default function ResumenReporte() {
   const Datosasignatura = reporteCompleto.encuesta_asignatura.asignatura;
 
   return (
-    <LayoutReporte
+    <LayoutReporte2
       asignatura={Datosasignatura.nombre}
       anio={Datosasignatura.año}
       docente={Datosasignatura.nombre_docente}
       carrera={Datosasignatura.carrera}
+      ciclo_lectivo={reporteCompleto.encuesta_asignatura.ciclo_lectivo}
+      sede={Datosasignatura.sede}
     >
       <Container className="my-4">
         <Row className="g-4">
@@ -149,15 +151,8 @@ export default function ResumenReporte() {
 
           
           <Col xs={12} md={4} lg={4}>
+                  
             <aside className="right-rail">
-              
-              <Card className="border rounded shadow-sm mb-3 ">
-                <Card.Header as="h6" className="bg-primary text-white">
-                  Resumen de la Variable
-                </Card.Header>
-                <ResumenVariable resumen={activeVariableSummary} />
-              </Card>
-
               <div className="right-cta mb-3">
                 {reporteCompleto?.has_respuesta ? (
                   <Link
@@ -200,10 +195,17 @@ export default function ResumenReporte() {
                   </div>
                 </Card.Body>
               </Card>
+              <br />
+              <Card className="border rounded shadow-sm mb-3 ">
+                <Card.Header as="h6" className="bg-primary text-white">
+                  Resumen de la Variable
+                </Card.Header>
+                <ResumenVariable resumen={activeVariableSummary} />
+              </Card>
             </aside>
           </Col>
         </Row>
       </Container>
-    </LayoutReporte>
+    </LayoutReporte2>
   );
 }

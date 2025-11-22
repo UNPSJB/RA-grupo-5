@@ -39,6 +39,16 @@ def listar_encuestas_asignaturas(db:Session):
         )
         .all()
     )
+    
+def listar_encuestas_asignaturas_cortas(db:Session):
+    return (
+        db.query(EncuestaAsignatura)
+        .options(
+            joinedload(EncuestaAsignatura.asignatura),
+            joinedload(EncuestaAsignatura.encuesta_base)
+        )
+        .all()
+    )
 
 def listar_encuestas_respondidas_alumno(db: Session, persona_id: int) -> List[EncuestaAsignatura]:
     query = (
