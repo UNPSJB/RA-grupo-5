@@ -4,7 +4,6 @@ from typing import List, Union
 class Indicador(BaseModel):
     titulo: str
     valor: Union[str, int]
-    bg: str  # "primary", "success", "warning", "info"
 
 class Dimension(BaseModel):
     nombre: str
