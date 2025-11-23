@@ -37,7 +37,7 @@ export default function EncuestasPendientes() {
     );
   }
 
-  const Pendientes = encuestas.filter(
+  const Pendientes = encuestasPendientes.filter(
     (encuesta) => encuesta.estado === "abierta" && !encuesta.respondida
   );
 
