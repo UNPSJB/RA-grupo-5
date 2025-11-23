@@ -20,6 +20,9 @@ router = APIRouter(
 def read_encuestas_asignaturas(db: Session = Depends(get_db)):
     return services.listar_encuestas_asignaturas(db)
 
+@router.get("/cortas", response_model=list[schemas.EncuestaAsignaturaBase])
+def read_encuestas_asignaturas_cortas(db: Session = Depends(get_db)):
+    return services.listar_encuestas_asignaturas_cortas(db)
 
 @router.post("/", response_model=schemas.EncuestaAsignaturaRead)
 def create_encuesta_asignatura(

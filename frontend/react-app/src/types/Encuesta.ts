@@ -1,4 +1,4 @@
-
+import type {Carrera} from "./models/Carrera";
 export interface OpcionRespuesta {
   id: number;
   texto_opcion: string;
@@ -38,7 +38,7 @@ export interface Asignatura {
   año: number; 
   nombre_docente: string;
   cursado: string;
-  carrera: string;
+  carrera: Carrera;
   sede: string;
 }
 export interface EncuestaAsignatura {
