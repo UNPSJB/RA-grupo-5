@@ -13,14 +13,39 @@ from src.preguntas.models import Pregunta
 from src.variables.models import Variable
 from collections import defaultdict
 from src.reportes import schemas, exceptions
+from src.cursadas.models import Cursada
 
-def listar_reportes(db:Session) -> List[schemas.Reporte]:    
-    return db.scalars(select(Reporte)).all()
+def listar_reportes(db: Session, persona_id: int) -> List[schemas.Reporte]:    
+    # 1. Subquery: Asignaturas del docente
+    subquery_asignaturas = select(Cursada.id_asignatura).where(
+        Cursada.id_persona == persona_id
+    )
 
-def listar_reportes_disponibles(db: Session) -> list[schemas.ReporteListadoItem]:
-    # Eager load de informes para no hacer N+1
+    # 2. Filtrar Reportes que pertenezcan a esas asignaturas
+    query = (
+        select(Reporte)
+        .join(Reporte.encuesta_asignatura)
+        .where(EncuestaAsignatura.id_asignatura.in_(subquery_asignaturas))
+        .options(
+            # Cargamos la relación para que el schema no falle
+            selectinload(Reporte.encuesta_asignatura).selectinload(EncuestaAsignatura.asignatura)
+        )
+    )
+    
+    return db.scalars(query).all()
+
+def listar_reportes_disponibles(db: Session, persona_id: int) -> list[schemas.ReporteListadoItem]:
+    # 1. Subquery: Asignaturas del docente
+    subquery_asignaturas = select(Cursada.id_asignatura).where(
+        Cursada.id_persona == persona_id
+    )
+
+    # 2. Filtramos la query original con el JOIN a EncuestaAsignatura
     reportes = db.scalars(
-        select(Reporte).options(selectinload(Reporte.informes_asignaturas))
+        select(Reporte)
+        .join(Reporte.encuesta_asignatura)
+        .where(EncuestaAsignatura.id_asignatura.in_(subquery_asignaturas))
+        .options(selectinload(Reporte.informes_asignaturas))
     ).all()
 
     items: list[schemas.ReporteListadoItem] = []

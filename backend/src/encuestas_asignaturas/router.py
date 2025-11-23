@@ -20,6 +20,15 @@ router = APIRouter(
 def read_encuestas_asignaturas(db: Session = Depends(get_db)):
     return services.listar_encuestas_asignaturas(db)
 
+@router.get("/pendientes", response_model=list[schemas.EncuestaAsignaturaRead])
+def read_encuestas_pendientes(db: Session = Depends(get_db),
+    persona_actual = Depends(get_current_persona)):
+    """
+    Devuelve SOLO las encuestas que el alumno logueado debe responder.
+    Filtra por su cursada y excluye las que ya respondió.
+    """
+    return services.listar_encuestas_pendientes_alumno(db, persona_actual.id)
+
 @router.get("/cortas", response_model=list[schemas.EncuestaAsignaturaBase])
 def read_encuestas_asignaturas_cortas(db: Session = Depends(get_db)):
     return services.listar_encuestas_asignaturas_cortas(db)
@@ -71,6 +80,7 @@ def delete_encuesta_asignatura(
     db: Session = Depends(get_db),
 ):
     return services.eliminar_encuesta_asignatura(db, encuesta_id)
+
 
 
 @router.post("/{encuesta_id}/confirmar")

@@ -137,7 +137,7 @@ export default function VerInformeSinteticoRespondido() {
           <h2 className="text-primary fw-bold m-0">Informe Sintetico enviado</h2>
           <BotonDescargar onClick={handleDescargar} isGenerating={isGenerating} />
       </div>
-      <div ref={pdfRef} className="bg-white p-4 border rounded">
+      <div ref={pdfRef} className="bg-white p-4 rounded">
         <Form>
           <Col md={10} lg={8} className="mx-auto my-4">
             <EncabezadoSintetico

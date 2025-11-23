@@ -156,7 +156,7 @@ export default function ResumenReporte() {
               <div className="right-cta mb-3">
                 {reporteCompleto?.has_respuesta ? (
                   <Link
-                    to={`/docente/informes/${reporteCompleto.informe_id}`}
+                    to={`/docente/informes-curriculares-respondidos/${reporteCompleto.informe_id}`}
                     className="btn btn-outline-primary btn-lg w-100"
                   >
                     Ver Informe
