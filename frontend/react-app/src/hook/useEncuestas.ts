@@ -4,21 +4,22 @@ import { apiFetch } from "../api/client";
 import type { EncuestaAsignatura } from "../types/Encuesta"; 
 
 export function useEncuestas() {
-  const [encuestas, setEncuestas] = useState<EncuestaAsignatura[]>([]);
+  const [encuestasPendientes, setEncuestasPendientes] = useState<EncuestaAsignatura[]>([]);
+  const [encuestasRespondidas, setEncuestasRespondidas] = useState<
+    EncuestaAsignatura[]
+  >([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const API_PATH = "/encuestas-asignaturas/";
-
-  const fetchEncuestas = useCallback(async () => {
+  const fetchPendientes = async () => {
     try {
       setLoading(true);
-      setError(null);
-
-      const response = await apiFetch(API_PATH);
+      
+      // El backend ya filtra por token: Cursada + Fechas + Estado Abierto + No Respondida
+      const response = await apiFetch("/encuestas-asignaturas/pendientes");
       
       if (!response.ok) {
-        throw new Error("Error al obtener las encuestas");
+        throw new Error("Error al obtener las encuestas pendientes");
       }
 
       const data = await response.json();
@@ -29,6 +30,26 @@ export function useEncuestas() {
         ...e,
         ciclo_lectivo: e.ciclo_lectivo || new Date(e.fecha_inicio).getFullYear()
       }));
+      setEncuestasPendientes(data);
+      setError(null);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message ?? "Error desconocido al cargar pendientes");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchRespondidas = async () => {
+    try {
+      setLoading(true);
+
+      const personaId = getPersonaIdFromToken();
+      if (personaId == null) {
+        throw new Error(
+          "No se pudo determinar la persona logueada a partir del token"
+        );
+      }
 
       setEncuestas(dataConCiclo);
 
@@ -41,13 +62,15 @@ export function useEncuestas() {
   }, []);
 
   useEffect(() => {
-    fetchEncuestas();
-  }, [fetchEncuestas]);
+    fetchPendientes();
+    fetchRespondidas();
+  }, []);
 
   return {
-    encuestas,
     loading,
     error,
-    refetch: fetchEncuestas,
+    encuestasPendientes,
+    encuestasRespondidas,
+
   };
 }

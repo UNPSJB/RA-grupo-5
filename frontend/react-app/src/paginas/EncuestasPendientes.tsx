@@ -13,7 +13,8 @@ import {
 import { getRangoFechasEncuesta } from "../calendarioAcademico";
 
 export default function EncuestasPendientes() {
-  const { encuestas, loading, error } = useEncuestas();
+  // 1. Desestructuramos la nueva propiedad 'encuestasPendientes'
+  const { encuestasPendientes, loading, error } = useEncuestas();
 
   if (loading) {
     return (
@@ -62,7 +63,7 @@ export default function EncuestasPendientes() {
                   const fechaCierre = encuesta.asignatura.cursado 
                     ? getRangoFechasEncuesta(encuesta.asignatura.cursado) 
                     : "Consultar fecha";
-
+                  
                   return (
                     <ListGroup.Item
                       key={encuesta.id}

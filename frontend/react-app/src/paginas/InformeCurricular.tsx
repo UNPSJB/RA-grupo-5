@@ -267,7 +267,7 @@ export default function InformeCurricular() {
       >
         <Container className="mt-5 text-start">
           <Row>
-            <Col lg={9} md={10} className="mx-auto">
+            <Col lg={12} md={12} className="mx-auto">
               <Form onSubmit={handleSubmit}>
                 
                 <Card className="border rounded shadow-sm mb-4 bg-white">
@@ -288,15 +288,7 @@ export default function InformeCurricular() {
                         <span className="text-danger ms-1">*</span>
                       </Form.Label>
                       <Col sm={8}>
-                        <Form.Control
-                          type="number"
-                          value={cicloLectivo}
-                          onChange={(e) => setCicloLectivo(e.target.value === "" ? "" : Number(e.target.value))}
-                          placeholder="2025 (ejemplo)"
-                          min={2000}
-                          required
-                          disabled={saving}
-                        />
+                        <Form.Control type="text" value={cicloLectivo} readOnly plaintext />
                       </Col>
                     </Form.Group>
 
@@ -318,7 +310,7 @@ export default function InformeCurricular() {
                           value={cantInscriptos}
                           onChange={(e) => setCantInscriptos(e.target.value === "" ? "" : Number(e.target.value))}
                           min={1}
-                          placeholder="1"
+                          placeholder="Ingrese el numero en digitos"
                           required
                           disabled={saving}
                         />
@@ -336,7 +328,7 @@ export default function InformeCurricular() {
                           value={cantTeoricas}
                           onChange={(e) => setCantTeoricas(e.target.value === "" ? "" : Number(e.target.value))}
                           min={1}
-                          placeholder="1"
+                          placeholder="Ingrese el numero en digitos"
                           required
                           disabled={saving}
                         />
@@ -354,7 +346,7 @@ export default function InformeCurricular() {
                           value={cantPracticas}
                           onChange={(e) => setCantPracticas(e.target.value === "" ? "" : Number(e.target.value))}
                           min={1}
-                          placeholder="1"
+                          placeholder="Ingrese el numero en digitos"
                           required
                           disabled={saving}
                         />

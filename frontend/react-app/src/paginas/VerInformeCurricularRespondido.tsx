@@ -141,7 +141,7 @@ export default function VerInformeCurricularRespondido() {
                 <h2 className="text-primary fw-bold m-0">Informe Curricular enviado</h2>
                 <BotonDescargar onClick={handleDescargar} isGenerating={isGenerating} />
             </div>
-            <div ref={pdfRef} className="bg-white p-4 border rounded">
+            <div ref={pdfRef} className="bg-white p-4 rounded">
                 
                 <EncabezadoCurricular
                     asignatura={asignatura.nombre}
