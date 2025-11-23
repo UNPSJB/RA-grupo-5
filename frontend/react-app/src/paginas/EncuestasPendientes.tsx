@@ -27,8 +27,8 @@ export default function EncuestasPendientes() {
 
   // 1. Base: SOLO encuestas PENDIENTES (abiertas)
   const pendientesBase = useMemo(() => {
-    return encuestas.filter((encuesta) => encuesta.estado === "abierta");
-  }, [encuestas]);
+    return encuestasPendientes.filter((encuesta) => encuesta.estado === "abierta");
+  }, [encuestasPendientes]);
 
   // 2. Datos para los selects
   const carrerasDisponibles = useMemo(() => {

@@ -15,7 +15,7 @@ import {
 import { isGeneracionInformeCurricularActiva, getToday, getRangoFechasInformeCurricular } from "../calendarioAcademico";
 
 export default function ReportesDisponibles() {
-  const { reportes, loading, error } = useReportes();
+  const { reportesDisponibles, loading, error } = useReportes();
   const today = getToday();
   const currentYear = today.getFullYear();
 
@@ -29,22 +29,22 @@ export default function ReportesDisponibles() {
   // DATOS PARA SELECTS 
   const carrerasDisponibles = useMemo(() => {
     const map = new Map();
-    reportes.forEach(r => {
+    reportesDisponibles.forEach(r => {
       const nombre = r.encuesta_asignatura.asignatura?.carrera?.nombre;
       const id = r.encuesta_asignatura.asignatura?.carrera?.id;
       if (id && nombre) map.set(id.toString(), nombre);
     });
     return Array.from(map.entries()).map(([id, nombre]) => ({ id, nombre }));
-  }, [reportes]);
+  }, [reportesDisponibles]);
 
   const aniosDisponibles = useMemo(() => {
-    const years = new Set(reportes.map(r => r.encuesta_asignatura.ciclo_lectivo));
+    const years = new Set(reportesDisponibles.map(r => r.encuesta_asignatura.ciclo_lectivo));
     return Array.from(years).sort((a, b) => b - a);
-  }, [reportes]);
+  }, [reportesDisponibles]);
 
   //FILTRADO Y ORDENAMIENTO
   const reportesFiltrados = useMemo(() => {
-    let result = [...reportes];
+    let result = [...reportesDisponibles];
 
     if (filterCarrera !== "all") {
       result = result.filter(r => 
@@ -80,7 +80,7 @@ export default function ReportesDisponibles() {
     });
 
     return result;
-  }, [reportes, filterCarrera, filterAnio, filterCuatri, filterEstado, sortOrder]);
+  }, [reportesDisponibles, filterCarrera, filterAnio, filterCuatri, filterEstado, sortOrder]);
 
   if (loading) {
     return (
@@ -256,15 +256,6 @@ export default function ReportesDisponibles() {
                           </button>
                         )}
                         
-                        <Link
-                          to={`/docente/estadisticas/${reporte.id}`}
-                          className="btn btn-outline-success btn-sm"
-                          title="Ver Estadísticas"
-                        >
-                          <i className="bi bi-graph-up-arrow"></i>
-                          <span className="ms-2 d-none d-md-inline">Ver Estadísticas</span>
-                        </Link>
-
                         <Link
                           to={`/docente/estadisticas/${reporte.id}`}
                           className="btn btn-outline-success btn-sm"
