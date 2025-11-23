@@ -7,7 +7,8 @@ import {
   Card, 
   ListGroup, 
   Spinner, 
-  Alert 
+  Alert,
+  Badge
 } from "react-bootstrap";
 import { getRangoFechasEncuesta } from "../calendarioAcademico";
 
@@ -36,31 +37,32 @@ export default function EncuestasPendientes() {
     );
   }
 
-  // 2. Eliminamos el filtrado local. 
-  // La lista 'encuestasPendientes' viene limpia del backend.
-  const Pendientes = encuestasPendientes; 
+  const Pendientes = encuestas.filter(
+    (encuesta) => encuesta.estado === "abierta" && !encuesta.respondida
+  );
 
   return (
     <Container className="my-4">
       <Row>
         <Col md={10} lg={8} className="mx-auto">
           
-          <Card className="border rounded shadow-sm ">
+          <Card className="border rounded shadow-sm bg-white">
             
-            <Card.Header as="h5" className="bg-primary text-white">
+            <Card.Header as="h5" className="bg-primary text-white d-flex justify-content-between align-items-center">
               Encuestas Pendientes
+              <Badge bg="light" text="dark" pill>{Pendientes.length}</Badge>
             </Card.Header>
             
             <ListGroup variant="flush">
               {Pendientes.length === 0 ? (
                 <ListGroup.Item>
-                  <p className="text-muted mb-0">No hay encuestas pendientes.</p>
+                  <p className="text-muted mb-0">No tienes encuestas pendientes.</p>
                 </ListGroup.Item>
               ) : (
                 Pendientes.map(encuesta => {
-                  // Nota: Asegúrate de que tu backend devuelva la relación 'asignatura' poblada
-                  // en el endpoint /pendientes para que esto funcione.
-                  const fechaCierre = getRangoFechasEncuesta(encuesta.asignatura?.cursado || "");
+                  const fechaCierre = encuesta.asignatura.cursado 
+                    ? getRangoFechasEncuesta(encuesta.asignatura.cursado) 
+                    : "Consultar fecha";
                   
                   return (
                     <ListGroup.Item
@@ -70,20 +72,16 @@ export default function EncuestasPendientes() {
                       <div className="me-3 flex-grow-1 text-start">
                         <span className="fw-bold fs-5">{encuesta.asignatura?.nombre}</span>
                         
-                        <span className="text-danger fw-bold ms-3">
-                          Cierre: {fechaCierre} 
+                        <span className="text-danger fw-bold ms-3" style={{ fontSize: '0.9rem' }}>
+                          <i className="bi bi-clock-history me-1"></i>
+                          Cierre: {fechaCierre}
                         </span>
 
-                        <br />
-                        <small className="d-block m-1">
-                          <strong>Docente: </strong> {encuesta.asignatura?.nombre_docente}
-                        </small>
-                        <small className="d-block m-1">
-                          <strong>Ciclo lectivo: </strong>{`${encuesta.ciclo_lectivo} | Cursado: ${encuesta.asignatura?.cursado}`}
-                        </small>
-                        <small className="d-block m-1">
-                          <strong>Carrera: </strong>{`${encuesta.asignatura?.carrera?.nombre} `}
-                        </small>
+                        <div className="text-muted small mt-1">
+                          <div><strong>Docente:</strong> {encuesta.asignatura.nombre_docente}</div>
+                          <div><strong>Ciclo:</strong> {encuesta.ciclo_lectivo || 2025} | <strong>Cursado:</strong> {encuesta.asignatura.cursado}</div>
+                          <div><strong>Carrera:</strong> {encuesta.asignatura.carrera?.nombre || encuesta.asignatura.carrera?.nombre}</div>
+                        </div>
                       </div>
 
                       <Link
