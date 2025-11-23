@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
   Container,
@@ -9,6 +9,8 @@ import {
   Badge,
   Spinner,
   Alert,
+  Form,
+  Button
 } from "react-bootstrap";
 import type { InformeSinteticoCarrera } from "../types/InformeSintetico";
 import apiFetch from "../api/client";
@@ -33,6 +35,12 @@ export default function InformesSinteticosRespondidos() {
   const [informes, setInformes] = useState<InformeSinteticoCarrera[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // ==================== ESTADOS DE FILTROS ====================
+  const [filterCarrera, setFilterCarrera] = useState("all");
+  const [filterAnio, setFilterAnio] = useState("all");
+  const [filterCuatri, setFilterCuatri] = useState("all");
+  const [sortOrder, setSortOrder] = useState("desc");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -65,6 +73,77 @@ export default function InformesSinteticosRespondidos() {
     fetchData();
   }, []);
 
+  const getCuatrimestre = (informe: InformeSinteticoCarrera) => {
+    return informe.informes_asignaturas?.[0]?.asignatura?.cursado || "";
+  };
+
+  const carrerasDisponibles = useMemo(() => {
+    const map = new Map();
+    informes.forEach(i => {
+      const nombre = i.carrera?.nombre;
+      const id = i.carrera?.id;
+      if (id && nombre) map.set(id.toString(), nombre);
+    });
+    return Array.from(map.entries()).map(([id, nombre]) => ({ id, nombre }));
+  }, [informes]);
+
+  const aniosDisponibles = useMemo(() => {
+    const years = new Set(informes.map(i => i.ciclo_lectivo));
+    return Array.from(years).sort((a, b) => Number(b) - Number(a));
+  }, [informes]);
+
+  //  FILTRADO Y ORDENAMIENTO
+  const itemsProcesados = useMemo(() => {
+    let result = [...informes];
+
+    // Filtro Carrera
+    if (filterCarrera !== "all") {
+      result = result.filter(i => 
+        i.carrera?.id?.toString() === filterCarrera
+      );
+    }
+
+    // Filtro Año
+    if (filterAnio !== "all") {
+      result = result.filter(i => String(i.ciclo_lectivo) === filterAnio);
+    }
+
+    // Filtro Cuatrimestre
+    if (filterCuatri !== "all") {
+      result = result.filter(i => {
+        const cuatri = getCuatrimestre(i);
+        return cuatri.includes(filterCuatri);
+      });
+    }
+
+    // Ordenamiento
+    result.sort((a, b) => {
+      // 1. Ciclo Lectivo 
+      if (a.ciclo_lectivo !== b.ciclo_lectivo) {
+        return sortOrder === "desc" 
+          ? Number(b.ciclo_lectivo) - Number(a.ciclo_lectivo) 
+          : Number(a.ciclo_lectivo) - Number(b.ciclo_lectivo);
+      }
+      
+      // 2. Cuatrimestre
+      const cuatriA = getCuatrimestre(a);
+      const cuatriB = getCuatrimestre(b);
+      if (cuatriA !== cuatriB) {
+        const orderA = cuatriA.includes("1") ? 1 : 2;
+        const orderB = cuatriB.includes("1") ? 1 : 2;
+        return sortOrder === "desc" ? orderB - orderA : orderA - orderB;
+      }
+
+      // 3. Nombre Carrera
+      const nombreA = a.carrera?.nombre || "";
+      const nombreB = b.carrera?.nombre || "";
+      return nombreA.localeCompare(nombreB);
+    });
+
+    return result;
+  }, [informes, filterCarrera, filterAnio, filterCuatri, sortOrder]);
+
+
   if (loading) {
     return (
       <Container className="my-4 text-center">
@@ -87,25 +166,98 @@ export default function InformesSinteticosRespondidos() {
       <Row>
         <Col md={10} lg={8} className="mx-auto">
           <Card className="border rounded shadow-sm bg-white">
-            <Card.Header
-              as="h5"
-              className="bg-light d-flex justify-content-between align-items-center"
-            >
-              Historial de Informes Sintéticos Enviados
-              <Badge bg="secondary" pill>
-                {informes.length}
+            
+            <Card.Header className="bg-secondary text-white py-3 px-4 d-flex justify-content-between align-items-center">
+              <h5 className="mb-0" style={{ fontWeight: "normal" }}>
+                Historial de Informes Sintéticos Enviados
+              </h5> 
+
+              <Badge 
+                bg="white" 
+                text="secondary" 
+                className="fs-6 px-3 py-2 shadow-sm rounded-pill"
+                style={{ minWidth: '3rem', textAlign: 'center' }}
+              >
+                {itemsProcesados.length}
               </Badge>
             </Card.Header>
 
+            {/* BARRA DE FILTROS */}
+            <div className="bg-light border-bottom px-3 py-2">
+              <div className="d-flex align-items-center flex-wrap gap-2">
+                
+                <span className="text-muted fw-bold small text-nowrap me-1">Filtrar:</span>
+
+                <div className="d-flex flex-wrap align-items-center gap-2 flex-grow-1">
+                    <div style={{ minWidth: '200px', maxWidth: '300px', flexGrow: 1 }}>
+                        <Form.Select 
+                          size="sm" 
+                          className="border-secondary-subtle" 
+                          value={filterCarrera} 
+                          onChange={e => setFilterCarrera(e.target.value)}
+                        >
+                            <option value="all">Todas las Carreras</option>
+                            {carrerasDisponibles.map(c => (
+                                <option key={c.id} value={c.id}>{c.nombre}</option>
+                            ))}
+                        </Form.Select>
+                    </div>
+
+                    <div style={{ width: '100px' }}>
+                        <Form.Select 
+                          size="sm" 
+                          value={filterAnio} 
+                          onChange={e => setFilterAnio(e.target.value)}
+                        >
+                            <option value="all">Año (Todos)</option>
+                            {aniosDisponibles.map(y => <option key={y} value={y}>{y}</option>)}
+                        </Form.Select>
+                    </div>
+
+                    <div style={{ width: '130px' }}>
+                        <Form.Select 
+                          size="sm" 
+                          value={filterCuatri} 
+                          onChange={e => setFilterCuatri(e.target.value)}
+                        >
+                            <option value="all">Cuatri (Todos)</option>
+                            <option value="1">1° Cuat.</option>
+                            <option value="2">2° Cuat.</option>
+                        </Form.Select>
+                    </div>
+                </div>
+
+                <div className="d-flex align-items-center ms-auto ps-3 border-start">
+                      <Button
+                        variant="link"
+                        size="sm"
+                        className="text-decoration-none text-secondary p-0 fw-bold small text-nowrap d-flex align-items-center gap-1"
+                        onClick={() => setSortOrder(prev => prev === "desc" ? "asc" : "desc")}
+                      >
+                        {sortOrder === "desc" ? (
+                          <>
+                            Más recientes
+                            <i className="bi bi-arrow-down"></i>
+                          </>
+                        ) : (
+                          <>
+                            Más antiguos
+                            <i className="bi bi-arrow-up"></i>
+                          </>
+                        )}
+                      </Button>
+                </div>
+              </div>
+            </div>
+
             <ListGroup variant="flush">
-              {informes.length === 0 ? (
+              {itemsProcesados.length === 0 ? (
                 <ListGroup.Item className="text-muted text-center py-3">
-                  No has enviado ningún informe sintético todavía.
+                  No has enviado ningún informe sintético que coincida con los filtros.
                 </ListGroup.Item>
               ) : (
-                informes.map((informe) => {
-                  const primerHijo = informe.informes_asignaturas?.[0];
-                  const cuatrimestre = primerHijo?.asignatura?.cursado || "";
+                itemsProcesados.map((informe) => {
+                  const cuatrimestre = getCuatrimestre(informe);
 
                   return (
                     <ListGroup.Item
