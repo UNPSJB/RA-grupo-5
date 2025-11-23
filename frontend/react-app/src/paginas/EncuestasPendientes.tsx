@@ -9,10 +9,11 @@ import {
   Spinner, 
   Alert 
 } from "react-bootstrap";
-import {getRangoFechasEncuesta } from "../calendarioAcademico";
+import { getRangoFechasEncuesta } from "../calendarioAcademico";
 
 export default function EncuestasPendientes() {
-  const { encuestas, loading, error } = useEncuestas();
+  // 1. Desestructuramos la nueva propiedad 'encuestasPendientes'
+  const { encuestasPendientes, loading, error } = useEncuestas();
 
   if (loading) {
     return (
@@ -35,9 +36,9 @@ export default function EncuestasPendientes() {
     );
   }
 
-  const Pendientes = encuestas.filter(
-    (encuesta) => encuesta.estado === "abierta"
-  );
+  // 2. Eliminamos el filtrado local. 
+  // La lista 'encuestasPendientes' viene limpia del backend.
+  const Pendientes = encuestasPendientes; 
 
   return (
     <Container className="my-4">
@@ -57,7 +58,10 @@ export default function EncuestasPendientes() {
                 </ListGroup.Item>
               ) : (
                 Pendientes.map(encuesta => {
-                  const fechaCierre = getRangoFechasEncuesta(encuesta.asignatura.cursado);
+                  // Nota: Asegúrate de que tu backend devuelva la relación 'asignatura' poblada
+                  // en el endpoint /pendientes para que esto funcione.
+                  const fechaCierre = getRangoFechasEncuesta(encuesta.asignatura?.cursado || "");
+                  
                   return (
                     <ListGroup.Item
                       key={encuesta.id}
@@ -65,17 +69,17 @@ export default function EncuestasPendientes() {
                     > 
                       <div className="me-3 flex-grow-1 text-start">
                         <span className="fw-bold fs-5">{encuesta.asignatura?.nombre}</span>
-                        {/* implementar logica como en Reportes disponibles de que no tenga ya una respuesta: */}
+                        
                         <span className="text-danger fw-bold ms-3">
                           Cierre: {fechaCierre} 
                         </span>
 
                         <br />
                         <small className="d-block m-1">
-                          <strong>Docente: </strong> {encuesta.asignatura.nombre_docente}
+                          <strong>Docente: </strong> {encuesta.asignatura?.nombre_docente}
                         </small>
                         <small className="d-block m-1">
-                          <strong>Ciclo lectivo: </strong>{`${encuesta.ciclo_lectivo} | Cursado: ${encuesta.asignatura.cursado}`}
+                          <strong>Ciclo lectivo: </strong>{`${encuesta.ciclo_lectivo} | Cursado: ${encuesta.asignatura?.cursado}`}
                         </small>
                         <small className="d-block m-1">
                           <strong>Carrera: </strong>{`${encuesta.asignatura?.carrera?.nombre} `}

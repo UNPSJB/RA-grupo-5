@@ -19,29 +19,30 @@ function getPersonaIdFromToken(): number | null {
 }
 
 export function useEncuestas() {
-  const [encuestas, setEncuestas] = useState<EncuestaAsignatura[]>([]);
+  const [encuestasPendientes, setEncuestasPendientes] = useState<EncuestaAsignatura[]>([]);
   const [encuestasRespondidas, setEncuestasRespondidas] = useState<
     EncuestaAsignatura[]
   >([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const API_PATH = "/encuestas-asignaturas/";
-
-  const fetchEncuestas = async () => {
+  const fetchPendientes = async () => {
     try {
       setLoading(true);
-
-      const response = await apiFetch(API_PATH);
+      
+      // El backend ya filtra por token: Cursada + Fechas + Estado Abierto + No Respondida
+      const response = await apiFetch("/encuestas-asignaturas/pendientes");
+      
       if (!response.ok) {
-        throw new Error("Error al obtener las encuestas");
+        throw new Error("Error al obtener las encuestas pendientes");
       }
 
       const data = await response.json();
-      setEncuestas(data);
+      setEncuestasPendientes(data);
       setError(null);
     } catch (err: any) {
-      setError(err.message ?? "Error desconocido");
+      console.error(err);
+      setError(err.message ?? "Error desconocido al cargar pendientes");
     } finally {
       setLoading(false);
     }
@@ -76,15 +77,15 @@ export function useEncuestas() {
   };
 
   useEffect(() => {
-    fetchEncuestas();
+    fetchPendientes();
     fetchRespondidas();
   }, []);
 
   return {
-    encuestas,
     loading,
     error,
-    refetch: fetchEncuestas,
+    encuestasPendientes,
     encuestasRespondidas,
+
   };
 }

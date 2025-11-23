@@ -9,7 +9,7 @@ type Flags = {
 };
 
 export function useReportes() {
-  const [reportes, setReportes] = useState<any[]>([]);
+  const [reportesDisponibles, setReportesDisponibles] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,7 +25,7 @@ export function useReportes() {
     }));
   };
 
-  const fetchReportes = useCallback(async () => {
+  const fetchReportesDisponibles = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -45,11 +45,11 @@ export function useReportes() {
       const full = await resFull.json();
       const flags = (await resFlags.json()) as Flags[];
 
-      setReportes(mergeWithFlags(full, flags));
+      setReportesDisponibles(mergeWithFlags(full, flags));
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Error desconocido al cargar reportes");
-      setReportes([]);
+      setReportesDisponibles([]);
     } finally {
       setLoading(false);
     }
@@ -138,14 +138,14 @@ export function useReportes() {
   );
 
   useEffect(() => {
-    fetchReportes();
-  }, [fetchReportes]);
+    fetchReportesDisponibles();
+  }, [fetchReportesDisponibles]);
 
   return {
-    reportes,
+    reportesDisponibles,
     loading,
     error,
-    refetch: fetchReportes,
+    refetch: fetchReportesDisponibles,
     fetchReporteById,
     fetchResumenByReporteId,
     fetchResumenComparativo,

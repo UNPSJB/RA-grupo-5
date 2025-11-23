@@ -7,7 +7,6 @@ from src.respuestas.schemas import RespuestaRead
 from datetime import date
 
 class EncuestaAsignaturaBase(BaseModel):
-    id: Optional[int] = None
     fecha_inicio: date = date(2025, 7, 1)
     fecha_fin: date = date(2025,12,31)
     ciclo_lectivo: int

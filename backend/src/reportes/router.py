@@ -5,6 +5,7 @@ from src.reportes import schemas, services
 
 from src.seguridad.deps import require_permissions
 from src.seguridad.models import PermissionName
+from src.seguridad.deps_auth import get_current_persona
 
 router = APIRouter(
     prefix="/reportes",
@@ -17,8 +18,9 @@ router = APIRouter(
     response_model=list[schemas.Reporte],
     dependencies=[Depends(require_permissions(PermissionName.VER_REPORTES))],
 )
-def read_reportes(db: Session = Depends(get_db)):
-    return services.listar_reportes(db)
+def read_reportes(db: Session = Depends(get_db),
+    current_persona = Depends(get_current_persona)):
+    return services.listar_reportes(db, current_persona.id)
 
 
 @router.get(
@@ -26,8 +28,9 @@ def read_reportes(db: Session = Depends(get_db)):
     response_model=list[schemas.ReporteListadoItem],
     dependencies=[Depends(require_permissions(PermissionName.VER_REPORTES))],
 )
-def read_reportes_disponibles(db: Session = Depends(get_db)):
-    return services.listar_reportes_disponibles(db)
+def read_reportes_disponibles(db: Session = Depends(get_db),
+    current_persona = Depends(get_current_persona)):
+    return services.listar_reportes_disponibles(db, current_persona.id)
 
 
 # Endpoint para pedir el informe y usar "Ver Informe" a partir del id del reporte
