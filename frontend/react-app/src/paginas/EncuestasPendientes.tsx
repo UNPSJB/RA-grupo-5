@@ -16,7 +16,8 @@ import {
 import { getRangoFechasEncuesta } from "../calendarioAcademico";
 
 export default function EncuestasPendientes() {
-  const { encuestas, loading, error } = useEncuestas();
+  // 1. Desestructuramos la nueva propiedad 'encuestasPendientes'
+  const { encuestasPendientes, loading, error } = useEncuestas();
 
   // ==================== ESTADOS DE FILTROS ====================
   const [filterCarrera, setFilterCarrera] = useState("all");
@@ -109,6 +110,10 @@ export default function EncuestasPendientes() {
     );
   }
 
+  const Pendientes = encuestasPendientes.filter(
+    (encuesta) => encuesta.estado === "abierta" && !encuesta.respondida
+  );
+
   return (
     <Container className="my-4">
       <Row>
@@ -200,7 +205,9 @@ export default function EncuestasPendientes() {
                 </ListGroup.Item>
               ) : (
                 itemsProcesados.map(encuesta => {
-                  const fechaCierre = getRangoFechasEncuesta(encuesta.asignatura.cursado);
+                   const fechaCierre = encuesta.asignatura.cursado 
+                    ? getRangoFechasEncuesta(encuesta.asignatura.cursado) 
+                    : "Consultar fecha";
                   return (
                     <ListGroup.Item
                       key={encuesta.id}
@@ -209,20 +216,16 @@ export default function EncuestasPendientes() {
                       <div className="me-3 flex-grow-1 text-start">
                         <span className="fw-bold fs-5">{encuesta.asignatura?.nombre}</span>
                         
-                        <span className="text-danger fw-bold ms-3">
-                          Cierre: {fechaCierre} 
+                        <span className="text-danger fw-bold ms-3" style={{ fontSize: '0.9rem' }}>
+                          <i className="bi bi-clock-history me-1"></i>
+                          Cierre: {fechaCierre}
                         </span>
 
-                        <br />
-                        <small className="d-block m-1">
-                            <strong>Docente: </strong> {encuesta.asignatura.nombre_docente}
-                        </small>
-                        <small className="d-block m-1">
-                            <strong>Ciclo lectivo: </strong>{`${encuesta.ciclo_lectivo} | Cursado: ${encuesta.asignatura.cursado}`}
-                        </small>
-                        <small className="d-block m-1">
-                            <strong>Carrera: </strong>{`${encuesta.asignatura.carrera.nombre} `}
-                        </small>
+                        <div className="text-muted small mt-1">
+                          <div><strong>Docente:</strong> {encuesta.asignatura.nombre_docente}</div>
+                          <div><strong>Ciclo:</strong> {encuesta.ciclo_lectivo || 2025} | <strong>Cursado:</strong> {encuesta.asignatura.cursado}</div>
+                          <div><strong>Carrera:</strong> {encuesta.asignatura.carrera?.nombre || encuesta.asignatura.carrera?.nombre}</div>
+                        </div>
                       </div>
 
                       <Link

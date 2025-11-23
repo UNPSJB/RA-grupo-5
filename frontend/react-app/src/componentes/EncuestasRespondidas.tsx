@@ -12,13 +12,14 @@ import {
 } from "react-bootstrap";
 
 export default function EncuestasRespondidas() {
-  const { encuestas, loading, error } = useEncuestas();
+  // 1. Usamos 'encuestasRespondidas' en lugar de 'encuestas'
+  const { encuestasRespondidas, loading, error } = useEncuestas();
 
   if (loading) {
     return (
       <Container className="my-4 text-center">
         <Spinner animation="border" variant="primary" />
-        <p className="mt-2">Cargando encuestas...</p>
+        <p className="mt-2">Cargando historial...</p>
       </Container>
     );
   }
@@ -35,9 +36,7 @@ export default function EncuestasRespondidas() {
     );
   }
 
-  const Respondidas = encuestas.filter(
-    (encuesta) => encuesta.estado === "cerrada"
-  );
+  const Respondidas = encuestasRespondidas;
 
   return (
     <Container className="my-4">
@@ -53,7 +52,7 @@ export default function EncuestasRespondidas() {
             <ListGroup variant="flush">
               {Respondidas.length === 0 ? (
                 <ListGroup.Item>
-                  <p className="text-muted mb-0">No hay encuestas respondidas.</p>
+                  <p className="text-muted mb-0">No has respondido ninguna encuesta aún.</p>
                 </ListGroup.Item>
               ) : (
                 Respondidas.map((encuesta) => (

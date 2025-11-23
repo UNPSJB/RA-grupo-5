@@ -25,7 +25,8 @@ class Persona(ModeloBase):
         back_populates="personas",
         lazy="selectin"
     )
-
+    cursadas = relationship("Cursada", back_populates="persona")
+    
     # 🔐 MÉTODO PARA VALIDAR CONTRASEÑA
     def verificar_password(self, password_plano: str) -> bool:
         return pbkdf2_sha256.verify(password_plano, self.password_hash)

@@ -1,6 +1,5 @@
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, EmailStr, Field
-
 
 class PersonaBase(BaseModel):
     apellido: str
