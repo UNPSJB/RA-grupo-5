@@ -15,7 +15,8 @@ import {
 import { isGeneracionInformeCurricularActiva, getToday, getRangoFechasInformeCurricular } from "../calendarioAcademico";
 
 export default function ReportesDisponibles() {
-  const { reportes, loading, error } = useReportes();
+
+const { reportesDisponibles: reportes, loading, error } = useReportes();
   const today = getToday();
   const currentYear = today.getFullYear();
 
@@ -114,12 +115,12 @@ export default function ReportesDisponibles() {
             </Card.Header>
 
             {/* BARRA DE FILTROS */}
-            <div className="bg-light border-bottom px-3 py-2">
-              <div className="d-flex align-items-center flex-wrap gap-2">
-                
-                <span className="text-muted fw-bold small text-nowrap me-1">Filtrar:</span>
+<div className="bg-light border-bottom px-3 py-2">
+  <div className="d-flex align-items-center flex-nowrap gap-2">
 
-                <div className="d-flex flex-wrap align-items-center gap-2 flex-grow-1">
+    <span className="text-muted fw-bold small text-nowrap me-1">Filtrar:</span>
+
+    <div className="d-flex flex-grow-1 align-items-center gap-2 flex-nowrap overflow-auto">
                     <div style={{ minWidth: '200px', maxWidth: '300px', flexGrow: 1 }}>
                         <Form.Select size="sm" className="border-secondary-subtle" value={filterCarrera} onChange={e => setFilterCarrera(e.target.value)}>
                             <option value="all">Todas las Carreras</option>
@@ -256,15 +257,6 @@ export default function ReportesDisponibles() {
                           </button>
                         )}
                         
-                        <Link
-                          to={`/docente/estadisticas/${reporte.id}`}
-                          className="btn btn-outline-success btn-sm"
-                          title="Ver Estadísticas"
-                        >
-                          <i className="bi bi-graph-up-arrow"></i>
-                          <span className="ms-2 d-none d-md-inline">Ver Estadísticas</span>
-                        </Link>
-
                         <Link
                           to={`/docente/estadisticas/${reporte.id}`}
                           className="btn btn-outline-success btn-sm"

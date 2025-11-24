@@ -27,8 +27,8 @@ export default function EncuestasPendientes() {
 
   // 1. Base: SOLO encuestas PENDIENTES (abiertas)
   const pendientesBase = useMemo(() => {
-    return encuestas.filter((encuesta) => encuesta.estado === "abierta");
-  }, [encuestas]);
+    return encuestasPendientes.filter((encuesta) => encuesta.estado === "abierta");
+  }, [encuestasPendientes]);
 
   // 2. Datos para los selects
   const carrerasDisponibles = useMemo(() => {
@@ -109,11 +109,6 @@ export default function EncuestasPendientes() {
       </Container>
     );
   }
-
-  const Pendientes = encuestasPendientes.filter(
-    (encuesta) => encuesta.estado === "abierta" && !encuesta.respondida
-  );
-
   return (
     <Container className="my-4">
       <Row>
@@ -136,7 +131,6 @@ export default function EncuestasPendientes() {
                 
                 <span className="text-muted fw-bold small text-nowrap me-1">Filtrar:</span>
 
-                {/* Filtros */}
                 <div className="d-flex flex-wrap align-items-center gap-2 flex-grow-1">
                     <div style={{ minWidth: '200px', maxWidth: '300px', flexGrow: 1 }}>
                         <Form.Select 
