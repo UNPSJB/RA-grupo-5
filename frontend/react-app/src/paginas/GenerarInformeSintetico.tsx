@@ -59,10 +59,7 @@ export default function GenerarInformeSintetico() {
     carrera,
     loading: loadingInformes,
   } = useInformesParaSintetico(numCarreraId, numCiclo, cuatrimestre);
-  const { crearInformeSinteticoCarrera } = useInformesSinteticos(
-    numCiclo ?? 0,
-    cuatrimestre
-  );
+  const { crearInformeSinteticoCarrera } = useInformesSinteticos();
   const {
     answersByPreguntaOpcion,
     setTextoRespuesta,

@@ -9,13 +9,12 @@ from src.respuestas.schemas import RespuestaRead
 class EncuestaAsignaturaBase(BaseModel):
     fecha_inicio: date = date(2025, 7, 1)
     fecha_fin: date = date(2025, 12, 31)
-    # Nota: ciclo_lectivo quitado o puesto según tu modelo real
+    ciclo_lectivo: int
     estado: EstadoEncuesta
 
 class EncuestaAsignaturaCreate(EncuestaAsignaturaBase):
     id_encuesta_base: int
     id_asignatura: int
-    # ciclo_lectivo: int (si lo usas)
 
 class EncuestaAsignaturaUpdate(EncuestaAsignaturaBase):
     id_encuesta_base: int
@@ -25,7 +24,6 @@ class EncuestaAsignaturaRead(EncuestaAsignaturaBase):
     id: int
     id_encuesta_base: int
     id_asignatura: int
-    
     encuesta_base: EncuestaBaseRead
     asignatura: AsignaturaRead
     respuestas: List[RespuestaRead] = []
