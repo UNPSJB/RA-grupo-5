@@ -122,7 +122,7 @@ export default function EstadisticasDocentePage() {
   const [rankingSource, setRankingSource] = useState<'general' | string>('general');
   const [comparisonYear, setComparisonYear] = useState<number>(new Date().getFullYear() - 1);
 
-  const inscriptos = 10;
+  const inscriptos = 2;
 
   // --- EFECTO DE CARGA INICIAL ---
   useEffect(() => {
