@@ -78,7 +78,7 @@ export default function EncuestasRespondidas() {
 
   if (loading) return <p className="text-center mt-4">Cargando encuestas respondidas...</p>;
   if (error) return <p className="text-center mt-4 text-danger">Error: {error}</p>;
-  const Respondidas = encuestasRespondidas
+
 
   return (
      <Container className="my-4">
