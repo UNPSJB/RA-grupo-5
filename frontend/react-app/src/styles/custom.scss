@@ -33,3 +33,32 @@ $secondary:     $gray-600;
         }
     }
 }
+
+// ... imports anteriores ...
+
+// --- CORRECCIÓN VISUAL PARA TABS ---
+.nav-tabs {
+  border-bottom: 1px solid $gray-300; // Línea base suave
+
+  .nav-link {
+    // 1. Estado Normal (No seleccionado)
+    color: $gray-600; // Gris para las que no estás viendo (menos distracciones)
+    font-weight: 500;
+    border: 1px solid transparent; // Mantiene el espacio para que no "salte" al hover
+    
+    // 2. Estado Hover (Al pasar el mouse)
+    &:hover {
+      color: $primary; // Se pone azul al pasar el mouse
+      border-color: $gray-200 $gray-200 $gray-300;
+    }
+
+    // 3. Estado ACTIVO (La pestaña seleccionada)
+    &.active {
+      color: $primary !important; // <--- ¡AQUÍ ESTÁ EL CAMBIO! (Azul UNPSJB)
+      background-color: $white;   // Fondo blanco
+      border-color: $gray-300 $gray-300 $white; // Borde gris, pero abajo blanco para "unirse"
+      border-bottom: 2px solid $white; // Truco visual para tapar la línea de abajo
+      font-weight: 700; // Un poco más gordita para destacar
+    }
+  }
+}
