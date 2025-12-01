@@ -169,10 +169,10 @@ export default function ResumenReporte() {
                     </Link>
                   ) : (
                     <Link
-                      to={`/docente/nuevo-informe/${reporteCompleto.id}`}
-                      className="btn btn-primary btn-lg w-100"
-                    >
-                      Nuevo Informe de Act.Curricular
+                        to={`/docente/nuevo-informe/${reporteCompleto.id}`}
+                        className="btn btn-outline-success btn-lg w-100"
+                      >
+                        Nuevo Informe de Act.Curricular
                     </Link>
                   )}
                 </div>
