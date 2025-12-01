@@ -456,7 +456,7 @@ export default function InformeCurricular() {
                               Guardando...
                             </>
                           ) : (
-                            "Guardar Informe"
+                            "Enviar Informe"
                         )}
                       </Button>
                     </div>

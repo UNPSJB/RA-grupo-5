@@ -57,15 +57,11 @@ export default function LayoutHome() {
             <Col lg={9} md={10} className="mx-auto">
               <Card className="border rounded shadow-sm bg-white text-center">
                 <Card.Header as="h4" className="bg-primary text-white">
-                  Plataforma de Gestión Académica
+                  SIstema de Análisis Académico
                 </Card.Header>
 
                 <Card.Body className="p-4 p-md-5">
-                  <h2>Bienvenido al Sistema</h2>
-                  <p className="lead text-muted">
-                    Por favor, seleccione su rol para ingresar.
-                  </p>
-
+                  <h2>¡Bienvenido!</h2>
                   <hr className="my-4" />
 
                   {token ? (
@@ -130,7 +126,18 @@ export default function LayoutHome() {
       </main>
 
       <footer className="footer bg-primary text-white text-center p-3 mb-0 fixed-bottom">
-        &copy; 2025 Reportes de Alumnos
+        <div className="d-flex justify-content-center align-items-center gap-3">
+          <span>&copy; 2025 Sistema de Analisis Academico</span>
+          
+          {/* Enlace de correo */}
+          <a 
+            href="mailto:ingenieria.trelew@gmail.com" 
+            className="text-white text-decoration-none d-flex align-items-center"
+            title="Enviar consulta"
+          >
+            <i className="bi bi-envelope-fill fs-5"></i>
+          </a>
+        </div>
       </footer>
     </div>
   );

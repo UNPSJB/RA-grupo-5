@@ -95,7 +95,18 @@ export default function LayoutPrincipal({ links, requiredRole }: Props) {
       </main>
 
       <footer className="footer bg-primary text-white text-center p-3 mb-0">
-        &copy; 2025 Reportes de Alumnos
+        <div className="d-flex justify-content-center align-items-center gap-3">
+          <span>&copy; 2025 Sistema de Analisis Academico</span>
+          
+          {/* Enlace de correo */}
+          <a 
+            href="mailto:ingenieria.trelew@gmail.com" 
+            className="text-white text-decoration-none d-flex align-items-center"
+            title="Enviar consulta"
+          >
+            <i className="bi bi-envelope-fill fs-5"></i>
+          </a>
+        </div>
       </footer>
     </div>
   );

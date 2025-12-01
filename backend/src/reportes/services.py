@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload, joinedload
 from sqlalchemy.sql.expression import func # <-- NECESARIO PARA strftime
 from src.reportes.models import Reporte
-from src.encuestas_asignaturas.models import EncuestaAsignatura
+from src.encuestas_asignaturas.models import EncuestaAsignatura, EstadoEncuesta
 from src.encuestas_base.models import EncuestaBase
 from src.respuestas.models import Respuesta
 from src.detalle_respuesta.models import DetalleRespuesta
@@ -71,6 +71,10 @@ def listar_reportes_disponibles(db: Session, persona_id: int) -> list[schemas.Re
 def crear_reporte(db: Session, reporte: schemas.ReporteCreate) -> schemas.Reporte:
     _reporte = Reporte(**reporte.model_dump())
     db.add(_reporte)
+    encuesta = db.get(EncuestaAsignatura, reporte.id_encuesta_asignatura)
+    if encuesta.estado != EstadoEncuesta.cerrada:
+        encuesta.estado = EstadoEncuesta.cerrada
+        db.add(encuesta) 
     db.commit()
     db.refresh(_reporte)
     return _reporte

@@ -149,6 +149,7 @@ export default function VerEncuesta() {
               activeKey={activeTab || undefined}
               onSelect={(k) => setActiveTab(k)}
               className="mb-3"
+              transition={false}
             >
               {encuesta.variables.map((variable) => (
                 <Tab

@@ -32,10 +32,9 @@ export default function Variable({
 
   return (
     <Form.Group as="fieldset" className="border p-3 mt-4 rounded" disabled={disabled}>
-      <legend className="h5 w-auto px-2">
+      <div className="h5 w-auto px-2 mb-3 fw-bold">
         {variable.nombre}
-      </legend>
-
+      </div>
       {preguntasLimpias.map((pregunta) => (
         <Pregunta
           key={pregunta.id}

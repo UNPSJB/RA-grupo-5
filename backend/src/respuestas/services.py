@@ -65,7 +65,7 @@ def crear_respuesta(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Informe curricular no encontrado para responder",
             )
-
+        
         if informe.estado == EstadoInforme.cerrado:
             rid = _respuesta_existente_id_asignatura(
                 db, respuesta.id_informe_asignatura
@@ -99,7 +99,7 @@ def crear_respuesta(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Informe sintético de carrera no encontrado para responder",
             )
-
+        
         if informe_sc.estado == EstadoInforme.cerrado:
             rid = _respuesta_existente_id_carrera(
                 db, respuesta.id_informe_sintetico_carrera

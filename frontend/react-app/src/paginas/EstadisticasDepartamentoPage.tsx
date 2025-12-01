@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Container,
   Row,
@@ -103,8 +103,7 @@ export default function EstadisticasDepartamentoPage() {
       
       <div className="d-flex flex-wrap justify-content-between align-items-end mb-4 border-bottom pb-3 gap-3">
         <div>
-            <h2 className="text-primary fw-bold mb-1">Dashboard</h2>
-            <p className="text-muted mb-0 small">Estadísticas de Encuestas de Desempeño Docente</p>
+            <h2 className="text-primary fw-bold mb-1">Estadisticas Facultad de Ingenieria</h2>
         </div>
         
         <div className="d-flex flex-wrap align-items-end gap-3">
@@ -173,7 +172,6 @@ export default function EstadisticasDepartamentoPage() {
           </Col>
         ))}
       </Row>
-
       {/* Gráficos */}
       <Row className="mb-4 g-4">
         <Col lg={8}>
@@ -202,7 +200,7 @@ export default function EstadisticasDepartamentoPage() {
           </Card>
         </Col>
       </Row>
-
+       <br />
       {/* Top Asignaturas */}
       <h5 className="text-primary fw-bold mb-3 border-bottom pb-2">Asignaturas con Mayor Participación</h5>
       <Row className="g-3 mb-4">
@@ -221,10 +219,10 @@ export default function EstadisticasDepartamentoPage() {
           </Col>
         ))}
       </Row>
-
+        <br />
       {/* Alertas */}
       <Row className="g-4">
-        <Col lg={8}>
+        <Col lg={12}>
           <Card className="shadow-sm border h-100">
             <Card.Header className="bg-white d-flex justify-content-between align-items-center">
                  <h5 className="text-primary fw-bold mb-0">Alertas y Observaciones</h5>
@@ -248,7 +246,7 @@ export default function EstadisticasDepartamentoPage() {
             </Table>
           </Card>
         </Col>
-        <Col lg={4}>
+        {/* <Col lg={4}>
           <Card className="shadow-sm border h-100">
             <Card.Header className="bg-white"><h5 className="text-primary fw-bold mb-0">Términos</h5></Card.Header>
             <Card.Body>
@@ -258,7 +256,7 @@ export default function EstadisticasDepartamentoPage() {
               </div>
             </Card.Body>
           </Card>
-        </Col>
+        </Col> */}
       </Row>
     </Container>
   );
