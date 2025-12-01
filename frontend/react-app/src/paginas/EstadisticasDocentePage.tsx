@@ -369,7 +369,9 @@ const renderComparativaSection = () => {
 
   return (
     <Container className="my-4">
-      <h2 className="mb-4 text-center">Estadísticas por Materia</h2>
+      <div className="text-center mb-4">
+          <h2 className="text-primary fw-bold m-0">Estadisticas {reporteCompleto?.encuesta_asignatura?.asignatura?.nombre}</h2>
+      </div>
       
       {/* 1. Indicadores Clave (KPIs) - Altura reducida con py-2 */}
       <Row className="g-4 mb-4">

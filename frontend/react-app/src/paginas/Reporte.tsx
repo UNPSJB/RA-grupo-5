@@ -108,104 +108,111 @@ export default function ResumenReporte() {
   const Datosasignatura = reporteCompleto.encuesta_asignatura.asignatura;
 
   return (
-    <EncabezadoReporte
-      asignatura={Datosasignatura.nombre}
-      anio={Datosasignatura.año}
-      docente={Datosasignatura.nombre_docente}
-      carrera={Datosasignatura.carrera}
-      ciclo_lectivo={reporteCompleto.encuesta_asignatura.ciclo_lectivo}
-      sede={Datosasignatura.sede}
-    >
-      <Container className="my-4">
-        <Row className="g-4">
-          
-          
-          <Col xs={12} md={8} lg={8}>
-            <Card className="border rounded shadow-sm">
-              <Card.Header as="h5" className="bg-primary text-white">
-                Análisis de Respuestas por Variable
-              </Card.Header>
-              <Card.Body className="p-4">
-                <Tabs
-                  id="variable-tabs"
-                  activeKey={activeVariableKey}
-                  onSelect={(k) => setActiveVariableKey(k || null)}
-                  className="mb-3"
-                  mountOnEnter
-                  unmountOnExit
-                >
-                  {tabsData.map((tab) => (
-                    <Tab key={tab.key} eventKey={tab.key} title={tab.cod}>
-                      <div className="mb-4 text-center">
-                        <h5 className="mb-0">
-                          {tab.cod}: {tab.title}
-                        </h5>
-                      </div>
-                      {tab.content}
-                    </Tab>
-                  ))}
-                </Tabs>
-              </Card.Body>
-            </Card>
-          </Col>
-
-          
-          <Col xs={12} md={4} lg={4}>
-                  
-            <aside className="right-rail">
-              <div className="right-cta mb-3">
-                {reporteCompleto?.has_respuesta ? (
-                  <Link
-                    to={`/docente/informes-curriculares-respondidos/${reporteCompleto.informe_id}`}
-                    className="btn btn-outline-primary btn-lg w-100"
-                  >
-                    Ver Informe
-                  </Link>
-                ) : (
-                  <Link
-                    to={`/docente/nuevo-informe/${reporteCompleto.id}`}
-                    className="btn btn-primary btn-lg w-100"
-                  >
-                    Nuevo Informe de Act.Curricular
-                  </Link>
-                )}
-              </div>
-              
+    <Container className="my-4">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+          <h2 className="text-primary fw-bold m-0">Reporte generado</h2>
+      </div>
+      
+      <EncabezadoReporte
+      
+        asignatura={Datosasignatura.nombre}
+        anio={Datosasignatura.año}
+        docente={Datosasignatura.nombre_docente}
+        carrera={Datosasignatura.carrera}
+        ciclo_lectivo={reporteCompleto.encuesta_asignatura.ciclo_lectivo}
+        sede={Datosasignatura.sede}
+      >
+        <Container className="my-4">
+          <Row className="g-4">
+            
+            
+            <Col xs={12} md={8} lg={8}>
               <Card className="border rounded shadow-sm">
-                <Card.Header as="h6" className="bg-primary text-white">
-                  Métricas de la Encuesta
+                <Card.Header as="h5" className="bg-primary text-white">
+                  Análisis de Respuestas por Variable
                 </Card.Header>
-                <Card.Body className="p-3">
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <span className="text-muted fw-semibold small">
-                      Total inscriptos
-                    </span>
-                    <span className="text-dark fw-bold">
-                      25
-                    </span>
-                  </div>
-
-                  <div className="d-flex justify-content-between align-items-center">
-                    <span className="text-muted fw-semibold small">
-                      Encuestas procesadas
-                    </span>
-                    <span className="text-primary fw-bold">
-                      {reporteCompleto.encuesta_asignatura.respuestas.length}
-                    </span>
-                  </div>
+                <Card.Body className="p-4">
+                  <Tabs
+                    id="variable-tabs"
+                    activeKey={activeVariableKey}
+                    onSelect={(k) => setActiveVariableKey(k || null)}
+                    className="mb-3"
+                    mountOnEnter
+                    unmountOnExit
+                  >
+                    {tabsData.map((tab) => (
+                      <Tab key={tab.key} eventKey={tab.key} title={tab.cod}>
+                        <div className="mb-4 text-center">
+                          <h5 className="mb-0">
+                            {tab.cod}: {tab.title}
+                          </h5>
+                        </div>
+                        {tab.content}
+                      </Tab>
+                    ))}
+                  </Tabs>
                 </Card.Body>
               </Card>
-              <br />
-              <Card className="border rounded shadow-sm mb-3 ">
-                <Card.Header as="h6" className="bg-primary text-white">
-                  Resumen de la Variable
-                </Card.Header>
-                <ResumenVariable resumen={activeVariableSummary} />
-              </Card>
-            </aside>
-          </Col>
-        </Row>
-      </Container>
-    </EncabezadoReporte>
+            </Col>
+
+            
+            <Col xs={12} md={4} lg={4}>
+                    
+              <aside className="right-rail">
+                <div className="right-cta mb-3">
+                  {reporteCompleto?.has_respuesta ? (
+                    <Link
+                      to={`/docente/informes-curriculares-respondidos/${reporteCompleto.informe_id}`}
+                      className="btn btn-outline-primary btn-lg w-100"
+                    >
+                      Ver Informe
+                    </Link>
+                  ) : (
+                    <Link
+                      to={`/docente/nuevo-informe/${reporteCompleto.id}`}
+                      className="btn btn-primary btn-lg w-100"
+                    >
+                      Nuevo Informe de Act.Curricular
+                    </Link>
+                  )}
+                </div>
+                
+                <Card className="border rounded shadow-sm">
+                  <Card.Header as="h6" className="bg-primary text-white">
+                    Métricas de la Encuesta
+                  </Card.Header>
+                  <Card.Body className="p-3">
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <span className="text-muted fw-semibold small">
+                        Total inscriptos
+                      </span>
+                      <span className="text-dark fw-bold">
+                        25
+                      </span>
+                    </div>
+
+                    <div className="d-flex justify-content-between align-items-center">
+                      <span className="text-muted fw-semibold small">
+                        Encuestas procesadas
+                      </span>
+                      <span className="text-primary fw-bold">
+                        {reporteCompleto.encuesta_asignatura.respuestas.length}
+                      </span>
+                    </div>
+                  </Card.Body>
+                </Card>
+                <br />
+                <Card className="border rounded shadow-sm mb-3 ">
+                  <Card.Header as="h6" className="bg-primary text-white">
+                    Resumen de la Variable
+                  </Card.Header>
+                  <ResumenVariable resumen={activeVariableSummary} />
+                </Card>
+              </aside>
+            </Col>
+          </Row>
+        </Container>
+      </EncabezadoReporte>
+    </Container>
   );
 }

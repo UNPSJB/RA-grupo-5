@@ -188,6 +188,7 @@ function ResponderEncuesta() {
                       onSelect={handleTabSelect} 
                       id="variable-tabs"
                       className="mb-3"
+                      transition={false}
                     >
                       {encuesta.variables.map(variable => (
                         <Tab

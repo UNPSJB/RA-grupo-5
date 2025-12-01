@@ -7,8 +7,8 @@ from src.encuestas_base.schemas import EncuestaBaseRead
 from src.respuestas.schemas import RespuestaRead
 
 class EncuestaAsignaturaBase(BaseModel):
-    fecha_inicio: date = date(2025, 7, 1)
-    fecha_fin: date = date(2025, 12, 31)
+    fecha_inicio: date 
+    fecha_fin: date 
     ciclo_lectivo: int
     estado: EstadoEncuesta
 

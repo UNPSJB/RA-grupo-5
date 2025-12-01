@@ -9,7 +9,6 @@ import {
   Tab,
   Alert,
   Button,
-  Row,
   Spinner,
 } from "react-bootstrap";
 import type { InformeSinteticoCarrera } from "../types/InformeSintetico";
@@ -132,14 +131,14 @@ export default function VerInformeSinteticoRespondido() {
   const cursado = informesHijos[0]?.asignatura?.cursado || "";
 
   return (
-    <Container>
+    <Container className="my-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
           <h2 className="text-primary fw-bold m-0">Informe Sintetico enviado</h2>
           <BotonDescargar onClick={handleDescargar} isGenerating={isGenerating} />
       </div>
       <div ref={pdfRef} className="bg-white p-4 rounded">
         <Form>
-          <Col md={10} lg={8} className="mx-auto my-4">
+          <Col md={12} lg={12} className="mx-auto my-4">
             <EncabezadoSintetico
               carrera={informe.carrera}
               ciclo_lectivo= {informe.ciclo_lectivo as unknown as number}

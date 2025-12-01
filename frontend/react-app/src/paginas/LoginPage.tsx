@@ -87,7 +87,7 @@ export default function LoginPage() {
           onSubmit={handleSubmit}
         >
           <h2 className="text-center mb-4">Iniciar sesión</h2>
-          <h6 className="text-center mb-4">Sistema de encuestas</h6>
+          <h6 className="text-center mb-4">Sistema de Analisis Academico</h6>
 
           <div className="mb-3">
             <label>Usuario</label>

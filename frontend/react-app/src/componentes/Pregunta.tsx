@@ -73,7 +73,7 @@ export default function Pregunta({
 
                 case 'single_choice':
                   return (
-                    <div className="d-flex flex-wrap gap-3">
+                    <div className="d-flex flex-column gap-3">
                       {opcionesDeChoice.map((opcion) => (
                         <Form.Check
                           {...field}
