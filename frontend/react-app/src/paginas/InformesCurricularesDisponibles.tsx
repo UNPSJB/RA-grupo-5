@@ -1,6 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useInformesCurriculares } from "../hook/useInformesCurriculares";
 import { Link } from "react-router-dom";
+import { obtenerPeriodoEncuestaAsignada } from "../helpers/respondVersion";
 import { 
   Container, 
   Row, 
@@ -22,11 +23,26 @@ export default function InformesCurricularesDisponibles() {
   const [filterAnio, setFilterAnio] = useState("all");
   const [filterCuatri, setFilterCuatri] = useState("all");
   const [sortOrder, setSortOrder] = useState("desc");
+  const [periodosPorInforme, setPeriodosPorInforme] = useState<Record<number, string | null>>({});
 
   // 1. Obtener la base: SOLO informes CERRADOS
   const cerradosBase = useMemo(() => {
     return informesCurriculares.filter((informe) => informe.estado === "cerrado");
   }, [informesCurriculares]);
+
+  useEffect(() => {
+    Promise.all(
+      cerradosBase.map(async (informe) => [
+        informe.id,
+        await obtenerPeriodoEncuestaAsignada(
+          informe.id_asignatura,
+          informe.ciclo_lectivo
+        ),
+      ] as const)
+    )
+      .then((entries) => setPeriodosPorInforme(Object.fromEntries(entries)))
+      .catch(() => setPeriodosPorInforme({}));
+  }, [cerradosBase]);
 
   // 2. Datos para los selects (Calculados sobre los cerrados disponibles)
   const carrerasDisponibles = useMemo(() => {
@@ -139,12 +155,12 @@ export default function InformesCurricularesDisponibles() {
             
             {/* BARRA DE FILTROS */}
             <div className="bg-light border-bottom px-3 py-2">
-              <div className="d-flex align-items-center flex-wrap gap-2">
+              <div className="d-flex align-items-center flex-nowrap gap-2 overflow-auto">
                 
                 <span className="text-muted fw-bold small text-nowrap me-1">Filtrar:</span>
 
                 {/* Filtros*/}
-                <div className="d-flex flex-wrap align-items-center gap-2 flex-grow-1">
+                <div className="d-flex align-items-center gap-2 flex-grow-1">
                     <div style={{ minWidth: '200px', maxWidth: '300px', flexGrow: 1 }}>
                         <Form.Select 
                           size="sm" 
@@ -184,7 +200,7 @@ export default function InformesCurricularesDisponibles() {
                 </div>
 
                 {/* Botón alineado a la derecha */}
-                <div className="d-flex align-items-center ms-auto ps-3 border-start">
+                <div className="d-flex align-items-center ms-auto ps-3 border-start flex-shrink-0">
                       <Button
                         variant="link"
                         size="sm"
@@ -227,6 +243,13 @@ export default function InformesCurricularesDisponibles() {
                       <small className="text-muted">
                         {`Ciclo lectivo: ${informe.ciclo_lectivo} | Cursado: ${informe.asignatura.cursado}` }
                       </small>
+                      {periodosPorInforme[informe.id] && (
+                        <div className="mt-2">
+                          <Badge bg="light" text="dark" className="border fw-semibold">
+                            Periodo: {periodosPorInforme[informe.id]}
+                          </Badge>
+                        </div>
+                      )}
                       <br />
                       <small className="text-muted">
                         {`Carrera: ${informe.asignatura?.carrera?.nombre} ` }

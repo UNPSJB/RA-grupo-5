@@ -10,6 +10,7 @@ import {
   Button,
   Row,
   Spinner,
+  Badge,
 } from "react-bootstrap";
 import type { Respuesta } from "../types/InformeSintetico";
 
@@ -56,6 +57,7 @@ export default function GenerarInformeSintetico() {
   const { fetchInformeSinteticoBaseActual } = useInformeSinteticoBase();
   const {
     informesFiltrados,
+    periodosEncuesta,
     carrera,
     loading: loadingInformes,
   } = useInformesParaSintetico(numCarreraId, numCiclo, cuatrimestre);
@@ -269,6 +271,23 @@ export default function GenerarInformeSintetico() {
                   </Form.Group>
                 </Col>
               </Row>
+              {periodosEncuesta.length > 0 && (
+                <div className="border-top pt-3 mt-1">
+                  <span className="text-muted fw-semibold me-2">
+                    Periodo de encuestas:
+                  </span>
+                  {periodosEncuesta.map((periodo) => (
+                    <Badge
+                      key={periodo}
+                      bg="light"
+                      text="dark"
+                      className="border fw-semibold me-2"
+                    >
+                      {periodo}
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </Card.Body>
           </Card>
 

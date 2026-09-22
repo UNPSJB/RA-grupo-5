@@ -8,6 +8,8 @@ interface Props {
   docente?: string;
   carrera: Carrera;
   ciclo_lectivo?: number;
+  anio_inicio?: number | null;
+  anio_fin?: number | null;
   sede?: string;
   cant_alumnos_insc?: number;
   cant_comisiones_practicas?: number;
@@ -15,11 +17,12 @@ interface Props {
   comision_asesora?: string;
   cursado?: string;
   integrantes?: string;
+  periodosEncuesta?: string[];
   children?: React.ReactNode;
 }
 
 
-const EncabezadoCurricular: React.FC<Props> = ({ asignatura, anio, docente, carrera, ciclo_lectivo, sede, cant_alumnos_insc, cant_comisiones_practicas, cant_comisiones_teoricas, children }) => {
+const EncabezadoCurricular: React.FC<Props> = ({ asignatura, anio, docente, carrera, ciclo_lectivo, anio_inicio, anio_fin, sede, cant_alumnos_insc, cant_comisiones_practicas, cant_comisiones_teoricas, children }) => {
   return (
     <div style={{ padding: '2rem', textAlign: "left" }}>
         <Card className="border rounded shadow-sm mb-4">
@@ -30,37 +33,42 @@ const EncabezadoCurricular: React.FC<Props> = ({ asignatura, anio, docente, carr
 
         <Card.Body className="p-4 bg-light">
             <Row className="mb-2">
-                <Col sm={6}>
+              <Col sm={6}>
                     <strong>Asignatura:</strong> {asignatura}
                 </Col>
-                <Col sm={6}>
+              <Col sm={6}>
                     <strong>Carrera:</strong> {carrera.nombre}
                 </Col>
-            </Row>
+          </Row>
 
-            <Row className="mb-2">
-                <Col sm={6}>
-                    <strong>Ciclo Lectivo:</strong> {ciclo_lectivo}
-                </Col>
-                <Col sm={6}>
+          <Row className="mb-2">
+              <Col sm={6}>
+                <strong>Ciclo Lectivo:</strong> {ciclo_lectivo}
+                {anio_inicio != null && anio_fin != null && (
+                  <div className="small text-muted mt-1">
+                    <strong>Periodo:</strong> {anio_inicio} - {anio_fin}
+                  </div>
+                )}
+              </Col>
+              <Col sm={6}>
                     <strong>Sede:</strong> {sede}
                 </Col>
             </Row>
 
             <Row className="mb-2">
-                <Col sm={6}>
-                    <strong>Docente Responsable:</strong> {docente}
-                </Col>
-                <Col sm={6}>
-                    <strong>Alumnos Inscriptos:</strong> {cant_alumnos_insc}
-                </Col>
+              <Col sm={6}>
+                <strong>Docente Responsable:</strong> {docente}
+              </Col>
+              <Col sm={6}>
+                <strong>Alumnos Inscriptos:</strong> {cant_alumnos_insc}
+              </Col>
             </Row>
 
             <Row>
-                <Col sm={6}>
+              <Col sm={6}>
                     <strong>Comisiones Teóricas:</strong> {cant_comisiones_teoricas}
                 </Col>
-                <Col sm={6}>
+              <Col sm={6}>
                     <strong>Comisiones Prácticas:</strong> {cant_comisiones_practicas}
                 </Col>
             </Row>
@@ -79,6 +87,8 @@ const EncabezadoReporte: React.FC<Props> = ({
   docente,
   carrera,
   ciclo_lectivo,
+  anio_inicio,
+  anio_fin,
   sede,
   children
 }) => {
@@ -118,6 +128,13 @@ const EncabezadoReporte: React.FC<Props> = ({
             <Col sm={6}>
               <strong>Docente Responsable:</strong> {docente}
             </Col>
+            <Col sm={6}>
+              {anio_inicio != null && anio_fin != null && (
+                <>
+                  <strong>Periodo:</strong> {anio_inicio} - {anio_fin}
+                </>
+              )}
+            </Col>
           </Row>
 
         </Card.Body>
@@ -135,6 +152,7 @@ const EncabezadoSintetico: React.FC<Props> = ({
   cursado,
   comision_asesora,
   integrantes,
+  periodosEncuesta,
   children
 }) => {
   return (
@@ -150,6 +168,9 @@ const EncabezadoSintetico: React.FC<Props> = ({
           <Col md={6}>
             <p><strong>Carrera:</strong> {carrera.nombre}</p>
             <p><strong>Ciclo Lectivo:</strong> {ciclo_lectivo}</p>
+            {periodosEncuesta && periodosEncuesta.length > 0 && (
+              <p><strong>Periodo de encuestas:</strong> {periodosEncuesta.join(" | ")}</p>
+            )}
             <p><strong>Cursado:</strong> {cursado}</p>
             <p><strong>Sede:</strong> {sede}</p>
 

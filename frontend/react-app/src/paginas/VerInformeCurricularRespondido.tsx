@@ -33,6 +33,10 @@ export default function VerInformeCurricularRespondido() {
 
   const [informe, setInforme] = useState<InformeCurricular | null>(null);
   const [informeBase, setInformeBase] = useState<InformeBase | null>(null);
+  const [periodoEncuesta, setPeriodoEncuesta] = useState<{
+    anio_inicio: number | null;
+    anio_fin: number | null;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,7 +60,16 @@ export default function VerInformeCurricularRespondido() {
 
         const dataInforme = (await resInforme.json()) as InformeCurricular & {
           id_informe_curricular_base?: number;
+          id_reporte?: number;
         };
+
+        if (dataInforme.id_reporte) {
+          const resReporte = await apiFetch(`/reportes/${dataInforme.id_reporte}`);
+          if (resReporte.ok) {
+            const dataReporte = await resReporte.json();
+            setPeriodoEncuesta(dataReporte.encuesta_asignatura?.encuesta_base ?? null);
+          }
+        }
 
         const idBase =
           dataInforme.id_informe_curricular_base ??
@@ -149,6 +162,8 @@ export default function VerInformeCurricularRespondido() {
                     docente={asignatura.nombre_docente}
                     carrera={asignatura.carrera}
                     ciclo_lectivo={ciclo_lectivo}
+                    anio_inicio={periodoEncuesta?.anio_inicio}
+                    anio_fin={periodoEncuesta?.anio_fin}
                     sede={sede}
                     cant_alumnos_insc={cant_alumnos_insc}
                     cant_comisiones_practicas={cant_comisiones_practicas}

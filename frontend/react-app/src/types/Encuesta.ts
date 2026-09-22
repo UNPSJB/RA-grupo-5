@@ -30,6 +30,8 @@ export interface EncuestaBase {
   id: number;
   nombre: string;
   variables: Variable[];
+  anio_inicio: number | null;
+  anio_fin: number | null;
 }
 
 export interface Asignatura {
@@ -51,6 +53,7 @@ export interface EncuestaAsignatura {
   ciclo_lectivo: number;    // ✅ Correcto
   estado: "abierta" | "cerrada"; 
   asignatura: Asignatura; 
+  encuesta_base?: EncuestaBase;
   
   // --- ¡FALTABA ESTO! ---
   // Es vital para que los filtros de Pendientes/Respondidas funcionen

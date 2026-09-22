@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Container,
   Row,
@@ -14,6 +14,7 @@ import {
   Button // Importamos ButtonGroup
 } from "react-bootstrap";
 import { useEstadisticasDepartamento } from "../hook/useEstadisticasDepartamento";
+import { obtenerPeriodosEncuestaPorAnio } from "../helpers/respondVersion";
 
 // --- HELPERS DE ESTILO ---
 const getColorByLabel = (label: string) => {
@@ -91,8 +92,15 @@ export default function EstadisticasDepartamentoPage() {
   const [cuatrimestre, setCuatrimestre] = useState("todos");
   // Estado para los botones de Ciclo (Básico / Superior)
   const [nivel, setNivel] = useState("todos"); 
+  const [periodosEncuesta, setPeriodosEncuesta] = useState<string[]>([]);
 
   const { data, loading, error } = useEstadisticasDepartamento(ciclo, cuatrimestre, nivel);
+
+  useEffect(() => {
+    obtenerPeriodosEncuestaPorAnio(ciclo)
+      .then(setPeriodosEncuesta)
+      .catch(() => setPeriodosEncuesta([]));
+  }, [ciclo]);
 
   if (loading) return <Container className="mt-5 text-center"><Spinner animation="border" variant="primary"/></Container>;
   if (error) return <Container className="mt-5"><Alert variant="danger">{error}</Alert></Container>;
@@ -105,6 +113,11 @@ export default function EstadisticasDepartamentoPage() {
         <div>
             <h2 className="text-primary fw-bold mb-1">Dashboard</h2>
             <p className="text-muted mb-0 small">Estadísticas de Encuestas de Desempeño Docente</p>
+            {periodosEncuesta.length > 0 && (
+              <p className="text-muted mb-0 small mt-2">
+                <strong>Periodo:</strong> {periodosEncuesta.join(" | ")}
+              </p>
+            )}
         </div>
         
         <div className="d-flex flex-wrap align-items-end gap-3">

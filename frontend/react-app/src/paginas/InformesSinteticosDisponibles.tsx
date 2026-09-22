@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useInformesSinteticos } from "../hook/useInformesSinteticos";
 // Importamos el tipo correctamente para evitar el error de TS
 import { 
@@ -6,6 +6,7 @@ import {
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { isGeneracionInformeSinteticoActivo, getToday } from "../calendarioAcademico"; 
+import { obtenerPeriodosEncuestaPorAnio } from "../helpers/respondVersion";
 
 export default function InformesSinteticosDisponibles() {
   // 1. HOOK
@@ -18,6 +19,14 @@ export default function InformesSinteticosDisponibles() {
   const [filterCuatri, setFilterCuatri] = useState<string>("all");
   const [filterEstado, setFilterEstado] = useState<string>("all");
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
+  const [periodosPorAnio, setPeriodosPorAnio] = useState<Record<number, string[]>>({});
+
+  useEffect(() => {
+    const years = Array.from(new Set(resumenes.map((resumen) => resumen.ciclo)));
+    Promise.all(years.map(async (year) => [year, await obtenerPeriodosEncuestaPorAnio(year)] as const))
+      .then((entries) => setPeriodosPorAnio(Object.fromEntries(entries)))
+      .catch(() => setPeriodosPorAnio({}));
+  }, [resumenes]);
 
   // 3. DATOS DERIVADOS PARA LOS SELECTS 
   const aniosDisponibles = useMemo(() => {
@@ -173,6 +182,13 @@ export default function InformesSinteticosDisponibles() {
                 Informes publicados:
                 <Badge bg="success" pill className="ms-1">{r.publicados}</Badge>
               </small>
+              {periodosPorAnio[r.ciclo]?.length > 0 && (
+                <div className="mt-2">
+                  <Badge bg="light" text="dark" className="border fw-semibold">
+                    Periodo: {periodosPorAnio[r.ciclo].join(" | ")}
+                  </Badge>
+                </div>
+              )}
             </div>
 
             {/* --- ACCIONES --- */}

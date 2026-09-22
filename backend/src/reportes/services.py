@@ -27,8 +27,10 @@ def listar_reportes(db: Session, persona_id: int) -> List[schemas.Reporte]:
         .join(Reporte.encuesta_asignatura)
         .where(EncuestaAsignatura.id_asignatura.in_(subquery_asignaturas))
         .options(
-            # Cargamos la relación para que el schema no falle
-            selectinload(Reporte.encuesta_asignatura).selectinload(EncuestaAsignatura.asignatura)
+            selectinload(Reporte.encuesta_asignatura).options(
+                selectinload(EncuestaAsignatura.asignatura),
+                selectinload(EncuestaAsignatura.encuesta_base),
+            )
         )
     )
     

@@ -10,6 +10,8 @@ enum EstadoInformeCurricular {
 
 export interface InformeCurricular {
   id: number; 
+  id_asignatura: number;
+  id_reporte: number;
   sede: string;
   ciclo_lectivo: number;
   docente: string;

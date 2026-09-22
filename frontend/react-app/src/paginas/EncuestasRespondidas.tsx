@@ -103,11 +103,11 @@ export default function EncuestasRespondidas() {
             </Card.Header>
             
             <div className="bg-light border-bottom px-3 py-2">
-              <div className="d-flex align-items-center flex-wrap gap-2">
+              <div className="d-flex align-items-center flex-nowrap gap-2 overflow-auto">
                 
                 <span className="text-muted fw-bold small text-nowrap me-1">Filtrar:</span>
 
-                <div className="d-flex flex-wrap align-items-center gap-2 flex-grow-1">
+                <div className="d-flex align-items-center gap-2 flex-grow-1">
                     <div style={{ minWidth: '200px', maxWidth: '300px', flexGrow: 1 }}>
                         <Form.Select 
                           size="sm" 
@@ -146,7 +146,7 @@ export default function EncuestasRespondidas() {
                     </div>
                 </div>
 
-                <div className="d-flex align-items-center ms-auto ps-3 border-start">
+                <div className="d-flex align-items-center ms-auto ps-3 border-start flex-shrink-0">
                       <Button
                         variant="link"
                         size="sm"
@@ -193,6 +193,13 @@ export default function EncuestasRespondidas() {
                       <small className="text-muted">
                         {`Carrera: ${encuesta.asignatura?.carrera?.nombre}` }
                       </small>
+                      {encuesta.encuesta_base?.anio_inicio != null && encuesta.encuesta_base?.anio_fin != null && (
+                        <div className="mt-2">
+                          <Badge bg="light" text="primary" className="border border-primary-subtle fw-semibold">
+                            Período: {encuesta.encuesta_base.anio_inicio} - {encuesta.encuesta_base.anio_fin}
+                          </Badge>
+                        </div>
+                      )}
                     </div>
                     
                     <Link 

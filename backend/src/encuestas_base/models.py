@@ -15,5 +15,11 @@ class EncuestaBase(ModeloBase):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     nombre: Mapped[str] = mapped_column(String, index=True)
     ciclo: Mapped[Ciclo] = mapped_column(SQLEnum(Ciclo), index=True)
+    anio_inicio: Mapped[Optional[int]] = mapped_column(Integer)
+    anio_fin: Mapped[Optional[int]] = mapped_column(Integer)
     variables = relationship("Variable", back_populates="encuesta_base")
+    encuestas_asignaturas = relationship("EncuestaAsignatura", back_populates="encuesta_base")
+
+    #nuevos campos para el versionado de anios
+    variables = relationship ("Variable", back_populates="encuesta_base")
     encuestas_asignaturas = relationship("EncuestaAsignatura", back_populates="encuesta_base")

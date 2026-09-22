@@ -9,8 +9,6 @@ export interface Encuesta{
     id_asignatura: number;
     id_encuesta_base: number;
     estado: EstadoEncuesta;  
-    fecha_inicio: string;
-    fecha_fin: string;
     asignatura?: Asignatura;
     encuesta_base?: EncuestaBase;
 }

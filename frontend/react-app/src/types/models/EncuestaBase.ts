@@ -5,4 +5,6 @@ export interface EncuestaBase {
     nombre: string;
     ciclo: Ciclo;
     variables?: any[];
-    }
+    anio_inicio: number | null;
+    anio_fin: number | null;
+}

@@ -8,6 +8,7 @@ import {
   Tabs,
   Tab,
   Spinner,
+  Badge,
 } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -132,7 +133,18 @@ export default function VerEncuesta() {
     return (
         <Container className="my-4">
           <div className="d-flex justify-content-between align-items-center mb-4">
-              <h2 className="text-primary fw-bold m-0">Respuesta Registrada - {asignatura?.nombre} </h2>
+              <h2 className="text-primary fw-bold m-0">
+                Respuesta Registrada - {asignatura?.nombre}{" "}
+                {encuesta.anio_inicio != null && encuesta.anio_fin != null && (
+                  <Badge
+                    bg="light"
+                    text="primary"
+                    className="border border-primary-subtle fw-semibold fs-6 align-middle"
+                  >
+                    Período: {encuesta.anio_inicio} - {encuesta.anio_fin}
+                  </Badge>
+                )}
+              </h2>
           </div>
           
           <Card className="border rounded shadow-sm bg-white"> 

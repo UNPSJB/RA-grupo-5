@@ -40,4 +40,24 @@ def eliminar_encuesta_base(db: Session, encuesta_base_id: int) -> dict:
     db.commit()
     return {"message": f"Encuesta base eliminada"}
 
+def obtener_encuesta_base_vigente(db: Session, ciclo_lectivo: int, ciclo_tipo: str):
+    """
+    Busca la EncuestaBase que esté vigente para el año del ciclo lectivo 
+    y el ciclo correspondiente (básico/superior).
+    """
+    encuesta_base = (
+        db.query(EncuestaBase)
+        .filter(
+            EncuestaBase.ciclo == ciclo_tipo,
+            EncuestaBase.anio_inicio <= ciclo_lectivo,
+            EncuestaBase.anio_fin >= ciclo_lectivo
+        )
+        .first()
+    )
+    
+    if not encuesta_base:
+        raise ValueError(f"No existe una encuesta base configurada para el ciclo {ciclo_tipo} en el año {ciclo_lectivo}")
+        
+    return encuesta_base
+
 

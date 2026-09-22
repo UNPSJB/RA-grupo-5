@@ -17,6 +17,7 @@ import {useDescargarPdf} from '../hook/useDescargarPdf';
 import { BotonDescargar } from '../componentes/BotonDescargar';
 import {EncabezadoSintetico} from "../componentes/LayoutEncabezados";
 import apiFetch from "../api/client";
+import { obtenerPeriodosEncuestaPorAnio } from "../helpers/respondVersion";
 
 // --- HELPER PARA BUSCAR RESPUESTA EN INFORMES CURRICULARES HIJOS ---
 const findRespuestaPorPreguntaId = (
@@ -52,6 +53,7 @@ export default function VerInformeSinteticoRespondido() {
 
   // Estado para mapear las respuestas del DEPARTAMENTO (ID Pregunta -> Texto)
   const [respuestasVisualizacion, setRespuestasVisualizacion] = useState<Record<number, string>>({});
+  const [periodosEncuesta, setPeriodosEncuesta] = useState<string[]>([]);
   
   const pdfRef = useRef<HTMLDivElement>(null);
   const { downloadPdf, isGenerating } = useDescargarPdf();
@@ -71,6 +73,7 @@ export default function VerInformeSinteticoRespondido() {
         if (!res.ok) throw new Error("Error al cargar el informe sintético");
         const data: InformeSinteticoCarrera = await res.json();
         setInforme(data);
+        setPeriodosEncuesta(await obtenerPeriodosEncuestaPorAnio(Number(data.ciclo_lectivo)));
 
         // 2. Cargar la BASE DEL INFORME por separado para asegurar las preguntas
         if (data.id_informe_sintetico_base) {
@@ -147,6 +150,7 @@ export default function VerInformeSinteticoRespondido() {
               cursado={cursado}
               comision_asesora={informe.comision_asesora}
               integrantes={informe.integrantes}
+              periodosEncuesta={periodosEncuesta}
             />
 
             {/* 2. Pestañas de Informes Curriculares Incluidos (Read-Only) */}

@@ -9,6 +9,7 @@ import {
   ListGroup, 
   Spinner, 
   Alert,
+  Badge,
   Form,          
   Button         
 } from "react-bootstrap";
@@ -115,12 +116,13 @@ export default function ReportesDisponibles() {
 
             {/* BARRA DE FILTROS */}
 <div className="bg-light border-bottom px-3 py-2">
-  <div className="d-flex align-items-center flex-nowrap gap-2">
+  <div className="d-flex align-items-center gap-2">
 
-    <span className="text-muted fw-bold small text-nowrap me-1">Filtrar:</span>
+    <div className="d-flex align-items-center gap-2 flex-grow-1">
+      <span className="text-muted fw-bold small text-nowrap me-1 flex-shrink-0">Filtrar:</span>
 
-    <div className="d-flex flex-grow-1 align-items-center gap-2 flex-nowrap overflow-auto">
-                    <div style={{ minWidth: '200px', maxWidth: '300px', flexGrow: 1 }}>
+      <div className="d-flex flex-grow-1 align-items-center gap-2" style={{ minWidth: 0 }}>
+            <div className="flex-grow-1" style={{ minWidth: 0 }}>
                         <Form.Select size="sm" className="border-secondary-subtle" value={filterCarrera} onChange={e => setFilterCarrera(e.target.value)}>
                             <option value="all">Todas las Carreras</option>
                             {carrerasDisponibles.map(c => (
@@ -129,14 +131,14 @@ export default function ReportesDisponibles() {
                         </Form.Select>
                     </div>
 
-                    <div style={{ width: '100px' }}>
+                    <div style={{ width: '92px', flexShrink: 0 }}>
                         <Form.Select size="sm" value={filterAnio} onChange={e => setFilterAnio(e.target.value)}>
                             <option value="all">Año (Todos)</option>
                             {aniosDisponibles.map(y => <option key={y} value={y}>{y}</option>)}
                         </Form.Select>
                     </div>
 
-                    <div style={{ width: '130px' }}>
+                    <div style={{ width: '118px', flexShrink: 0 }}>
                         <Form.Select size="sm" value={filterCuatri} onChange={e => setFilterCuatri(e.target.value)}>
                             <option value="all">Cuatri (Todos)</option>
                             <option value="1">1° Cuat.</option>
@@ -144,37 +146,38 @@ export default function ReportesDisponibles() {
                         </Form.Select>
                     </div>
 
-                    <div style={{ width: '140px' }}>
+                    <div style={{ width: '128px', flexShrink: 0 }}>
                         <Form.Select size="sm" value={filterEstado} onChange={e => setFilterEstado(e.target.value)}>
                             <option value="all">Estado (Todos)</option>
                             <option value="respondido">Respondidos</option>
                             <option value="pendiente">Pendientes</option>
                         </Form.Select>
                     </div>
-                </div>
+      </div>
+    </div>
 
-                <div className="d-flex align-items-center ms-auto ps-3 border-start">
-                      <Button
-                        variant="link"
-                        size="sm"
-                        className="text-decoration-none text-secondary p-0 fw-bold small text-nowrap d-flex align-items-center gap-1"
-                        onClick={() => setSortOrder(prev => prev === "desc" ? "asc" : "desc")}
-                      >
-                        {sortOrder === "desc" ? (
-                          <>
-                            Más recientes
-                            <i className="bi bi-arrow-down"></i>
-                          </>
-                        ) : (
-                          <>
-                            Más antiguos
-                            <i className="bi bi-arrow-up"></i>
-                          </>
-                        )}
-                      </Button>
-                </div>
-              </div>
-            </div>
+    <div className="d-flex align-items-center ps-2 border-start flex-shrink-0">
+      <Button
+        variant="link"
+        size="sm"
+        className="text-decoration-none text-secondary p-0 fw-bold small text-nowrap d-flex align-items-center gap-1"
+        onClick={() => setSortOrder(prev => prev === "desc" ? "asc" : "desc")}
+      >
+        {sortOrder === "desc" ? (
+          <>
+            Más recientes
+            <i className="bi bi-arrow-down"></i>
+          </>
+        ) : (
+          <>
+            Más antiguos
+            <i className="bi bi-arrow-up"></i>
+          </>
+        )}
+      </Button>
+    </div>
+  </div>
+</div>
 
             {/* LISTADO  */}
             <ListGroup variant="flush">
@@ -214,6 +217,13 @@ export default function ReportesDisponibles() {
                         <small className="d-block m-1">
                           <strong>Carrera: </strong>{`${asignatura?.carrera?.nombre} ` }
                         </small>
+                        {reporte.encuesta_asignatura.encuesta_base?.anio_inicio != null && reporte.encuesta_asignatura.encuesta_base?.anio_fin != null && (
+                          <div className="d-block mt-2">
+                            <Badge bg="light" text="dark" className="border fw-semibold">
+                              Periodo: {reporte.encuesta_asignatura.encuesta_base.anio_inicio} - {reporte.encuesta_asignatura.encuesta_base.anio_fin}
+                            </Badge>
+                          </div>
+                        )}
                       </div>
 
                       <div className="d-flex flex-column gap-3" style={{ minWidth: '130px' }}>

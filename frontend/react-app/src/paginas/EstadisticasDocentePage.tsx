@@ -1,4 +1,4 @@
-import { Container, Row, Col, Card, ProgressBar, ListGroup, Dropdown, Spinner } from "react-bootstrap";
+import { Container, Row, Col, Card, ProgressBar, ListGroup, Dropdown, Spinner, Badge } from "react-bootstrap";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { useEffect, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
@@ -369,7 +369,14 @@ const renderComparativaSection = () => {
 
   return (
     <Container className="my-4">
-      <h2 className="mb-4 text-center">Estadísticas por Materia</h2>
+      <div className="text-center mb-4">
+        <h2 className="mb-2">Estadísticas por Materia</h2>
+        {reporteCompleto.encuesta_asignatura?.encuesta_base?.anio_inicio != null && reporteCompleto.encuesta_asignatura?.encuesta_base?.anio_fin != null && (
+          <Badge bg="light" text="dark" className="border fw-semibold">
+            Periodo: {reporteCompleto.encuesta_asignatura.encuesta_base.anio_inicio} - {reporteCompleto.encuesta_asignatura.encuesta_base.anio_fin}
+          </Badge>
+        )}
+      </div>
       
       {/* 1. Indicadores Clave (KPIs) - Altura reducida con py-2 */}
       <Row className="g-4 mb-4">

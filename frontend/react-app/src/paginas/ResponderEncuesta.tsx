@@ -176,7 +176,12 @@ function ResponderEncuesta() {
             <Col md={8} className="mx-auto">
               <Card className="border rounded shadow-sm bg-white">
                 <Card.Header as="h4" className="bg-primary text-white text-center">
-                  {asignatura?.nombre}
+                                    {asignatura?.nombre}
+                                    {encuesta.anio_inicio != null && encuesta.anio_fin != null && (
+                                        <div className="small fw-normal mt-1">
+                                            Periodo: {encuesta.anio_inicio} - {encuesta.anio_fin}
+                                        </div>
+                                    )}
                 </Card.Header>
                 <Card.Body className="p-4">
                   <Form onSubmit={handleSubmit(onSubmit)} onKeyDown={handleKeyDown}> 

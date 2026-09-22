@@ -263,6 +263,8 @@ export default function InformeCurricular() {
         docente={asignatura.nombre_docente}
         carrera={asignatura.carrera}
         ciclo_lectivo={cicloLectivo as number}
+        anio_inicio={reporte.encuesta_asignatura?.encuesta_base?.anio_inicio}
+        anio_fin={reporte.encuesta_asignatura?.encuesta_base?.anio_fin}
         sede={sede}
       >
         <Container className="mt-5 text-start">

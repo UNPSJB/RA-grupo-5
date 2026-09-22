@@ -75,13 +75,15 @@ def listar_encuestas_para_usuario(db: Session, persona_id: int):
         
     return resultado
 
-# ... (Mantienes el resto de tus funciones: crear, leer, modificar, eliminar) ...
+
 def crear_encuesta_asignatura(db: Session, encuesta: schemas.EncuestaAsignaturaCreate) -> EncuestaAsignatura:
     _encuesta = EncuestaAsignatura(**encuesta.model_dump())
     db.add(_encuesta)
     db.commit()
     db.refresh(_encuesta)
     return leer_encuesta_asignatura(db, _encuesta.id)
+
+
 
 def leer_encuesta_asignatura(db: Session, encuesta_id: int) -> EncuestaAsignatura:
     query = _get_eager_loading_query().where(EncuestaAsignatura.id == encuesta_id)

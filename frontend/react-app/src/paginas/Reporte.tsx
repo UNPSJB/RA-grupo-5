@@ -114,6 +114,8 @@ export default function ResumenReporte() {
       docente={Datosasignatura.nombre_docente}
       carrera={Datosasignatura.carrera}
       ciclo_lectivo={reporteCompleto.encuesta_asignatura.ciclo_lectivo}
+      anio_inicio={reporteCompleto.encuesta_asignatura.encuesta_base?.anio_inicio}
+      anio_fin={reporteCompleto.encuesta_asignatura.encuesta_base?.anio_fin}
       sede={Datosasignatura.sede}
     >
       <Container className="my-4">

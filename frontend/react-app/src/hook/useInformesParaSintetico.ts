@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import type { InformeCurricular } from "../types/models/InformeCurricular";
 import type { Carrera } from "../types/models/Carrera";
 import { apiFetch } from "../api/client";
+import { obtenerPeriodosEncuestaPorAnio } from "../helpers/respondVersion";
 
 export function useInformesParaSintetico(
   carreraId: number | null,
@@ -12,6 +13,7 @@ export function useInformesParaSintetico(
     InformeCurricular[]
   >([]);
   const [carrera, setCarrera] = useState<Carrera | null>(null);
+  const [periodosEncuesta, setPeriodosEncuesta] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,6 +62,8 @@ export function useInformesParaSintetico(
         });
 
         setInformesFiltrados(filtrados);
+
+        setPeriodosEncuesta(await obtenerPeriodosEncuestaPorAnio(ciclo));
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -70,5 +74,5 @@ export function useInformesParaSintetico(
     fetchData();
   }, [carreraId, ciclo, cuatrimestre]);
 
-  return { informesFiltrados, carrera, loading, error };
+  return { informesFiltrados, periodosEncuesta, carrera, loading, error };
 }
