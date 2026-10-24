@@ -17,6 +17,7 @@ from src.respuestas.models import Respuesta
 from src.cursadas.models import Cursada
 from src.encuestas_asignaturas import schemas
 from datetime import date
+from src.config.services import get_current_system_date
 
 def _get_eager_loading_query():
     return select(EncuestaAsignatura).options(
@@ -120,7 +121,7 @@ def eliminar_encuesta_asignatura(db: Session, encuesta_id: int) -> dict:
 
 def listar_encuestas_pendientes_alumno(db: Session, persona_id: int) -> List[EncuestaAsignatura]:
 
-    today = date.today()
+    today = get_current_system_date()
 
     # 1. Subquery: IDs de asignaturas que el alumno cursa actualmente
     subquery_asignaturas = select(Cursada.id_asignatura).where(

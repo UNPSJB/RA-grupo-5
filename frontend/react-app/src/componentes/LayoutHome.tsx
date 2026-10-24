@@ -4,9 +4,11 @@ import "../styles/Layout.css";
 import logoUnpsjb from "../assets/escudo_tranparente_sinletras.png";
 import { useAuth } from "../context/AuthContext";
 import UserMenu from "../componentes/UserMenu";
+import TimeTravelSelector from "../componentes/TimeTravelSelector";
 
 export default function LayoutHome() {
   const { roles = [], token } = useAuth();
+  const esAdmin = roles.includes("admin");
 
   // Permisos: admin siempre entra
   const can = (role: string) => {
@@ -39,7 +41,13 @@ export default function LayoutHome() {
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto"></Nav>
 
-          <div className="ms-auto me-3">
+          <div className="ms-auto me-3 d-flex align-items-center">
+            <TimeTravelSelector />
+            {esAdmin && (
+              <Link to="/admin" className="btn btn-warning me-2 fw-bold">
+                Administración
+              </Link>
+            )}
             {!token ? (
               <Link to="/login" className="btn btn-outline-light">
                 Iniciar sesión

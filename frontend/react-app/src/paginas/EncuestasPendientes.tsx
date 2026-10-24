@@ -199,9 +199,11 @@ export default function EncuestasPendientes() {
                 </ListGroup.Item>
               ) : (
                 itemsProcesados.map(encuesta => {
-                   const fechaCierre = encuesta.asignatura.cursado 
-                    ? getRangoFechasEncuesta(encuesta.asignatura.cursado) 
-                    : "Consultar fecha";
+                   const fechaCierre = encuesta.fecha_fin
+                    ? new Date(encuesta.fecha_fin + "T00:00:00").toLocaleDateString("es-AR")
+                    : encuesta.asignatura.cursado
+                      ? getRangoFechasEncuesta(encuesta.asignatura.cursado)
+                      : "Consultar fecha";
                   return (
                     <ListGroup.Item
                       key={encuesta.id}

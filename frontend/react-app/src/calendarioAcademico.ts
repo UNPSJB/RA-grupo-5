@@ -40,45 +40,27 @@ const ANUAL = "anual";
  * FUNCIÓN PARA DOCENTES (Informes Curriculares)
  * Verifica si se puede generar un Informe Curricular (Reporte)
  */
-export function isGeneracionInformeCurricularActiva(cursado: string, today: Date): boolean {
-  if (cursado === CUATRIMESTRE_1) {
-    return today >= IC_C1_START && today <= IC_C1_END;
-  }
-  
-  if (cursado === CUATRIMESTRE_2 || cursado === ANUAL) {
-    return today >= IC_C2_START && today <= IC_C2_END;
-  }
-  return false;
+export function isGeneracionInformeCurricularActiva(_cursado: string, _today: Date): boolean {
+  // En modo demo habilitado para cualquier fecha/período
+  return true;
 }
 
 /**
  * FUNCIÓN PARA DEPARTAMENTO (Informes Sintéticos)
  * Verifica si se puede generar un Informe Sintético
  */
-export function isGeneracionInformeSinteticoActivo(cursado: string, today: Date): boolean {
-  if (cursado === CUATRIMESTRE_1) {
-    return today >= IS_C1_START && today <= IS_C1_END;
-  }
-  
-  if (cursado === CUATRIMESTRE_2 || cursado === ANUAL) {
-    return today >= IS_C2_START && today <= IS_C2_END;
-  }
-  return false;
+export function isGeneracionInformeSinteticoActivo(_cursado: string, _today: Date): boolean {
+  // En modo demo habilitado para cualquier fecha/período
+  return true;
 }
 
 /**
  * FUNCIÓN PARA ALUMNOS (Encuestas)
  * Verifica si se puede responder una Encuesta
  */
-export function isRespuestaEncuestaActiva(cursado: string, today: Date): boolean {
-  if (cursado === CUATRIMESTRE_1) {
-    return today >= ENCUESTA_C1_START && today <= ENCUESTA_C1_END;
-  }
-  
-  if (cursado === CUATRIMESTRE_2 || cursado === ANUAL) {
-    return today >= ENCUESTA_C2_START && today <= ENCUESTA_C2_END;
-  }
-  return false;
+export function isRespuestaEncuestaActiva(_cursado: string, _today: Date): boolean {
+  // En modo demo habilitado para cualquier fecha/período
+  return true;
 }
 
 const formatDate = (date: Date): string => {

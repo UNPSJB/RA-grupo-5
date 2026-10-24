@@ -41,6 +41,20 @@ function ResponderEncuesta() {
         guardarRespuestas
     } = useResponderEncuesta(idEncuesta);
 
+    const encuestaOrdenada = useMemo(() => {
+        if (!encuesta || !encuesta.variables) return encuesta;
+        const variables = [...encuesta.variables].sort((a: any, b: any) => {
+            const codigoA = (a.codigo || "").toString().toUpperCase();
+            const codigoB = (b.codigo || "").toString().toUpperCase();
+            if (codigoA === "H") return 1;
+            if (codigoB === "H") return -1;
+            if (codigoA < codigoB) return -1;
+            if (codigoA > codigoB) return 1;
+            return 0;
+        });
+        return { ...encuesta, variables };
+    }, [encuesta]);
+
     const { alerta, mostrarAlerta, cerrarAlerta } = useAlertaFlotante();
 
     const handleAlertExited = () => {
@@ -50,21 +64,22 @@ function ResponderEncuesta() {
     };
 
     const { defaultValues, schema } = useMemo(() => {
-        if (!encuesta || !encuesta.variables) {
+        if (!encuestaOrdenada || !encuestaOrdenada.variables) {
             return { defaultValues: {}, schema: undefined };
         }
         return {
-            defaultValues: construirValoresPorDefecto(encuesta),
-            schema: construirEsquemaEncuesta(encuesta)
+            defaultValues: construirValoresPorDefecto(encuestaOrdenada),
+            schema: construirEsquemaEncuesta(encuestaOrdenada)
         };
-    }, [encuesta]);
+    }, [encuestaOrdenada]);
 
     const {
         control,
         handleSubmit,
         formState: { errors, isSubmitting },
         reset,
-        trigger
+        trigger,
+        setValue
     } = useForm<SurveyFormData>({
         defaultValues: defaultValues,
         resolver: schema ? zodResolver(schema) : undefined,
@@ -77,11 +92,76 @@ function ResponderEncuesta() {
         reset(defaultValues); 
     }, [defaultValues, reset]);
 
+    const autocompletarDemo = () => {
+        if (!encuestaRender || !encuestaRender.variables) return;
+        const valores: Record<string, any> = {};
+        const esPeriodoIA = encuestaRender.anio_inicio === 2029 && encuestaRender.anio_fin === 2032;
+        const totalVars = encuestaRender.variables.length;
+
+        encuestaRender.variables.forEach((variable: any, varIndex: number) => {
+            const esUltimaVariable = varIndex === totalVars - 1;
+            const esVariableIA = (variable.codigo || "").toString().toUpperCase() === "H";
+
+            variable.preguntas?.forEach((pregunta: any) => {
+                const fieldName = obtenerNombreCampo(pregunta.id);
+                const textoPregunta = (pregunta.texto_pregunta || "").toLowerCase();
+
+                // No responder preguntas de IA en encuestas 2025-2028
+                if (esVariableIA && !esPeriodoIA) {
+                    return;
+                }
+
+                if (pregunta.tipo === "open") {
+                    if (esVariableIA && esPeriodoIA) {
+                        valores[fieldName] =
+                            "Las herramientas de IA generativa fueron útiles para organizar ideas y resolver dudas. Siempre las contrasté con los apuntes de cátedra y considero fundamental recibir pautas claras sobre su uso ético.";
+                    } else if (esUltimaVariable || textoPregunta.includes("opinion") || textoPregunta.includes("sugerencia") || textoPregunta.includes("global")) {
+                        valores[fieldName] =
+                            "La asignatura fue muy clara, los contenidos prácticos ayudaron mucho y la evaluación fue acorde a lo trabajado en clase.";
+                    } else {
+                        valores[fieldName] =
+                            "Los contenidos fueron claros, bien organizados y resultaron útiles para el aprendizaje.";
+                    }
+                } else if (pregunta.tipo === "single_choice") {
+                    const opciones = pregunta.pregunta_opcion || [];
+                    if (opciones.length === 0) return;
+                    let opcionPreferida: any = null;
+                    if (esVariableIA && esPeriodoIA) {
+                        opcionPreferida =
+                            opciones.find((po: any) => po.opcion_respuesta?.valor >= 3) ||
+                            opciones[2] ||
+                            opciones[opciones.length - 1];
+                    } else {
+                        opcionPreferida =
+                            opciones.find((po: any) => po.opcion_respuesta?.valor >= 4) ||
+                            opciones[opciones.length - 2] ||
+                            opciones[opciones.length - 1];
+                    }
+                    if (opcionPreferida?.opcion_respuesta?.id) {
+                        valores[fieldName] = opcionPreferida.opcion_respuesta.id;
+                    } else if (opcionPreferida?.id_opcion_respuesta) {
+                        valores[fieldName] = opcionPreferida.id_opcion_respuesta;
+                    }
+                } else if (pregunta.tipo === "multiple_choice") {
+                    const opciones = pregunta.pregunta_opcion || [];
+                    if (opciones.length === 0) return;
+                    const opcion = opciones[0];
+                    if (opcion?.opcion_respuesta?.id) {
+                        valores[fieldName] = [opcion.opcion_respuesta.id];
+                    } else if (opcion?.id_opcion_respuesta) {
+                        valores[fieldName] = [opcion.id_opcion_respuesta];
+                    }
+                }
+            });
+        });
+        reset(valores);
+    };
+
     useEffect(() => {
-        if (encuesta && encuesta.variables && encuesta.variables.length > 0 && activeTab === null) {
-            setActiveTab(encuesta.variables[0].id.toString());
+        if (encuestaOrdenada && encuestaOrdenada.variables && encuestaOrdenada.variables.length > 0 && activeTab === null) {
+            setActiveTab(encuestaOrdenada.variables[0].id.toString());
         }
-    }, [encuesta, activeTab]);
+    }, [encuestaOrdenada, activeTab]);
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') {
@@ -108,26 +188,27 @@ function ResponderEncuesta() {
     };
 
     if (loading) return <Container className="py-4 text-center"><Spinner animation="border" /></Container>;
-    if (!encuesta || !encuesta.variables) return <Container className="py-4 text-center"><Alert variant="danger">Error al cargar.</Alert></Container>;
-    if (encuesta.variables.length === 0) return <Container className="py-4 text-center"><Alert variant="info">No hay preguntas.</Alert></Container>;
+    if (!encuestaOrdenada || !encuestaOrdenada.variables) return <Container className="py-4 text-center"><Alert variant="danger">Error al cargar.</Alert></Container>;
+    if (encuestaOrdenada.variables.length === 0) return <Container className="py-4 text-center"><Alert variant="info">No hay preguntas.</Alert></Container>;
     if (activeTab === null) return <Container className="py-4 text-center">Iniciando...</Container>;
 
-    const activeTabIndex = encuesta.variables.findIndex(v => v.id.toString() === activeTab);
-    const isLastTab = activeTabIndex === encuesta.variables.length - 1;
+    const encuestaRender = encuestaOrdenada;
+    const activeTabIndex = encuestaRender.variables.findIndex(v => v.id.toString() === activeTab);
+    const isLastTab = activeTabIndex === encuestaRender.variables.length - 1;
     
     if (activeTabIndex === -1) {
-        setActiveTab(encuesta.variables[0].id.toString());
+        setActiveTab(encuestaRender.variables[0].id.toString());
         return null;
     }
 
     const handlePrevious = (e: React.MouseEvent) => {
         e.preventDefault(); 
-        const previousTabKey = encuesta.variables[activeTabIndex - 1].id.toString();
+        const previousTabKey = encuestaRender.variables[activeTabIndex - 1].id.toString();
         setActiveTab(previousTabKey);
     };
 
     const validateCurrentTab = async () => {
-        const currentVariable = encuesta.variables[activeTabIndex];
+        const currentVariable = encuestaRender.variables[activeTabIndex];
         const fieldsToValidate = currentVariable.preguntas
             .filter(p => p.obligatoria && p.tipo === 'single_choice')
             .map(p => obtenerNombreCampo(p.id));
@@ -142,14 +223,14 @@ function ResponderEncuesta() {
         
         const isValid = await validateCurrentTab();
         if (isValid) {
-            const nextTabKey = encuesta.variables[activeTabIndex + 1].id.toString();
+            const nextTabKey = encuestaRender.variables[activeTabIndex + 1].id.toString();
             setActiveTab(nextTabKey);
         }
     };
 
     const handleTabSelect = async (key: string | null) => {
         if (key === null || key === activeTab) return;
-        const newTabIndex = encuesta.variables.findIndex(v => v.id.toString() === key);
+        const newTabIndex = encuestaRender.variables.findIndex(v => v.id.toString() === key);
         
         if (newTabIndex < activeTabIndex) {
             setActiveTab(key);
@@ -175,13 +256,26 @@ function ResponderEncuesta() {
           <Row>
             <Col md={8} className="mx-auto">
               <Card className="border rounded shadow-sm bg-white">
-                <Card.Header as="h4" className="bg-primary text-white text-center">
-                                    {asignatura?.nombre}
-                                    {encuesta.anio_inicio != null && encuesta.anio_fin != null && (
-                                        <div className="small fw-normal mt-1">
-                                            Periodo: {encuesta.anio_inicio} - {encuesta.anio_fin}
-                                        </div>
-                                    )}
+                <Card.Header className="bg-primary text-white">
+                  <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div className="text-center flex-grow-1">
+                      <h4 className="mb-0">{asignatura?.nombre}</h4>
+                      {encuestaRender.anio_inicio != null && encuestaRender.anio_fin != null && (
+                        <div className="small fw-normal mt-1">
+                          Periodo: {encuestaRender.anio_inicio} - {encuestaRender.anio_fin}
+                        </div>
+                      )}
+                    </div>
+                    <Button
+                      variant="outline-light"
+                      size="sm"
+                      onClick={autocompletarDemo}
+                      type="button"
+                      className="text-nowrap"
+                    >
+                       Autocompletar Demo
+                    </Button>
+                  </div>
                 </Card.Header>
                 <Card.Body className="p-4">
                   <Form onSubmit={handleSubmit(onSubmit)} onKeyDown={handleKeyDown}> 
@@ -194,7 +288,7 @@ function ResponderEncuesta() {
                       id="variable-tabs"
                       className="mb-3"
                     >
-                      {encuesta.variables.map(variable => (
+                      {encuestaRender.variables.map(variable => (
                         <Tab
                           key={variable.id}
                           eventKey={variable.id.toString()} 

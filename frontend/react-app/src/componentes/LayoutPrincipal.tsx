@@ -4,6 +4,7 @@ import "../styles/Layout.css";
 import logoUnpsjb from "../assets/escudo_tranparente_sinletras.png";
 import { useAuth } from "../context/AuthContext";
 import UserMenu from "../componentes/UserMenu";
+import TimeTravelSelector from "../componentes/TimeTravelSelector";
 
 type NavLinkItem = {
   to: string;
@@ -82,7 +83,8 @@ export default function LayoutPrincipal({ links, requiredRole }: Props) {
             ))}
           </Nav>
 
-          <div className="ms-auto me-3">
+          <div className="ms-auto me-3 d-flex align-items-center">
+            <TimeTravelSelector />
             <UserMenu />
           </div>
         </Navbar.Collapse>

@@ -5,6 +5,8 @@ import LayoutHome from "./componentes/LayoutHome.tsx";
 import LayoutAlumno from "./componentes/LayoutAlumno.tsx";
 import LayoutDocente from "./componentes/LayoutDocente.tsx";
 import LayoutDepartamento from "./componentes/LayoutDepartamento.tsx";
+import LayoutAdmin from "./componentes/LayoutAdmin.tsx";
+import AdminHome from "./paginas/admin/AdminHome.tsx";
 import EncuestasPendientes from "./paginas/EncuestasPendientes.tsx";
 import Encuesta from "./paginas/ResponderEncuesta.tsx";
 import Reporte from "./paginas/Reporte.tsx";
@@ -95,6 +97,11 @@ function App() {
         />
 
         <Route path="estadisticas" element={<EstadisticasDepartamentoPage />} />
+      </Route>
+
+      {/* 👉 ADMINISTRADOR */}
+      <Route path="/admin" element={<LayoutAdmin />}>
+        <Route index element={<AdminHome />} />
       </Route>
     </Routes>
   );

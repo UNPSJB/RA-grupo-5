@@ -30,6 +30,7 @@ from src.estadisticas.router import router as estadisticas_router
 from src.cursadas.router import router as cursadas_router
 from src.seguridad.router import router as seguridad_router
 from src.auth.router import router as auth_router
+from src.config.router import router as config_router
 from src.seguridad.services import SeguridadService
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -109,3 +110,4 @@ app.include_router(carreras_router)
 app.include_router(informe_sintetico_carrera_router)
 app.include_router(estadisticas_router)
 app.include_router(cursadas_router)
+app.include_router(config_router)

@@ -88,7 +88,7 @@ const DonutManual = ({ data }: { data: { label: string; valor: number }[] }) => 
 
 export default function EstadisticasDepartamentoPage() {
   // Filtros
-  const [ciclo, setCiclo] = useState(2025);
+  const [ciclo, setCiclo] = useState(2026);
   const [cuatrimestre, setCuatrimestre] = useState("todos");
   // Estado para los botones de Ciclo (Básico / Superior)
   const [nivel, setNivel] = useState("todos"); 
@@ -163,7 +163,9 @@ export default function EstadisticasDepartamentoPage() {
             {/* Filtro Año */}
             <Form.Group>
                 <Form.Label className="small text-muted fw-bold mb-1">Año</Form.Label>
-                <Form.Select size="sm" value={ciclo} onChange={(e) => setCiclo(Number(e.target.value))} style={{width: '90px'}}>
+                <Form.Select size="sm" value={ciclo} onChange={(e) => setCiclo(Number(e.target.value))} style={{width: '145px'}}>
+                    <option value={2029}>2029 (V2 - IA)</option>
+                    <option value={2026}>2026 (V1)</option>
                     <option value={2025}>2025</option>
                     <option value={2024}>2024</option>
                 </Form.Select>

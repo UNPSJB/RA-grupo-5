@@ -1,3 +1,5 @@
+import sys, os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from datetime import date
 
 import src.main  # noqa: F401 - registra todos los modelos SQLAlchemy
@@ -183,6 +185,11 @@ def main():
         add_demo_response(db, alumno.id, historica)
         get_or_create_reporte(db, respondida.id)
         get_or_create_reporte(db, historica.id)
+        try:
+            from scripts.seed_version_2029 import poblar_version_2029
+            poblar_version_2029(db)
+        except Exception as e:
+            print(e)
 
         db.commit()
         print("Datos demo creados o actualizados correctamente.")

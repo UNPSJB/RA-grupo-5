@@ -1,8 +1,9 @@
-from typing import List
+from typing import List, Optional
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session, joinedload
 from src.encuestas_base.models import EncuestaBase
 from src.encuestas_base import schemas, exceptions
+from src.config.services import get_current_system_year
 
 
 # CRUD:
@@ -17,6 +18,7 @@ def crear_encuesta_base(db: Session, encuesta: schemas.EncuestaBaseCreate) -> sc
     db.commit()
     db.refresh(_encuestabase)
     return _encuestabase
+
 
 def leer_encuesta_base(db: Session, encuesta_base_id: int)-> schemas.EncuestaBaseRead:
     db_encuesta_base = db.scalar(select(EncuestaBase).where(EncuestaBase.id == encuesta_base_id))
@@ -40,11 +42,16 @@ def eliminar_encuesta_base(db: Session, encuesta_base_id: int) -> dict:
     db.commit()
     return {"message": f"Encuesta base eliminada"}
 
-def obtener_encuesta_base_vigente(db: Session, ciclo_lectivo: int, ciclo_tipo: str):
+
+def obtener_encuesta_base_vigente(db: Session, ciclo_lectivo: Optional[int] = None, ciclo_tipo: str = "ciclo basico"):
     """
     Busca la EncuestaBase que esté vigente para el año del ciclo lectivo 
     y el ciclo correspondiente (básico/superior).
+    Si no se especifica ciclo_lectivo, utiliza el año simulado actual del sistema.
     """
+    if ciclo_lectivo is None:
+        ciclo_lectivo = get_current_system_year()
+
     encuesta_base = (
         db.query(EncuestaBase)
         .filter(
@@ -59,5 +66,3 @@ def obtener_encuesta_base_vigente(db: Session, ciclo_lectivo: int, ciclo_tipo: s
         raise ValueError(f"No existe una encuesta base configurada para el ciclo {ciclo_tipo} en el año {ciclo_lectivo}")
         
     return encuesta_base
-
-

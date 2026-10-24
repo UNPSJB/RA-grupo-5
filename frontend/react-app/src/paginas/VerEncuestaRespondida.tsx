@@ -100,11 +100,22 @@ export default function VerEncuesta() {
         }
 
         setAsignatura(dataAsig.asignatura);
-        setEncuesta(dataBase);
+        const variablesOrdenadas = dataBase.variables
+          ? [...dataBase.variables].sort((a: any, b: any) => {
+              const codigoA = (a.codigo || "").toString().toUpperCase();
+              const codigoB = (b.codigo || "").toString().toUpperCase();
+              if (codigoA === "H") return 1;
+              if (codigoB === "H") return -1;
+              if (codigoA < codigoB) return -1;
+              if (codigoA > codigoB) return 1;
+              return 0;
+            })
+          : [];
+        setEncuesta({ ...dataBase, variables: variablesOrdenadas });
         reset(valoresIniciales);
 
-        if (dataBase.variables && dataBase.variables.length > 0) {
-          setActiveTab(dataBase.variables[0].id.toString());
+        if (variablesOrdenadas.length > 0) {
+          setActiveTab(variablesOrdenadas[0].id.toString());
         }
       } catch (err: any) {
         setError(err.message);
