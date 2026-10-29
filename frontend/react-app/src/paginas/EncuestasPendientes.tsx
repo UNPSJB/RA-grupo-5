@@ -14,6 +14,7 @@ import {
   Button
 } from "react-bootstrap";
 import { getRangoFechasEncuesta } from "../calendarioAcademico";
+import EmptyState from "../componentes/EmptyState";
 
 export default function EncuestasPendientes() {
   // 1. Desestructuramos la nueva propiedad 'encuestasPendientes'
@@ -23,7 +24,7 @@ export default function EncuestasPendientes() {
   const [filterCarrera, setFilterCarrera] = useState("all");
   const [filterAnio, setFilterAnio] = useState("all");
   const [filterCuatri, setFilterCuatri] = useState("all");
-  const [sortOrder, setSortOrder] = useState("desc");
+  const [sortOrder, setSortOrder] = useState("asc");
 
   // 1. Base: SOLO encuestas PENDIENTES (abiertas)
   const pendientesBase = useMemo(() => {
@@ -43,7 +44,7 @@ export default function EncuestasPendientes() {
 
   const aniosDisponibles = useMemo(() => {
     const years = new Set(pendientesBase.map(e => e.ciclo_lectivo));
-    return Array.from(years).sort((a, b) => b - a);
+    return Array.from(years).sort((a, b) => a - b);
   }, [pendientesBase]);
 
   // 3. Filtrado y Ordenamiento
@@ -121,6 +122,8 @@ export default function EncuestasPendientes() {
               <h5 className="mb-0 fw-normal">
                 Encuestas Pendientes
                 <Badge bg="light" text="primary" pill className="ms-2 fs-6 align-middle"> 
+                  <span className="status-dot status-dot-primary" />
+                  {itemsProcesados.length}
                 </Badge>
               </h5>
             </Card.Header>
@@ -194,8 +197,12 @@ export default function EncuestasPendientes() {
             
             <ListGroup variant="flush">
               {itemsProcesados.length === 0 ? (
-                <ListGroup.Item className="text-muted text-center py-3">
-                   No hay encuestas pendientes.
+                <ListGroup.Item className="p-0 border-0 bg-transparent">
+                  <EmptyState
+                    icon="bi-clipboard-check"
+                    title="No hay encuestas pendientes"
+                    message="No hay elementos pendientes en este momento. ¡Buen trabajo! Podés volver más tarde para ver nuevas encuestas."
+                  />
                 </ListGroup.Item>
               ) : (
                 itemsProcesados.map(encuesta => {
@@ -207,10 +214,14 @@ export default function EncuestasPendientes() {
                   return (
                     <ListGroup.Item
                       key={encuesta.id}
-                      className="d-flex align-items-start"
+                      className="d-flex align-items-start hover-lift"
                     > 
                       <div className="me-3 flex-grow-1 text-start">
                         <span className="fw-bold fs-5">{encuesta.asignatura?.nombre}</span>
+                        <Badge bg="success" pill className="ms-2 align-middle">
+                          <span className="status-dot status-dot-light" />
+                          Abierta
+                        </Badge>
                         
                         <span className="text-danger fw-bold ms-3" style={{ fontSize: '0.9rem' }}>
                           <i className="bi bi-clock-history me-1"></i>

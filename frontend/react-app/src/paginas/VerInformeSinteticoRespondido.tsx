@@ -9,7 +9,6 @@ import {
   Tab,
   Alert,
   Button,
-  Row,
   Spinner,
 } from "react-bootstrap";
 import type { InformeSinteticoCarrera } from "../types/InformeSintetico";

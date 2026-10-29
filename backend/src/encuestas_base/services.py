@@ -9,7 +9,9 @@ from src.config.services import get_current_system_year
 # CRUD:
 
 def listar_encuestas_base(db:Session) -> List[schemas.EncuestaBaseRead]:
-    return db.scalars(select(EncuestaBase)).all()
+    return db.scalars(
+        select(EncuestaBase).order_by(EncuestaBase.id.asc())
+    ).all()
 
 
 def crear_encuesta_base(db: Session, encuesta: schemas.EncuestaBaseCreate) -> schemas.EncuestaBaseRead:

@@ -18,4 +18,6 @@ def crear_pregunta_opcion(
     return _opcion
 
 def listar_pregunta_opcion(db: Session) -> List[PreguntaOpcion]:
-    return db.scalars(select(PreguntaOpcion)).all()
+    return db.scalars(
+        select(PreguntaOpcion).order_by(PreguntaOpcion.id.asc())
+    ).all()

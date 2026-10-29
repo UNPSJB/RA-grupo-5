@@ -1,7 +1,12 @@
 import LayoutPrincipal from "../componentes/LayoutPrincipal";
 
 const docenteLinks = [
-  { to: "/docente/reportes", label: "Listado de reportes disponibles" },
+  {
+    to: "/docente/reportes",
+    label: "Listado de reportes disponibles",
+    defaultFor: ["/docente"],
+    activePrefixes: ["/docente/nuevo-informe", "/docente/estadisticas"],
+  },
   {
     to: "/docente/informes-curriculares-respondidos",
     label: "Mis Informes Enviados",

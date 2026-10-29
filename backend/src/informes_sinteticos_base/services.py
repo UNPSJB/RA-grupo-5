@@ -16,7 +16,11 @@ def crear_informe_sintetico(db: Session, informe: schemas.InformeSinteticoBaseCr
     return _informe
 
 def listar_informes_sinteticos(db: Session) -> List[models.InformeSinteticoBase]:
-    return db.scalars(select(models.InformeSinteticoBase)).all()
+    return db.scalars(
+        select(models.InformeSinteticoBase).order_by(
+            models.InformeSinteticoBase.id.asc()
+        )
+    ).all()
 
 def leer_informe_sintetico(db: Session, informe_id: int) -> models.InformeSinteticoBase:
     db_informe = db.scalar(

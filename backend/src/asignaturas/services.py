@@ -8,7 +8,7 @@ from src.asignaturas import schemas
 # CRUD:
 
 def listar_asignaturas(db:Session) -> List[schemas.AsignaturaRead]:
-    return db.scalars(select(Asignatura)).all()
+    return db.scalars(select(Asignatura).order_by(Asignatura.id.asc())).all()
 
 
 def crear_asignatura(db: Session, asignatura: schemas.AsignaturaCreate) -> schemas.AsignaturaRead:

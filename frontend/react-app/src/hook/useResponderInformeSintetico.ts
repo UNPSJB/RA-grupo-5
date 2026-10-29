@@ -19,7 +19,7 @@ export function useResponderInformeSintetico() {
   );
 
   const guardarRespuestaSintetico = useCallback(
-    async (idPersona: number, idInformeSinteticoCarrera: number) => {
+    async (idInformeSinteticoCarrera: number) => {
       const detalles = Object.entries(answersByPreguntaOpcion).map(
         ([id_pregunta_opcion_str, texto_respuesta_abierta]) => ({
           id_pregunta_opcion: Number(id_pregunta_opcion_str),
@@ -27,8 +27,8 @@ export function useResponderInformeSintetico() {
         })
       );
 
+      // El backend toma la persona autenticada desde el token.
       const payload = {
-        id_persona: idPersona,
         id_informe_sintetico_carrera: idInformeSinteticoCarrera,
         detalles,
       };

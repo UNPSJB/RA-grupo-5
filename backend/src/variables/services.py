@@ -14,7 +14,7 @@ def crear_variable(db: Session, variable: schemas.VariableCreate) -> Variable:
 
 
 def listar_variables(db: Session) -> List[Variable]:
-    return db.scalars(select(Variable)).all()
+    return db.scalars(select(Variable).order_by(Variable.id.asc())).all()
 
 
 def leer_variable(db: Session, variable_id: int) -> Variable:

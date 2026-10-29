@@ -17,7 +17,7 @@ from src.respuestas.models import Respuesta
 from src.cursadas.models import Cursada
 from src.encuestas_asignaturas import schemas
 from datetime import date
-from src.config.services import get_current_system_date
+from src.config.services import get_current_system_date, get_current_system_year
 
 def _get_eager_loading_query():
     return select(EncuestaAsignatura).options(
@@ -41,6 +41,7 @@ def listar_encuestas_asignaturas(db: Session):
             joinedload(EncuestaAsignatura.asignatura),
             joinedload(EncuestaAsignatura.encuesta_base)
         )
+        .order_by(EncuestaAsignatura.id.asc())
         .all()
     )
     
@@ -51,6 +52,7 @@ def listar_encuestas_asignaturas_cortas(db:Session):
             joinedload(EncuestaAsignatura.asignatura),
             joinedload(EncuestaAsignatura.encuesta_base)
         )
+        .order_by(EncuestaAsignatura.id.asc())
         .all()
     )
 
@@ -93,6 +95,43 @@ def leer_encuesta_asignatura(db: Session, encuesta_id: int) -> EncuestaAsignatur
         raise HTTPException(status_code=404, detail="Encuesta no encontrada")
     return db_encuesta
 
+
+def encuesta_respondida_por_persona(
+    db: Session, persona_id: int, encuesta_id: int
+) -> bool:
+    return (
+        db.scalar(
+            select(Respuesta.id)
+            .where(
+                Respuesta.id_persona == persona_id,
+                Respuesta.id_encuesta_asignatura == encuesta_id,
+            )
+            .limit(1)
+        )
+        is not None
+    )
+
+
+def validar_periodo_encuesta(encuesta: EncuestaAsignatura) -> None:
+    """Valida la encuesta contra el año simulado activo."""
+    anio_actual = get_current_system_year()
+    base = encuesta.encuesta_base
+    anio_inicio = (
+        base.anio_inicio if base and base.anio_inicio else encuesta.ciclo_lectivo
+    )
+    anio_fin = base.anio_fin if base and base.anio_fin else encuesta.ciclo_lectivo
+
+    if anio_actual < anio_inicio:
+        raise HTTPException(
+            status_code=400,
+            detail="Esta encuesta no se encuentra en período vigente",
+        )
+    if anio_actual > anio_fin:
+        raise HTTPException(
+            status_code=400,
+            detail="El plazo de este período lectivo ha finalizado",
+        )
+
 def listar_encuestas_respondidas_alumno(db: Session, persona_id: int) -> List[EncuestaAsignatura]:
     query = (
         db.query(EncuestaAsignatura)
@@ -102,6 +141,7 @@ def listar_encuestas_respondidas_alumno(db: Session, persona_id: int) -> List[En
             joinedload(EncuestaAsignatura.asignatura),
             joinedload(EncuestaAsignatura.encuesta_base)
         )
+        .order_by(EncuestaAsignatura.id.asc())
     )
     return query.all()
 
@@ -162,6 +202,7 @@ def listar_encuestas_pendientes_alumno(db: Session, persona_id: int) -> List[Enc
             # C) Que NO esté en la lista de respondidas
             EncuestaAsignatura.id.not_in(subquery_respondidas)
         )
+        .order_by(EncuestaAsignatura.id.asc())
     )
     resultados = db.scalars(query).unique().all()
     for encuesta in resultados:

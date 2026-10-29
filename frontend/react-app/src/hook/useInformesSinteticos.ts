@@ -1,5 +1,9 @@
 import { useState, useCallback, useEffect } from "react";
 import { apiFetch } from "../api/client"; // 👈 usamos tu helper
+import {
+  obtenerAniosCicloValidos,
+  parseCicloLectivo,
+} from "../helpers/ciclosLectivos";
 
 export interface InformeSinteticoCarreraPayload {
   ciclo_lectivo: string;
@@ -35,11 +39,13 @@ export function useInformesSinteticos() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [resCarreras, resCurriculares, resSinteticos] = await Promise.all([
+        const [resCarreras, resCurriculares, resSinteticos, aniosCicloValidos] =
+          await Promise.all([
             apiFetch("/carreras"),
             apiFetch("/informes-asignaturas"),
             apiFetch("/informe-sintetico-carrera"),
-        ]);
+            obtenerAniosCicloValidos().catch(() => new Set<number>()),
+          ]);
 
         if (!resCarreras.ok || !resCurriculares.ok || !resSinteticos.ok) {
           throw new Error("Error al cargar datos");
@@ -55,6 +61,10 @@ export function useInformesSinteticos() {
 
         curriculares.forEach((inf: any) => {
             if(!inf.asignatura?.carrera?.id) return;
+
+            const ciclo = parseCicloLectivo(inf.ciclo_lectivo);
+            if (ciclo === null) return;
+            if (aniosCicloValidos.size > 0 && !aniosCicloValidos.has(ciclo)) return;
             
             const cursado = inf.asignatura.cursado;
             const cuatrimestreStr = 
@@ -63,11 +73,11 @@ export function useInformesSinteticos() {
                 cursado === "anual" ? "2° cuatrimestre" : null; // Asumimos anual en el 2do
 
             if(cuatrimestreStr) {
-                const key = `${inf.asignatura.carrera.id}-${inf.ciclo_lectivo}-${cuatrimestreStr}`;
+                const key = `${inf.asignatura.carrera.id}-${ciclo}-${cuatrimestreStr}`;
                 if (!combinaciones.has(key)) {
                     combinaciones.set(key, {
                         carreraId: inf.asignatura.carrera.id,
-                        ciclo: Number(inf.ciclo_lectivo),
+                        ciclo,
                         cuatrimestreStr
                     });
                 }
@@ -83,6 +93,9 @@ export function useInformesSinteticos() {
 
             // Filtrar curriculares para este combo
             const informesPorCarrera = curriculares.filter((informe: any) => {
+                const ciclo = parseCicloLectivo(informe.ciclo_lectivo);
+                if (ciclo !== combo.ciclo) return false;
+
                 const cursado = informe.asignatura?.cursado;
                 const etiqueta = 
                     cursado === "cuatrimestre 1" ? "1° cuatrimestre" :
@@ -91,7 +104,6 @@ export function useInformesSinteticos() {
                 
                 return (
                     informe.asignatura?.carrera?.id === combo.carreraId &&
-                    Number(informe.ciclo_lectivo) === combo.ciclo &&
                     etiqueta === combo.cuatrimestreStr
                 );
             });
@@ -100,6 +112,9 @@ export function useInformesSinteticos() {
 
             // Buscar si ya existe sintético
             const sintetico = sinteticos.find((s: any) => {
+                const cicloSintetico = parseCicloLectivo(s.ciclo_lectivo);
+                if (cicloSintetico !== combo.ciclo) return false;
+
                 // Mismo criterio de búsqueda que tenías, pero adaptado
                 const primerHijo = s.informes_asignaturas?.[0];
                 const cursadoSint = primerHijo?.asignatura?.cursado;
@@ -110,9 +125,8 @@ export function useInformesSinteticos() {
 
                 return (
                     Number(s.carrera?.id) === Number(combo.carreraId) &&
-                    Number(s.ciclo_lectivo) === Number(combo.ciclo) &&
                     etiquetaSint === combo.cuatrimestreStr &&
-                    s.respuesta !== null
+                    s.respuesta != null
                 );
             });
 
@@ -128,8 +142,8 @@ export function useInformesSinteticos() {
             });
         });
 
-        // Ordenar por defecto (más reciente primero)
-        listaResumenes.sort((a, b) => b.ciclo - a.ciclo);
+        // Ordenar por defecto (más antiguo primero)
+        listaResumenes.sort((a, b) => a.ciclo - b.ciclo);
 
         setResumenes(listaResumenes);
       } catch (err: any) {

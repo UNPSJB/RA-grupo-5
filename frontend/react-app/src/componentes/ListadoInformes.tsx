@@ -1,6 +1,7 @@
 import Table from "react-bootstrap/Table";
 import { InformeItem } from "./InformeItem";
 import type { Props as InformeProps } from "./InformeItem";
+import EmptyState from "./EmptyState";
 
 type Props = {
   informes: InformeProps[];
@@ -21,8 +22,12 @@ export function ListadoDeInformes({ informes }: Props) {
       <tbody>
         {informes.length === 0 ? (
           <tr>
-            <td colSpan={5} className="text-muted text-center">
-              No hay informes disponibles.
+            <td colSpan={5} className="p-0">
+              <EmptyState
+                icon="bi-inbox"
+                title="No hay informes disponibles"
+                message="Cuando se generen informes, aparecerán listados en esta tabla."
+              />
             </td>
           </tr>
         ) : (

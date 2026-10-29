@@ -5,7 +5,9 @@ from src.detalle_respuesta.models import DetalleRespuesta
 from src.detalle_respuesta import schemas
 
 def listar_detalle_respuestas(db: Session) -> List[DetalleRespuesta]:
-    return db.scalars(select(DetalleRespuesta)).all()   
+    return db.scalars(
+        select(DetalleRespuesta).order_by(DetalleRespuesta.id.asc())
+    ).all()
 
 def leer_detalle_respuesta(db: Session, detalle_respuesta_id: int) -> DetalleRespuesta:
     db_detalle_respuesta = db.scalar(select(DetalleRespuesta).where(DetalleRespuesta.id == detalle_respuesta_id))

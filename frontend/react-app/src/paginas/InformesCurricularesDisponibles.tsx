@@ -14,6 +14,7 @@ import {
   Form,
   Button
 } from "react-bootstrap";
+import EmptyState from "../componentes/EmptyState";
 
 export default function InformesCurricularesDisponibles() {
   const { informesCurriculares, loading, error } = useInformesCurriculares();
@@ -22,7 +23,7 @@ export default function InformesCurricularesDisponibles() {
   const [filterCarrera, setFilterCarrera] = useState("all");
   const [filterAnio, setFilterAnio] = useState("all");
   const [filterCuatri, setFilterCuatri] = useState("all");
-  const [sortOrder, setSortOrder] = useState("desc");
+  const [sortOrder, setSortOrder] = useState("asc");
   const [periodosPorInforme, setPeriodosPorInforme] = useState<Record<number, string | null>>({});
 
   // 1. Obtener la base: SOLO informes CERRADOS
@@ -57,7 +58,7 @@ export default function InformesCurricularesDisponibles() {
 
   const aniosDisponibles = useMemo(() => {
     const years = new Set(cerradosBase.map(r => r.ciclo_lectivo));
-    return Array.from(years).sort((a, b) => b - a);
+    return Array.from(years).sort((a, b) => a - b);
   }, [cerradosBase]);
 
   // 3. Filtrado y Ordenamiento
@@ -225,14 +226,18 @@ export default function InformesCurricularesDisponibles() {
 
             <ListGroup variant="flush">
               {itemsProcesados.length === 0 ? (
-                <ListGroup.Item className="text-muted text-center py-3">
-                  No hay informes cerrados que coincidan con los filtros.
+                <ListGroup.Item className="p-0 border-0 bg-transparent">
+                  <EmptyState
+                    icon="bi-folder2-open"
+                    title="No hay informes cerrados"
+                    message="No hay informes cerrados que coincidan con los filtros seleccionados. Probá ampliando los criterios de búsqueda."
+                  />
                 </ListGroup.Item>
               ) : (
                 itemsProcesados.map(informe => (
                   <ListGroup.Item 
                     key={informe.id} 
-                    className="d-flex align-items-start"
+                    className="d-flex align-items-start hover-lift"
                   >
                     <div className="me-3 flex-grow-1 text-start">
                       <span className="fw fs-5">{informe.asignatura?.nombre}</span>
@@ -243,6 +248,10 @@ export default function InformesCurricularesDisponibles() {
                       <small className="text-muted">
                         {`Ciclo lectivo: ${informe.ciclo_lectivo} | Cursado: ${informe.asignatura.cursado}` }
                       </small>
+                      <br />
+                      <small className="text-muted">
+                        {`Carrera: ${informe.asignatura?.carrera?.nombre} ` }
+                      </small>
                       {periodosPorInforme[informe.id] && (
                         <div className="mt-2">
                           <Badge bg="light" text="dark" className="border fw-semibold">
@@ -250,10 +259,6 @@ export default function InformesCurricularesDisponibles() {
                           </Badge>
                         </div>
                       )}
-                      <br />
-                      <small className="text-muted">
-                        {`Carrera: ${informe.asignatura?.carrera?.nombre} ` }
-                      </small>
                     </div>
                     <Link 
                       to={`/departamento/informes/${informe.id}`} 

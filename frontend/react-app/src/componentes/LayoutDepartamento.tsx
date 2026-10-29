@@ -2,7 +2,11 @@ import LayoutPrincipal from "../componentes/LayoutPrincipal";
 
 const departamentoLinks = [
   { to: "/departamento/informes", label: "Informes curriculares" },
-  { to: "/departamento/informes-sinteticos", label: "Informes sintéticos" },
+  {
+    to: "/departamento/informes-sinteticos",
+    label: "Informes sintéticos",
+    defaultFor: ["/departamento"],
+  },
   { to: "/departamento/estadisticas", label: "Estadísticas" },
   {
     to: "/departamento/informes-sinteticos-respondidos",

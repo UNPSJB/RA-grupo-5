@@ -59,9 +59,10 @@ export default function LoginPage() {
 
       login(token, roles, userName);
 
-      if (roles.includes("docente")) navigate("/docente");
-      else if (roles.includes("alumno")) navigate("/alumno");
-      else if (roles.includes("departamento")) navigate("/departamento");
+      if (roles.includes("docente")) navigate("/docente/reportes");
+      else if (roles.includes("alumno")) navigate("/alumno/encuestas-pendientes");
+      else if (roles.includes("departamento"))
+        navigate("/departamento/informes-sinteticos");
       else navigate("/");
     } catch (err) {
       console.error(err);

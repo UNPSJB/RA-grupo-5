@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { Alert, Fade } from 'react-bootstrap'; 
+import { lanzarConfeti } from '../helpers/confetti';
 
 interface Props {
     show: boolean;
@@ -9,7 +11,13 @@ interface Props {
 }
 
 export default function AlertaFlotante({ show, variant, message, onClose, onExited }: Props) {
-    
+    // Disparo de confeti no invasivo al confirmar una acción exitosa.
+    useEffect(() => {
+        if (show && variant === 'success') {
+            lanzarConfeti();
+        }
+    }, [show, variant]);
+
     return (
         <div 
             className="position-fixed top-0 start-50 translate-middle-x mt-4" 

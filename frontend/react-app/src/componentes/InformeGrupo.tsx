@@ -1,6 +1,7 @@
 import Accordion from "react-bootstrap/Accordion";
 import Table from "react-bootstrap/Table";
 import { InformeItem } from "./InformeItem";
+import EmptyState from "./EmptyState";
 
 type Props = {
   titulo: string;
@@ -33,8 +34,12 @@ export function InformeGrupo({ titulo, eventKey, informes }: Props) {
           <tbody>
             {informes.length === 0 ? (
               <tr>
-                <td colSpan={5} className="text-muted text-center">
-                  No hay informes en esta categoría.
+                <td colSpan={5} className="p-0">
+                  <EmptyState
+                    icon="bi-inbox"
+                    title="Sin informes en esta categoría"
+                    message="No hay informes para mostrar dentro de esta categoría."
+                  />
                 </td>
               </tr>
             ) : (

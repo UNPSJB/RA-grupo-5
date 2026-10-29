@@ -14,22 +14,8 @@ import {
 } from "react-bootstrap";
 import type { InformeSinteticoCarrera } from "../types/InformeSintetico";
 import apiFetch from "../api/client";
-
-// Helper para obtener persona_id desde el JWT
-function getPersonaIdFromToken(): number | null {
-  const token = localStorage.getItem("token");
-  if (!token) return null;
-
-  try {
-    const payloadBase64 = token.split(".")[1];
-    const payloadJson = atob(payloadBase64);
-    const payload = JSON.parse(payloadJson);
-    return typeof payload.persona_id === "number" ? payload.persona_id : null;
-  } catch (e) {
-    console.error("No se pudo decodificar el token JWT", e);
-    return null;
-  }
-}
+import EmptyState from "../componentes/EmptyState";
+import { obtenerPeriodosEncuestaPorAnio } from "../helpers/respondVersion";
 
 export default function InformesSinteticosRespondidos() {
   const [informes, setInformes] = useState<InformeSinteticoCarrera[]>([]);
@@ -40,26 +26,20 @@ export default function InformesSinteticosRespondidos() {
   const [filterCarrera, setFilterCarrera] = useState("all");
   const [filterAnio, setFilterAnio] = useState("all");
   const [filterCuatri, setFilterCuatri] = useState("all");
-  const [sortOrder, setSortOrder] = useState("desc");
+  const [sortOrder, setSortOrder] = useState("asc");
+  const [periodosPorAnio, setPeriodosPorAnio] = useState<Record<number, string[]>>({});
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
 
-        const personaId = getPersonaIdFromToken();
-        if (personaId == null) {
-          throw new Error(
-            "No se pudo determinar el usuario de departamento a partir del token"
-          );
-        }
-
-        const res = await apiFetch(
-          `/informe-sintetico-carrera/departamento/${personaId}`
-        );
+        // El backend resuelve la persona desde el token y devuelve únicamente
+        // los informes que esa persona envió.
+        const res = await apiFetch("/informe-sintetico-carrera/mis-enviados");
 
         if (!res.ok)
-          throw new Error("Error al cargar informes sintéticos respondidos");
+          throw new Error("Error al cargar informes sintéticos enviados");
 
         const data = await res.json();
         setInformes(data);
@@ -72,6 +52,29 @@ export default function InformesSinteticosRespondidos() {
     };
     fetchData();
   }, []);
+
+  // Períodos válidos por ciclo, solo para mostrar el badge informativo al final.
+  useEffect(() => {
+    const years = Array.from(
+      new Set(
+        informes
+          .map((informe) => Number(informe.ciclo_lectivo))
+          .filter((year) => Number.isFinite(year))
+      )
+    );
+    if (years.length === 0) {
+      setPeriodosPorAnio({});
+      return;
+    }
+
+    Promise.all(
+      years.map(
+        async (year) => [year, await obtenerPeriodosEncuestaPorAnio(year)] as const
+      )
+    )
+      .then((entries) => setPeriodosPorAnio(Object.fromEntries(entries)))
+      .catch(() => setPeriodosPorAnio({}));
+  }, [informes]);
 
   const getCuatrimestre = (informe: InformeSinteticoCarrera) => {
     return informe.informes_asignaturas?.[0]?.asignatura?.cursado || "";
@@ -89,7 +92,7 @@ export default function InformesSinteticosRespondidos() {
 
   const aniosDisponibles = useMemo(() => {
     const years = new Set(informes.map(i => i.ciclo_lectivo));
-    return Array.from(years).sort((a, b) => Number(b) - Number(a));
+    return Array.from(years).sort((a, b) => Number(a) - Number(b));
   }, [informes]);
 
   //  FILTRADO Y ORDENAMIENTO
@@ -252,8 +255,12 @@ export default function InformesSinteticosRespondidos() {
 
             <ListGroup variant="flush">
               {itemsProcesados.length === 0 ? (
-                <ListGroup.Item className="text-muted text-center py-3">
-                  No has enviado ningún informe sintético que coincida con los filtros.
+                <ListGroup.Item className="p-0 border-0 bg-transparent">
+                  <EmptyState
+                    icon="bi-send-check"
+                    title="Todavía no enviaste informes"
+                    message="No has enviado ningún informe sintético que coincida con los filtros. Cuando generes uno, aparecerá en este historial."
+                  />
                 </ListGroup.Item>
               ) : (
                 itemsProcesados.map((informe) => {
@@ -262,7 +269,7 @@ export default function InformesSinteticosRespondidos() {
                   return (
                     <ListGroup.Item
                       key={informe.id}
-                      className="d-flex align-items-start"
+                      className="d-flex align-items-start hover-lift"
                     >
                       <div className="me-3 flex-grow-1 text-start">
                         <span className="fw fs-5">
@@ -280,6 +287,13 @@ export default function InformesSinteticosRespondidos() {
                         <small className="text-muted">
                           {`Ciclo lectivo: ${informe.ciclo_lectivo} | Cursado: ${cuatrimestre}`}
                         </small>
+                        {periodosPorAnio[Number(informe.ciclo_lectivo)]?.length > 0 && (
+                          <div className="mt-2">
+                            <Badge bg="light" text="dark" className="border fw-semibold">
+                              Periodo: {periodosPorAnio[Number(informe.ciclo_lectivo)].join(" | ")}
+                            </Badge>
+                          </div>
+                        )}
                       </div>
 
                       <Link

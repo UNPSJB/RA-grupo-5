@@ -15,7 +15,7 @@ def crear_cursada(db: Session, cursada: schemas.CursadaCreate) -> Cursada:
     return _cursada
 
 def listar_cursadas(db: Session) -> List[Cursada]:
-    return db.scalars(select(Cursada)).all()
+    return db.scalars(select(Cursada).order_by(Cursada.id.asc())).all()
 
 
 def leer_cursada(db: Session, cursada_id: int) -> Cursada:

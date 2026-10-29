@@ -8,7 +8,9 @@ from src.pregunta_opcion.models import PreguntaOpcion
 from src.opciones_respuesta.models import OpcionRespuesta
 
 def listar_informes_base(db:Session) -> List[schemas.InformeCurricularBaseRead]:
-    return db.scalars(select(InformeCurricularBase)).all()
+    return db.scalars(
+        select(InformeCurricularBase).order_by(InformeCurricularBase.id.asc())
+    ).all()
 
 def crear_informe_base(db: Session, informe: schemas.InformeCurricularBaseCreate) -> schemas.InformeCurricularBaseRead:
     _informebase = InformeCurricularBase(**informe.model_dump())

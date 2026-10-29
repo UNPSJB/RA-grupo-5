@@ -11,6 +11,8 @@ from src.preguntas.models import Pregunta
 from src.detalle_respuesta.models import DetalleRespuesta
 from src.informes_asignaturas.models import InformeAsignatura, EstadoInforme
 from src.informe_sintetico_carrera.models import InformeSinteticoCarrera
+from src.encuestas_asignaturas.models import EncuestaAsignatura
+from src.encuestas_asignaturas.services import validar_periodo_encuesta
 
 from sqlalchemy.exc import IntegrityError
 
@@ -43,6 +45,16 @@ def crear_respuesta(
     es_informe_asignatura = respuesta.id_informe_asignatura is not None
     es_informe_carrera = respuesta.id_informe_sintetico_carrera is not None
     es_encuesta = respuesta.id_encuesta_asignatura is not None
+
+    # --- VALIDACIÓN DE PERÍODO PARA ENCUESTAS ---
+    if es_encuesta:
+        encuesta = db.get(EncuestaAsignatura, respuesta.id_encuesta_asignatura)
+        if encuesta is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Encuesta no encontrada",
+            )
+        validar_periodo_encuesta(encuesta)
 
     # --- LÓGICA PARA INFORME ASIGNATURA ---
     if es_informe_asignatura:
@@ -219,6 +231,8 @@ def crear_respuesta(
             )
         if informe_sc.estado != EstadoInforme.cerrado:
             informe_sc.estado = EstadoInforme.cerrado
+        # Mantenemos sincronizada la FK directa que usa el modelo del informe.
+        informe_sc.id_respuesta = db_respuesta.id
 
     # 5. Confirmo todo, manejando unicidad (solo aplica a informes)
     try:
@@ -280,7 +294,7 @@ def listar_respuestas(
             Respuesta.id_informe_sintetico_carrera == informe_sintetico_carerra_id
         )
 
-    return db.scalars(query).unique().all()
+    return db.scalars(query.order_by(Respuesta.id.asc())).unique().all()
 
 
 def leer_respuesta(db: Session, respuesta_id: int) -> Respuesta:

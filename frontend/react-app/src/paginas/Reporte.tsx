@@ -8,11 +8,25 @@ import {
   Tab,
 } from "react-bootstrap";
 import { useReportes } from "../hook/useReportes";
+import apiFetch from "../api/client";
 import { useEffect, useState, useMemo } from "react"; 
 import { useParams, Link } from "react-router-dom";
 import {EncabezadoReporte } from "../componentes/LayoutEncabezados";
 import ResumenVariable from "../componentes/ResumenVariable";
+import EmptyState from "../componentes/EmptyState";
 import "../styles/Resumen-reporte.css"; 
+
+const esVariableIA = (codigo?: string) =>
+  (codigo ?? "").toString().toUpperCase() === "H";
+
+// La variable H (Inteligencia Artificial) debe mostrarse siempre al final.
+const ordenarEntradasVariables = (entradas: [string, any][]) =>
+  [...entradas].sort(([, a], [, b]) => {
+    const aEsIA = esVariableIA(a?.codigo);
+    const bEsIA = esVariableIA(b?.codigo);
+    if (aEsIA === bEsIA) return 0;
+    return aEsIA ? 1 : -1;
+  });
 
 export default function ResumenReporte() {
   const { id } = useParams();
@@ -21,6 +35,7 @@ export default function ResumenReporte() {
     useReportes();
   const [reporte, setReporte] = useState<any>(null);
   const [reporteCompleto, setReporteCompleto] = useState<any>(null);
+  const [inscriptos, setInscriptos] = useState<number | null>(null);
   const [activeVariableKey, setActiveVariableKey] = useState<string | null>(
     null
   );
@@ -32,7 +47,9 @@ export default function ResumenReporte() {
         const data = await fetchResumenByReporteId(idReporte);
         setReporte(data);
         if (data && data.resultados_por_pregunta && !activeVariableKey) {
-          const firstKey = Object.keys(data.resultados_por_pregunta)[0];
+          const firstKey = ordenarEntradasVariables(
+            Object.entries(data.resultados_por_pregunta)
+          )[0]?.[0];
           if (firstKey) {
             setActiveVariableKey(firstKey);
           }
@@ -45,7 +62,19 @@ export default function ResumenReporte() {
   useEffect(() => {
     const cargarReporte = async () => {
       const data = await fetchReporteById(idReporte);
-      if (data) setReporteCompleto(data);
+      if (data) {
+        setReporteCompleto(data);
+
+        // Los inscriptos provienen del informe curricular asociado al reporte.
+        if (data.informe_id) {
+          const resInforme = await apiFetch(`/informes-asignaturas/${data.informe_id}`);
+          if (resInforme.ok) {
+            const informe = await resInforme.json();
+            const cant = Number(informe?.cant_alumnos_insc);
+            setInscriptos(Number.isFinite(cant) && cant >= 0 ? cant : null);
+          }
+        }
+      }
     };
     cargarReporte();
   }, [idReporte, fetchReporteById]);
@@ -56,7 +85,9 @@ export default function ResumenReporte() {
     if (!reporte || !reporte.resultados_por_pregunta) {
       return [];
     }
-    return Object.entries(reporte.resultados_por_pregunta).map(
+    return ordenarEntradasVariables(
+      Object.entries(reporte.resultados_por_pregunta)
+    ).map(
       ([nombreVariable, variableData]: [string, any]) => ({
         key: nombreVariable,
         title: nombreVariable,
@@ -78,7 +109,7 @@ export default function ResumenReporte() {
                       now={opcion.porcentaje}
                       label={`${opcion.porcentaje}%`}
                       variant="primary" 
-                      className="progress-compact"
+                      className="progress-compact progress-animated"
                     />
                   </div>
                 ))}
@@ -100,7 +131,15 @@ export default function ResumenReporte() {
     !reporte.resumen_por_variable ||
     !activeVariableKey
   ) {
-    return <p>No hay datos disponibles</p>;
+    return (
+      <Container className="my-4">
+        <EmptyState
+          icon="bi-bar-chart"
+          title="Sin datos disponibles"
+          message="No hay datos disponibles para generar el resumen de este reporte."
+        />
+      </Container>
+    );
   }
 
 
@@ -183,7 +222,7 @@ export default function ResumenReporte() {
                       Total inscriptos
                     </span>
                     <span className="text-dark fw-bold">
-                      25
+                      {inscriptos ?? "N/D"}
                     </span>
                   </div>
 

@@ -9,7 +9,8 @@ import {
     Row,
     Card,
     Tabs,
-    Tab
+    Tab,
+    ProgressBar
 } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -79,12 +80,29 @@ function ResponderEncuesta() {
         formState: { errors, isSubmitting },
         reset,
         trigger,
-        setValue
+        watch
     } = useForm<SurveyFormData>({
         defaultValues: defaultValues,
         resolver: schema ? zodResolver(schema) : undefined,
         mode: 'onChange' 
     });
+
+    // Cálculo visual del avance: solo lee los valores actuales del formulario.
+    const valoresActuales = watch();
+    const progreso = useMemo(() => {
+        const variables = encuestaOrdenada?.variables ?? [];
+        const preguntas = variables.flatMap((variable: any) => variable?.preguntas ?? []);
+        if (preguntas.length === 0) return 0;
+
+        const respondidas = preguntas.filter((pregunta: any) => {
+            if (!pregunta?.id) return false;
+            const valor = valoresActuales?.[obtenerNombreCampo(pregunta.id)];
+            if (Array.isArray(valor)) return valor.length > 0;
+            return valor !== undefined && valor !== null && String(valor).trim() !== "";
+        }).length;
+
+        return Math.round((respondidas / preguntas.length) * 100);
+    }, [encuestaOrdenada, valoresActuales]);
 
     const [activeTab, setActiveTab] = useState<string | null>(null);
 
@@ -188,7 +206,15 @@ function ResponderEncuesta() {
     };
 
     if (loading) return <Container className="py-4 text-center"><Spinner animation="border" /></Container>;
-    if (!encuestaOrdenada || !encuestaOrdenada.variables) return <Container className="py-4 text-center"><Alert variant="danger">Error al cargar.</Alert></Container>;
+    if (!encuestaOrdenada || !encuestaOrdenada.variables) {
+        return (
+            <Container className="py-4 text-center">
+                <Alert variant="danger">
+                    {error ? `Error: ${error}` : "Error al cargar."}
+                </Alert>
+            </Container>
+        );
+    }
     if (encuestaOrdenada.variables.length === 0) return <Container className="py-4 text-center"><Alert variant="info">No hay preguntas.</Alert></Container>;
     if (activeTab === null) return <Container className="py-4 text-center">Iniciando...</Container>;
 
@@ -280,6 +306,26 @@ function ResponderEncuesta() {
                 <Card.Body className="p-4">
                   <Form onSubmit={handleSubmit(onSubmit)} onKeyDown={handleKeyDown}> 
                     
+                    <div className="mb-4">
+                      <div className="d-flex justify-content-between align-items-center small fw-semibold mb-1">
+                        <span>
+                          <i className="bi bi-list-check me-1 text-primary" />
+                          Progreso de la encuesta
+                        </span>
+                        <span className={progreso === 100 ? "text-success" : "text-muted"}>
+                          {progreso}%
+                        </span>
+                      </div>
+                      <ProgressBar
+                        now={progreso}
+                        animated
+                        striped
+                        variant={progreso === 100 ? "success" : "primary"}
+                        className="progress-animated"
+                        style={{ height: "10px" }}
+                      />
+                    </div>
+
                     {error && <Alert variant="danger" className="mb-3">Error: {error}</Alert>}
                     
                     <Tabs

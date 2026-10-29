@@ -19,6 +19,9 @@ class ReporteUpdate(ReporteBase):
 class Reporte(ReporteBase):
     id: int
     encuesta_asignatura: EncuestaAsignaturaRead
+    alumnos_participantes: int
+    alumnos_inscriptos: int
+    participacion: int | None
     model_config = {"from_attributes": True}
 
 class ReporteListadoItem(BaseModel):

@@ -52,8 +52,16 @@ def create_encuesta_asignatura(
 def read_encuesta_asignatura(
     encuesta_id: int,
     db: Session = Depends(get_db),
+    persona_actual=Depends(get_current_persona),
 ):
-    return services.leer_encuesta_asignatura(db, encuesta_id)
+    encuesta = services.leer_encuesta_asignatura(db, encuesta_id)
+    # Las encuestas ya respondidas se pueden consultar aunque el período haya
+    # finalizado; las pendientes solo se abren si están en el año simulado.
+    if not services.encuesta_respondida_por_persona(
+        db, persona_actual.id, encuesta_id
+    ):
+        services.validar_periodo_encuesta(encuesta)
+    return encuesta
 
 
 @router.get("/alumno/{persona_id}", response_model=list[schemas.EncuestaAsignaturaRead])

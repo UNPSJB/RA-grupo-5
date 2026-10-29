@@ -7,6 +7,7 @@ import {
 import { Link } from "react-router-dom";
 import { isGeneracionInformeSinteticoActivo, getToday } from "../calendarioAcademico"; 
 import { obtenerPeriodosEncuestaPorAnio } from "../helpers/respondVersion";
+import EmptyState from "../componentes/EmptyState";
 
 export default function InformesSinteticosDisponibles() {
   // 1. HOOK
@@ -18,7 +19,7 @@ export default function InformesSinteticosDisponibles() {
   const [filterAnio, setFilterAnio] = useState<string>("all");
   const [filterCuatri, setFilterCuatri] = useState<string>("all");
   const [filterEstado, setFilterEstado] = useState<string>("all");
-  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("asc");
   const [periodosPorAnio, setPeriodosPorAnio] = useState<Record<number, string[]>>({});
 
   useEffect(() => {
@@ -31,7 +32,7 @@ export default function InformesSinteticosDisponibles() {
   // 3. DATOS DERIVADOS PARA LOS SELECTS 
   const aniosDisponibles = useMemo(() => {
     const years = new Set(resumenes.map(r => r.ciclo));
-    return Array.from(years).sort((a, b) => b - a);
+    return Array.from(years).sort((a, b) => a - b);
   }, [resumenes]);
 
   const carrerasDisponibles = useMemo(() => {
@@ -158,8 +159,12 @@ export default function InformesSinteticosDisponibles() {
  <Card.Body className="p-0">
   <ListGroup variant="flush" className="mt-4">
     {itemsProcesados.length === 0 ? (
-      <ListGroup.Item>
-        <p className="text-muted mb-0">No hay informes para este período.</p>
+      <ListGroup.Item className="p-0 border-0 bg-transparent">
+        <EmptyState
+          icon="bi-journal-x"
+          title="No hay informes para este período"
+          message="No hay informes sintéticos que coincidan con los filtros seleccionados. Probá cambiando la carrera, el año o el estado."
+        />
       </ListGroup.Item>
     ) : (
       itemsProcesados.map((r) => {
@@ -168,7 +173,7 @@ export default function InformesSinteticosDisponibles() {
         return (
           <ListGroup.Item
             key={r.uniqueKey}
-            className="d-flex align-items-start"
+            className="d-flex align-items-start hover-lift"
           >
             <div className="me-3 flex-grow-1 text-start">
               <span className="fw-bold">{r.carrera.nombre}</span>
@@ -180,7 +185,10 @@ export default function InformesSinteticosDisponibles() {
               <br />
               <small className="text-muted">
                 Informes publicados:
-                <Badge bg="success" pill className="ms-1">{r.publicados}</Badge>
+                <Badge bg="success" pill className="ms-1 d-inline-flex align-items-center">
+                  <span className="status-dot status-dot-light" />
+                  {r.publicados}
+                </Badge>
               </small>
               {periodosPorAnio[r.ciclo]?.length > 0 && (
                 <div className="mt-2">

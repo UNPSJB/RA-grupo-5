@@ -43,6 +43,83 @@ const findRespuestaPorPreguntaId = (
   return <em className="text-muted">Sin Respuesta</em>;
 };
 
+const COMISION_ASESORA_DEMO =
+  "Mg. Laura Fernández (Presidenta), Ing. Martín Álvarez (Vocal), Lic. Carolina Ríos (Vocal)";
+const INTEGRANTES_DEMO =
+  "Mg. Laura Fernández, Ing. Martín Álvarez, Lic. Carolina Ríos, Ing. Pablo Méndez";
+
+interface ContextoDemoSintetico {
+  carrera?: string;
+  sede?: string;
+  ciclo?: number | null;
+  cuatrimestre?: string;
+  totalInformes: number;
+}
+
+function obtenerTextoSinteticoDemo(
+  pregunta: any,
+  indice: number,
+  contexto: ContextoDemoSintetico
+): string {
+  const enunciado = String(pregunta?.texto_pregunta ?? "").toLowerCase();
+  const carrera = contexto.carrera || "la carrera";
+  const sede = contexto.sede || "la sede correspondiente";
+  const ciclo = contexto.ciclo || "el período evaluado";
+  const cuatrimestre = contexto.cuatrimestre || "el cuatrimestre";
+  const totalInformes = contexto.totalInformes;
+
+  if (enunciado.includes("información general") || indice === 0) {
+    return `El presente informe sintético corresponde a ${carrera}, sede ${sede}, ciclo lectivo ${ciclo}, ${cuatrimestre}. Se integran y analizan ${totalInformes} informes curriculares de las asignaturas involucradas, elaborados por los equipos de cátedra. Durante el período se desarrollaron las actividades académicas previstas con normalidad, se sostuvo la articulación entre las asignaturas de la carrera y la Comisión Asesora acompañó el seguimiento de los procesos de enseñanza y aprendizaje. La participación de docentes y estudiantes fue adecuada y permitió relevar información consistente para la toma de decisiones académicas.`;
+  }
+
+  if (enunciado.includes("equipamiento") || enunciado.includes("bibliografía")) {
+    return `Se identifican como necesidades prioritarias la actualización de la bibliografía específica de las asignaturas del período, incorporando al menos dos títulos actualizados por espacio curricular y material complementario en formato digital. También se requiere ampliar la disponibilidad de insumos para actividades prácticas, renovar parte del equipamiento informático de las aulas y laboratorios, y garantizar conectividad estable para el desarrollo de clases y trabajos prácticos. Estas mejoras permitirían sostener la calidad de las propuestas formativas y favorecer la participación de todo el estudiantado.`;
+  }
+
+  if (enunciado.includes("porcentaje de horas") || enunciado.includes("horas de clases")) {
+    return `Se dictó en promedio el 94% de las horas teóricas y el 96% de las horas prácticas previstas en el plan de estudios. Las diferencias registradas se explican por feriados, jornadas institucionales y contingencias puntuales, y fueron recuperadas mediante clases de consulta, actividades asincrónicas y ajustes en el cronograma. No se registran incumplimientos significativos que afecten el desarrollo de los contenidos mínimos de las asignaturas.`;
+  }
+
+  if (enunciado.includes("contenidos planificados") || enunciado.startsWith("2.a")) {
+    return `Se alcanzó aproximadamente el 96% de los contenidos planificados en el conjunto de los espacios curriculares. En las asignaturas con mayor carga práctica se priorizaron los núcleos conceptuales y las competencias esenciales, complementando el dictado con actividades de refuerzo y seguimiento. Para el próximo dictado se propone ajustar la distribución temporal de los trabajos prácticos, incorporar instancias de evaluación formativa y fortalecer la articulación entre teoría y práctica para completar el cronograma sin sobrecargar a los estudiantes.`;
+  }
+
+  if (
+    enunciado.includes("aspectos positivos") ||
+    enunciado.includes("obstáculos") ||
+    enunciado.startsWith("2.c")
+  ) {
+    return `Aspectos positivos: se destaca el compromiso de los equipos de cátedra, la planificación de las actividades, la incorporación de recursos didácticos variados y la buena predisposición para acompañar a los estudiantes. Obstáculos: se registraron dificultades vinculadas con la disponibilidad de recursos tecnológicos, la heterogeneidad de saberes previos y algunas superposiciones de fechas de evaluación. Estrategias para el próximo dictado: profundizar las instancias de nivelación, coordinar el calendario de evaluaciones entre asignaturas, ampliar el uso de aulas virtuales y promover actividades prácticas colaborativas.`;
+  }
+
+  if (
+    enunciado.includes("capacitación") ||
+    enunciado.includes("investigación") ||
+    enunciado.includes("extensión")
+  ) {
+    return `Los integrantes de los equipos de cátedra participaron en jornadas de capacitación docente, talleres de actualización disciplinar y actividades de perfeccionamiento vinculadas con sus áreas de desempeño. Asimismo, se registró participación en proyectos de investigación, acciones de extensión universitaria y tareas de gestión académica. Estas actividades fortalecieron la formación del plantel docente y permitieron transferir experiencias y resultados al trabajo áulico. Se considera pertinente continuar promoviendo estas instancias y favorecer su socialización entre las distintas cátedras.`;
+  }
+
+  if (enunciado.includes("auxiliares")) {
+    return `La valoración del desempeño de los auxiliares de cátedra es muy buena. Se destaca su compromiso, puntualidad, predisposición para el acompañamiento de los estudiantes y participación activa en las actividades prácticas y de consulta. La justificación informada por los equipos de cátedra refiere a la responsabilidad asumida en el seguimiento de los trabajos, la colaboración en la preparación de materiales y la comunicación permanente con los estudiantes. Se recomienda sostener las instancias de formación y acompañamiento para los auxiliares.`;
+  }
+
+  if (
+    enunciado.includes("observaciones") ||
+    enunciado.includes("comisión asesora")
+  ) {
+    return `La Comisión Asesora observa un desarrollo adecuado de las actividades académicas del período y valora el trabajo de los equipos de cátedra. Se recomienda continuar fortaleciendo la articulación entre asignaturas, sostener las acciones de nivelación y acompañamiento estudiantil, y avanzar en la actualización de recursos bibliográficos y tecnológicos. Asimismo, se sugiere sistematizar las estrategias de recuperación de clases y socializar las buenas prácticas identificadas para contribuir a la mejora continua de la carrera.`;
+  }
+
+  const textosGenericos = [
+    `La actividad se desarrolló de acuerdo con lo planificado para ${carrera} durante ${ciclo}, con participación de los equipos de cátedra y cumplimiento de los objetivos académicos propuestos.`,
+    `Se registró un desarrollo normal de las actividades previstas en ${cuatrimestre}, con acompañamiento docente y seguimiento de los procesos de aprendizaje.`,
+    `La Comisión Asesora considera que la información relevada resulta suficiente para realizar el seguimiento académico del período y propone continuar con las acciones de mejora acordadas.`,
+  ];
+
+  return textosGenericos[indice % textosGenericos.length];
+}
+
 export default function GenerarInformeSintetico() {
   const { carreraId } = useParams<{ carreraId: string }>();
   const [searchParams] = useSearchParams();
@@ -89,6 +166,43 @@ export default function GenerarInformeSintetico() {
       .finally(() => setLoadingBase(false));
   }, [fetchInformeSinteticoBaseActual]);
 
+  const handleAutocompletarDemo = useCallback(() => {
+    if (!informeBase?.preguntas?.length) return;
+
+    const contexto: ContextoDemoSintetico = {
+      carrera: carrera?.nombre,
+      sede: carrera?.sede,
+      ciclo: numCiclo,
+      cuatrimestre,
+      totalInformes: informesFiltrados.length,
+    };
+
+    informeBase.preguntas.forEach((pregunta: any, indice: number) => {
+      const idPreguntaOpcion = pregunta.pregunta_opcion?.[0]?.id;
+      if (!idPreguntaOpcion) return;
+      setTextoRespuesta(
+        idPreguntaOpcion,
+        obtenerTextoSinteticoDemo(pregunta, indice, contexto)
+      );
+    });
+
+    setComisionAsesora(COMISION_ASESORA_DEMO);
+    setIntegrantes(INTEGRANTES_DEMO);
+
+    mostrarAlerta(
+      "info",
+      "Textos de demo cargados. Podés editarlos antes de guardar el informe."
+    );
+  }, [
+    informeBase,
+    carrera,
+    numCiclo,
+    cuatrimestre,
+    informesFiltrados,
+    setTextoRespuesta,
+    mostrarAlerta,
+  ]);
+
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -120,9 +234,7 @@ export default function GenerarInformeSintetico() {
           payloadCabecera
         );
 
-        const idDepartamento = 1;
         const resultGuardado = await guardarRespuestaSintetico(
-          idDepartamento,
           informeCreado.id
         );
 
@@ -194,9 +306,22 @@ export default function GenerarInformeSintetico() {
               Generar Informe Sintético - {carrera.nombre}
             </Card.Header>
             <Card.Body className="p-4">
-              <Card.Title as="h5" className="mb-3">
-                {informeBase.titulo}
-              </Card.Title>
+              <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <Card.Title as="h5" className="mb-0">
+                  {informeBase.titulo}
+                </Card.Title>
+                <Button
+                  type="button"
+                  variant="outline-secondary"
+                  size="sm"
+                  onClick={handleAutocompletarDemo}
+                  disabled={saving}
+                  title="Completar los textos con datos académicos de ejemplo"
+                >
+                  <i className="bi bi-magic me-2" />
+                  Autocompletar Demo
+                </Button>
+              </div>
               <Row>
                 <Col md={6}>
                   <Form.Group as={Row} className="mb-3">

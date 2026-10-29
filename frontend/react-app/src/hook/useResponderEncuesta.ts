@@ -36,10 +36,13 @@ export function useResponderEncuesta(idEncuestaAsignatura: number | null) {
         const resAsignatura = await apiFetch(
           `/encuestas-asignaturas/${idEncuestaAsignatura}`
         );
-        if (!resAsignatura.ok)
+        if (!resAsignatura.ok) {
+          const errData = await resAsignatura.json().catch(() => ({}));
           throw new Error(
-            `Error al cargar la asignatura (ID: ${idEncuestaAsignatura})`
+            errData.detail ||
+              `Error al cargar la asignatura (ID: ${idEncuestaAsignatura})`
           );
+        }
 
         const dataAsignatura: EncuestaAsignatura = await resAsignatura.json();
         setAsignatura(dataAsignatura.asignatura);

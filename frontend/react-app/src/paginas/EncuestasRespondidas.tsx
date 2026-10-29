@@ -11,6 +11,7 @@ import {
   Form,
   Button
 } from "react-bootstrap";
+import EmptyState from "../componentes/EmptyState";
 
 export default function EncuestasRespondidas() {
   const { encuestasRespondidas, loading, error } = useEncuestas();
@@ -18,7 +19,7 @@ export default function EncuestasRespondidas() {
   const [filterCarrera, setFilterCarrera] = useState("all");
   const [filterAnio, setFilterAnio] = useState("all");
   const [filterCuatri, setFilterCuatri] = useState("all");
-  const [sortOrder, setSortOrder] = useState("desc");
+  const [sortOrder, setSortOrder] = useState("asc");
 
   const respondidasBase = useMemo(() => {
     return encuestasRespondidas || [];
@@ -36,7 +37,7 @@ export default function EncuestasRespondidas() {
 
   const aniosDisponibles = useMemo(() => {
     const years = new Set(respondidasBase.map(e => e.ciclo_lectivo));
-    return Array.from(years).sort((a, b) => b - a);
+    return Array.from(years).sort((a, b) => a - b);
   }, [respondidasBase]);
 
   const itemsProcesados = useMemo(() => {
@@ -98,6 +99,7 @@ export default function EncuestasRespondidas() {
                 className="fs-6 px-3 py-2 shadow-sm rounded-pill"
                 style={{ minWidth: '3rem', textAlign: 'center' }}
               >
+                <span className="status-dot status-dot-success" />
                 {itemsProcesados.length}
               </Badge>
             </Card.Header>
@@ -171,14 +173,18 @@ export default function EncuestasRespondidas() {
             
             <ListGroup variant="flush">
               {itemsProcesados.length === 0 ? (
-                <ListGroup.Item className="text-muted text-center py-3">
-                  No hay encuestas respondidas.
+                <ListGroup.Item className="p-0 border-0 bg-transparent">
+                  <EmptyState
+                    icon="bi-clipboard2-check"
+                    title="Todavía no respondiste encuestas"
+                    message="Cuando completes tu primera encuesta, vas a encontrar el historial completo en esta sección."
+                  />
                 </ListGroup.Item>
               ) : (
                 itemsProcesados.map(encuesta => (
                   <ListGroup.Item 
                     key={encuesta.id} 
-                    className="d-flex align-items-start"
+                    className="d-flex align-items-start hover-lift"
                   >
                     <div className="me-3 flex-grow-1 text-start">
                       <span className="fw-bold fs-5">{encuesta.asignatura.nombre}</span>

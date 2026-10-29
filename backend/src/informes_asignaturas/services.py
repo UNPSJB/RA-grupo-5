@@ -40,7 +40,7 @@ def _get_query_con_joins():
     )
 
 def listar_informes_asignaturas(db:Session) -> list[schemas.InformeAsignaturaRead]:
-    query = _get_query_con_joins()
+    query = _get_query_con_joins().order_by(InformeAsignatura.id.asc())
     # .unique() es clave para evitar duplicados por los joins
     return db.scalars(query).unique().all()
 
@@ -53,7 +53,8 @@ def crear_informe_asignatura(db: Session, informe: schemas.InformeAsignaturaCrea
 
 def listar_informes_respondidos_docente(db: Session, persona_id: int) -> list[InformeAsignatura]:
     query = _get_query_con_joins().join(Respuesta, InformeAsignatura.respuesta) \
-            .filter(Respuesta.id_persona == persona_id)
+            .filter(Respuesta.id_persona == persona_id) \
+            .order_by(InformeAsignatura.id.asc())
             
     return db.scalars(query).unique().all()
 

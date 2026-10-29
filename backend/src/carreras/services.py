@@ -12,7 +12,9 @@ def crear_carrera(db: Session, carrera: schemas.CarreraCreate) -> models.Carrera
     return _carrera
 
 def listar_carreras(db: Session) -> List[models.Carrera]:
-    return db.scalars(select(models.Carrera)).all()
+    return db.scalars(
+        select(models.Carrera).order_by(models.Carrera.id.asc())
+    ).all()
 
 def leer_carrera(db: Session, carrera_id: int) -> models.Carrera:
     db_carrera = db.scalar(select(models.Carrera).where(models.Carrera.id == carrera_id))

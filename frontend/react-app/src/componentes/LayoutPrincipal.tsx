@@ -1,4 +1,4 @@
-import { Link, Outlet, NavLink } from "react-router-dom";
+import { Link, Outlet, NavLink, useLocation } from "react-router-dom";
 import { Container, Navbar, Nav } from "react-bootstrap";
 import "../styles/Layout.css";
 import logoUnpsjb from "../assets/escudo_tranparente_sinletras.png";
@@ -9,6 +9,10 @@ import TimeTravelSelector from "../componentes/TimeTravelSelector";
 type NavLinkItem = {
   to: string;
   label: string;
+  /** Rutas raíz que también deben marcar este enlace como activo. */
+  defaultFor?: string[];
+  /** Rutas auxiliares que pertenecen visualmente a este enlace. */
+  activePrefixes?: string[];
 };
 
 type Props = {
@@ -19,9 +23,18 @@ type Props = {
 
 export default function LayoutPrincipal({ links, requiredRole }: Props) {
   const { roles = [], token } = useAuth();
+  const { pathname } = useLocation();
 
   // Permisos: admin siempre tiene acceso
   const can = (role: string) => roles.includes("admin") || roles.includes(role);
+
+  const isLinkActive = (link: NavLinkItem) =>
+    pathname === link.to ||
+    pathname.startsWith(`${link.to}/`) ||
+    (link.defaultFor ?? []).includes(pathname) ||
+    (link.activePrefixes ?? []).some(
+      (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+    );
 
   // Si no está logueado
   if (!token) {
@@ -72,14 +85,15 @@ export default function LayoutPrincipal({ links, requiredRole }: Props) {
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
             {links.map((link) => (
-              <Nav.Link
-                as={NavLink}
+              <NavLink
                 to={link.to}
                 key={link.to}
-                end={link.to === "/"}
+                className={({ isActive }) =>
+                  `nav-link${isActive || isLinkActive(link) ? " active" : ""}`
+                }
               >
                 {link.label}
-              </Nav.Link>
+              </NavLink>
             ))}
           </Nav>
 

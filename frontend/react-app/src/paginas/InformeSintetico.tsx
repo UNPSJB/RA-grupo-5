@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { useInformeSinteticoCarrera } from "../hook/useInformeSinteticoCarrera";
 import type { Respuesta } from "../types/InformeSintetico";
 import { Container, Form, Col, Card, Tabs, Tab } from "react-bootstrap"; 
+import EmptyState from "../componentes/EmptyState";
 
 const findRespuestaPorPreguntaId = (
   preguntaId: number,
@@ -112,9 +113,12 @@ export default function InformeSintetico() {
                         ))
                       ) : (
                         <div className="py-3">
-                          <p className="text-muted">
-                            No hay preguntas definidas para este informe.
-                          </p>
+                          <EmptyState
+                            icon="bi-question-circle"
+                            title="Sin preguntas definidas"
+                            message="No hay preguntas definidas para este informe."
+                            className="my-2"
+                          />
                         </div>
                       )}
                     </div>

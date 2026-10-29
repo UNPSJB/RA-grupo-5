@@ -15,6 +15,7 @@ import {
 import type { InformeCurricular } from "../types/models/InformeCurricular";
 import apiFetch from "../api/client";
 import { obtenerPeriodosEncuestaPorAnio } from "../helpers/respondVersion";
+import EmptyState from "../componentes/EmptyState";
 
 // Helper para obtener persona_id desde el JWT
 function getPersonaIdFromToken(): number | null {
@@ -41,7 +42,7 @@ export default function InformesRespondidos() {
   const [filterCarrera, setFilterCarrera] = useState<string>("all");
   const [filterAnio, setFilterAnio] = useState<string>("all");
   const [filterCuatri, setFilterCuatri] = useState<string>("all");
-  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("asc");
   const [periodosPorAnio, setPeriodosPorAnio] = useState<Record<number, string[]>>({});
 
   useEffect(() => {
@@ -93,7 +94,7 @@ export default function InformesRespondidos() {
 
   const aniosDisponibles = useMemo(() => {
     const years = new Set(informes.map(r => r.ciclo_lectivo));
-    return Array.from(years).sort((a, b) => b - a);
+    return Array.from(years).sort((a, b) => a - b);
   }, [informes]);
 
   // 3. FILTRADO Y ORDENAMIENTO
@@ -253,14 +254,18 @@ export default function InformesRespondidos() {
 
             <ListGroup variant="flush">
               {informesFiltrados.length === 0 ? (
-                <ListGroup.Item className="text-muted text-center py-3">
-                  No hay informes respondidos que coincidan con los filtros.
+                <ListGroup.Item className="p-0 border-0 bg-transparent">
+                  <EmptyState
+                    icon="bi-file-earmark-x"
+                    title="Sin informes respondidos"
+                    message="No hay informes respondidos que coincidan con los filtros. Ajustá la carrera, el año o el cuatrimestre para ver otros resultados."
+                  />
                 </ListGroup.Item>
               ) : (
                 informesFiltrados.map((informe) => (
                   <ListGroup.Item
                     key={informe.id}
-                    className="d-flex align-items-start"
+                    className="d-flex align-items-start hover-lift"
                   >
                     <div className="me-3 flex-grow-1 text-start">
                       <span className="fw fs-5">
@@ -273,6 +278,12 @@ export default function InformesRespondidos() {
                       <small className="text-muted">
                         {`Ciclo lectivo: ${informe.ciclo_lectivo} | Cursado: ${informe.asignatura.cursado}`}
                       </small>
+                      <br />
+                      <small className="text-muted">
+                        {`Carrera: ${
+                          informe.asignatura?.carrera?.nombre ?? ""
+                        } `}
+                      </small>
                       {periodosPorAnio[informe.ciclo_lectivo]?.length > 0 && (
                         <div className="mt-2">
                           <Badge bg="light" text="dark" className="border fw-semibold">
@@ -280,12 +291,6 @@ export default function InformesRespondidos() {
                           </Badge>
                         </div>
                       )}
-                      <br />
-                      <small className="text-muted">
-                        {`Carrera: ${
-                          informe.asignatura?.carrera?.nombre ?? ""
-                        } `}
-                      </small>
                     </div>
 
                     <Link

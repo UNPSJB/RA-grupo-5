@@ -32,6 +32,7 @@ def listar_preguntas(db: Session) -> List[Pregunta]:
             joinedload(Pregunta.pregunta_opcion)
             .joinedload(PreguntaOpcion.opcion_respuesta)
         )
+        .order_by(Pregunta.id.asc())
     )
     result = db.execute(query)
 

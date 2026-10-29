@@ -33,3 +33,202 @@ $secondary:     $gray-600;
         }
     }
 }
+
+/* ==========================================================
+   Micro-interacciones y detalles visuales para la demo
+   (solo estética: no afectan la lógica de la aplicación)
+   ========================================================== */
+
+/* --- Punto de estado con pulso / glow --- */
+@keyframes statusPulse {
+  0% {
+    box-shadow: 0 0 0 0 currentColor;
+    opacity: 1;
+  }
+  70% {
+    box-shadow: 0 0 0 6px transparent;
+    opacity: 0.9;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+    opacity: 1;
+  }
+}
+
+.status-dot {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background-color: currentColor;
+  margin-right: 2px;
+  vertical-align: middle;
+  filter: drop-shadow(0 0 3px currentColor);
+  animation: statusPulse 1.8s ease-out infinite;
+}
+
+/* Badges que contienen un punto de estado: centrado perfecto del punto + texto */
+.badge:has(.status-dot),
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-dot-success { color: #198754; }
+.status-dot-primary { color: #0d6efd; }
+.status-dot-warning { color: #ffc107; }
+.status-dot-danger  { color: #dc3545; }
+.status-dot-info    { color: #0dcaf0; }
+.status-dot-secondary { color: #6c757d; }
+.status-dot-light { color: #ffffff; }
+
+/* --- Empty states --- */
+@keyframes emptyStateIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes floatSoft {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-5px); }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  margin: 1.5rem;
+  background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+  border: 1px dashed rgba(0, 74, 153, 0.18);
+  border-radius: 1rem;
+  box-shadow: 0 12px 28px -18px rgba(13, 110, 253, 0.45);
+  animation: emptyStateIn 0.45s ease-out both;
+}
+
+.empty-state__icon {
+  display: grid;
+  place-items: center;
+  width: 4rem;
+  height: 4rem;
+  margin-bottom: 1rem;
+  border-radius: 50%;
+  font-size: 1.75rem;
+  color: #0d6efd;
+  background: rgba(13, 110, 253, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(13, 110, 253, 0.15);
+  animation: floatSoft 3.2s ease-in-out infinite;
+}
+
+.empty-state__title {
+  margin-bottom: 0.35rem;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.empty-state__text {
+  max-width: 32rem;
+  margin-bottom: 0;
+  color: #6c757d;
+}
+
+/* --- Confeti (sin dependencias externas) --- */
+.confetti-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translate3d(0, -10vh, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--confetti-drift, 0), 110vh, 0)
+      rotate(var(--confetti-spin, 540deg));
+    opacity: 0.15;
+  }
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -10vh;
+  width: 9px;
+  height: 14px;
+  border-radius: 2px;
+  opacity: 0.95;
+  animation-name: confettiFall;
+  animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+  animation-fill-mode: forwards;
+}
+
+/* --- Barras de progreso animadas --- */
+@keyframes progressStripes {
+  from { background-position: 1rem 0; }
+  to   { background-position: 0 0; }
+}
+
+.progress-animated {
+  overflow: hidden;
+  border-radius: 999px;
+  background-color: rgba(13, 110, 253, 0.12);
+}
+
+.progress-animated .progress-bar {
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  background-image: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.22) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.22) 50%,
+    rgba(255, 255, 255, 0.22) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 1rem 1rem;
+  animation: progressStripes 1s linear infinite;
+}
+
+/* --- Interacciones sutiles en tarjetas / filas --- */
+.hover-lift {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+}
+
+.hover-lift:hover {
+  z-index: 1;
+  transform: translateY(-3px);
+  box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.12) !important;
+}
+
+/* --- Entrada suave de bloques --- */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.45s ease-out both;
+}
+
+/* --- Accesibilidad: respetar preferencia de movimiento reducido --- */
+@media (prefers-reduced-motion: reduce) {
+  .status-dot,
+  .empty-state,
+  .empty-state__icon,
+  .confetti-piece,
+  .progress-animated .progress-bar,
+  .hover-lift,
+  .fade-in-up {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}

@@ -39,6 +39,27 @@ def create_informe_sintetico_carrera(
     return services.crear_informe_sintetico_carrera(db, informe)
 
 @router.get(
+    "/mis-enviados",
+    response_model=list[schemas.InformeSinteticoCarreraRead],
+    dependencies=[Depends(require_permissions(PermissionName.VER_MIS_SINTETICOS))],
+)
+def read_mis_informes_sinteticos_enviados(
+    db: Session = Depends(get_db),
+    persona_actual = Depends(get_current_persona),
+):
+    """
+    Informes sintéticos enviados por la persona autenticada.
+
+    Un informe se considera enviado cuando tiene una Respuesta asociada.
+    No se filtra por ciclo para no ocultar envíos históricos con datos
+    inconsistentes; el filtro de ciclo sólo se aplica a los listados de
+    disponibilidad/agrupamiento.
+    """
+    return services.listar_informes_respondidos_departamento(
+        db, persona_actual.id
+    )
+
+@router.get(
     "/{informe_id}",
     response_model=schemas.InformeSinteticoCarreraRead,
     dependencies=[Depends(require_permissions(PermissionName.VER_MIS_SINTETICOS))],
@@ -53,4 +74,8 @@ def read_informe_sintetico_carrera(
 
 @router.get("/departamento/{persona_id}", response_model=list[schemas.InformeSinteticoCarreraRead])
 def read_informes_respondidos_departamento(persona_id: int, db: Session = Depends(get_db)):
+    """
+    Endpoint histórico. Se mantiene por compatibilidad; las vistas nuevas
+    deben usar /mis-enviados para que el backend resuelva la persona del token.
+    """
     return services.listar_informes_respondidos_departamento(db, persona_id)

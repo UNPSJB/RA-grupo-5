@@ -17,4 +17,6 @@ def crear_opcion_respuesta(
     return _opcion
 
 def listar_opciones_respuestas(db: Session) -> List[OpcionRespuesta]:
-    return db.scalars(select(OpcionRespuesta)).all()
+    return db.scalars(
+        select(OpcionRespuesta).order_by(OpcionRespuesta.id.asc())
+    ).all()

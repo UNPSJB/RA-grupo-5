@@ -15,10 +15,42 @@ import {
   Spinner,
 } from "react-bootstrap";
 import ResumenVariable from "../componentes/ResumenVariable";
+import EmptyState from "../componentes/EmptyState";
 import "../styles/informe.css"; 
 
 import { useAlertaFlotante } from "../hook/useAlertaFlotante";
 import AlertaFlotante from "../componentes/AlertaFlotante";
+
+const RESPUESTAS_DEMO_INFORME: Record<number, string> = {
+  32: "Se requiere actualizar el laboratorio de informática y ampliar la bibliografía específica de ingeniería de software.",
+  33: "Se dictó el 95% de las horas teóricas y el 100% de las prácticas previstas, cumpliendo el cronograma acordado.",
+  34: "Se desarrolló el 100% de los contenidos planificados, incorporando casos prácticos y actividades de seguimiento.",
+  35: "Los resultados de las encuestas muestran una valoración general positiva y sostenida, con oportunidades de mejora en la articulación teoría-práctica.",
+  36: "El dictado se desarrolló con normalidad, con buena participación del alumnado y cumplimiento de los objetivos propuestos.",
+  37: "El equipo participó en jornadas de capacitación docente y en proyectos de extensión vinculados con la carrera.",
+  38: "La valoración del desempeño de los auxiliares es muy buena, por su compromiso y acompañamiento a los estudiantes.",
+};
+
+function obtenerRespuestaDemo(pregunta: any): string {
+  const respuestaPorId = RESPUESTAS_DEMO_INFORME[Number(pregunta?.id)];
+  if (respuestaPorId) return respuestaPorId;
+
+  const enunciado = String(pregunta?.texto_pregunta ?? "").toLowerCase();
+  if (enunciado.includes("hora")) {
+    return "Se cumplió con las horas previstas, manteniendo el cronograma y recuperando las clases necesarias.";
+  }
+  if (enunciado.includes("contenido")) {
+    return "Se desarrollaron los contenidos planificados con actividades prácticas y ejemplos aplicados.";
+  }
+  if (enunciado.includes("equipo") || enunciado.includes("auxiliar")) {
+    return "El equipo docente mostró compromiso, buena predisposición y acompañamiento permanente a los estudiantes.";
+  }
+  if (enunciado.includes("resultado") || enunciado.includes("encuesta")) {
+    return "Los resultados reflejan una valoración positiva general, con aspectos puntuales para seguir mejorando.";
+  }
+
+  return "La actividad se desarrolló según lo planificado, con participación del alumnado y cumplimiento de los objetivos propuestos.";
+}
 
 export default function InformeCurricular() {
   const { reporteId } = useParams();
@@ -38,7 +70,7 @@ export default function InformeCurricular() {
 
   const handleAlertExited = () => {
     if (alerta.variant === 'success') {
-      navigate("/docente");
+      navigate("/docente/reportes");
     }
   };
 
@@ -63,7 +95,25 @@ export default function InformeCurricular() {
   const [cantTeoricas, setCantTeoricas] = useState<number | "">("");
   const [cantPracticas, setCantPracticas] = useState<number | "">("");
   const [saving, setSaving] = useState(false);
-  
+
+  const handleAutocompletarDemo = useCallback(() => {
+    if (!informeBase) return;
+
+    setCantInscriptos(35);
+    setCantTeoricas(2);
+    setCantPracticas(2);
+
+    informeBase.preguntas?.forEach((pregunta: any) => {
+      const idPreguntaOpcion = pregunta.pregunta_opcion?.[0]?.id;
+      if (!idPreguntaOpcion) return;
+      setTextoRespuesta(idPreguntaOpcion, obtenerRespuestaDemo(pregunta));
+    });
+
+    mostrarAlerta(
+      "info",
+      "Datos de demo cargados. Revisá las respuestas y guardá el informe."
+    );
+  }, [informeBase, setTextoRespuesta, mostrarAlerta]);
 
   useEffect(() => {
     async function cargarReporte() {
@@ -240,7 +290,17 @@ export default function InformeCurricular() {
   if (errorReporte) return <div className="container mt-4 text-danger">{errorReporte}</div>;
   if (errorBase) return <div className="container mt-4 text-danger">{errorBase}</div>;
   if (errorResumen) return <div className="container mt-4 text-danger">{errorResumen}</div>;
-  if (!reporte) return <div className="container mt-4">No hay datos del reporte.</div>;
+  if (!reporte) {
+    return (
+      <Container className="container mt-4">
+        <EmptyState
+          icon="bi-file-earmark-x"
+          title="Sin datos del reporte"
+          message="No se pudo cargar la información del reporte solicitado."
+        />
+      </Container>
+    );
+  }
   if (!informeBase) return <div className="container mt-4">Plantilla no disponible.</div>;
   if (!resumenData) return <div className="container mt-4">Datos de resumen no disponibles.</div>;
 
@@ -255,7 +315,20 @@ export default function InformeCurricular() {
         onExited={handleAlertExited}
       />
 
-      <h2 className="text-primary fw-bold">Informe de Actividad Curricular</h2>
+      <div className="d-flex justify-content-between align-items-center gap-3 mb-3">
+        <h2 className="text-primary fw-bold mb-0">
+          Informe de Actividad Curricular
+        </h2>
+        <Button
+          type="button"
+          variant="outline-secondary"
+          size="sm"
+          onClick={handleAutocompletarDemo}
+          disabled={saving}
+        >
+          Autocompletar Demo
+        </Button>
+      </div>
 
       <EncabezadoReporte
         asignatura={asignatura.nombre}

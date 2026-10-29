@@ -10,6 +10,7 @@ import {
   Spinner, 
   Alert 
 } from "react-bootstrap";
+import EmptyState from "./EmptyState";
 
 export default function EncuestasRespondidas() {
   // 1. Usamos 'encuestasRespondidas' en lugar de 'encuestas'
@@ -51,18 +52,25 @@ export default function EncuestasRespondidas() {
             
             <ListGroup variant="flush">
               {Respondidas.length === 0 ? (
-                <ListGroup.Item>
-                  <p className="text-muted mb-0">No has respondido ninguna encuesta aún.</p>
+                <ListGroup.Item className="p-0 border-0 bg-transparent">
+                  <EmptyState
+                    icon="bi-clipboard2-check"
+                    title="Sin encuestas respondidas"
+                    message="No has respondido ninguna encuesta aún. Tus respuestas aparecerán en este historial."
+                  />
                 </ListGroup.Item>
               ) : (
                 Respondidas.map((encuesta) => (
                   <ListGroup.Item 
                     key={encuesta.id}
-                    className="d-flex align-items-start"
+                    className="d-flex align-items-start hover-lift"
                   >
                     <div className="me-3 flex-grow-1 text-start">
                       <span className="fw-bold">{encuesta.asignatura?.nombre}</span>
-                      <Badge bg="success" pill className="ms-2">Respondida</Badge>
+                      <Badge bg="success" pill className="ms-2">
+                        <span className="status-dot status-dot-light" />
+                        Respondida
+                      </Badge>
                       <br /> 
                       <small className="text-muted">
                         {`Año: ${encuesta.asignatura?.año} | Cursado: ${encuesta.asignatura?.cursado} | Finalizada: ${encuesta.fecha_fin}`}

@@ -14,6 +14,7 @@ import {
   Button         
 } from "react-bootstrap";
 import { isGeneracionInformeCurricularActiva, getToday, getRangoFechasInformeCurricular } from "../calendarioAcademico";
+import EmptyState from "../componentes/EmptyState";
 
 export default function ReportesDisponibles() {
   const { reportesDisponibles, loading, error } = useReportes();
@@ -25,7 +26,7 @@ export default function ReportesDisponibles() {
   const [filterAnio, setFilterAnio] = useState("all");
   const [filterCuatri, setFilterCuatri] = useState("all");
   const [filterEstado, setFilterEstado] = useState("all"); 
-  const [sortOrder, setSortOrder] = useState("desc");
+  const [sortOrder, setSortOrder] = useState("asc");
 
   // DATOS PARA SELECTS 
   const carrerasDisponibles = useMemo(() => {
@@ -40,7 +41,7 @@ export default function ReportesDisponibles() {
 
   const aniosDisponibles = useMemo(() => {
     const years = new Set(reportesDisponibles.map(r => r.encuesta_asignatura.ciclo_lectivo));
-    return Array.from(years).sort((a, b) => b - a);
+    return Array.from(years).sort((a, b) => a - b);
   }, [reportesDisponibles]);
 
   //FILTRADO Y ORDENAMIENTO
@@ -161,9 +162,9 @@ export default function ReportesDisponibles() {
         variant="link"
         size="sm"
         className="text-decoration-none text-secondary p-0 fw-bold small text-nowrap d-flex align-items-center gap-1"
-        onClick={() => setSortOrder(prev => prev === "desc" ? "asc" : "desc")}
+        onClick={() => setSortOrder(prev => prev === "asc" ? "desc" : "asc")}
       >
-        {sortOrder === "desc" ? (
+        {sortOrder === "asc" ? (
           <>
             Más recientes
             <i className="bi bi-arrow-down"></i>
@@ -182,8 +183,12 @@ export default function ReportesDisponibles() {
             {/* LISTADO  */}
             <ListGroup variant="flush">
               {reportesFiltrados.length === 0 ? (
-                <ListGroup.Item>
-                  <p className="text-muted mb-0">No hay reportes disponibles para tus materias.</p>
+                <ListGroup.Item className="p-0 border-0 bg-transparent">
+                  <EmptyState
+                    icon="bi-bar-chart"
+                    title="No hay reportes disponibles"
+                    message="No hay reportes disponibles para tus materias con los filtros actuales. Cuando se generen nuevos reportes vas a verlos acá."
+                  />
                 </ListGroup.Item>
               ) : (
                 reportesFiltrados.map((reporte) => {
@@ -196,10 +201,23 @@ export default function ReportesDisponibles() {
                   return (
                     <ListGroup.Item 
                       key={reporte.id}
-                      className="d-flex align-items-start"
+                      className="d-flex align-items-start hover-lift"
                     >
                       <div className="me-3 flex-grow-1 text-start"> 
                         <span className="fw-bold fs-5">{asignatura.nombre}</span>
+                        <Badge
+                          bg={reporte.has_respuesta ? "success" : "warning"}
+                          text={reporte.has_respuesta ? undefined : "dark"}
+                          pill
+                          className="ms-2 align-middle"
+                        >
+                          <span
+                            className={`status-dot ${
+                              reporte.has_respuesta ? "status-dot-light" : "status-dot-warning"
+                            }`}
+                          />
+                          {reporte.has_respuesta ? "Respondido" : "Pendiente"}
+                        </Badge>
                         
                         {!reporte.has_respuesta && puedeGenerar && (
                           <span className="text-danger fw-bold ms-3">

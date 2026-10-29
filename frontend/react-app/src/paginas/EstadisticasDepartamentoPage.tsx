@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Container,
   Row,
@@ -15,6 +15,7 @@ import {
 } from "react-bootstrap";
 import { useEstadisticasDepartamento } from "../hook/useEstadisticasDepartamento";
 import { obtenerPeriodosEncuestaPorAnio } from "../helpers/respondVersion";
+import EmptyState from "../componentes/EmptyState";
 
 // --- HELPERS DE ESTILO ---
 const getColorByLabel = (label: string) => {
@@ -47,7 +48,16 @@ const getTextColor = (bg: string) => {
 // --- COMPONENTE DONUT ---
 const DonutManual = ({ data }: { data: { label: string; valor: number }[] }) => {
   const total = data.reduce((acc, v) => acc + v.valor, 0);
-  if (total === 0) return <div className="text-center py-5 text-muted">Sin datos</div>;
+  if (total === 0) {
+    return (
+      <EmptyState
+        icon="bi-pie-chart"
+        title="Sin valoraciones"
+        message="Todavía no hay valoraciones registradas para este período."
+        className="my-2"
+      />
+    );
+  }
 
   let acc = 0;
   const stops = data.map((v) => {
@@ -113,6 +123,10 @@ export default function EstadisticasDepartamentoPage() {
         <div>
             <h2 className="text-primary fw-bold mb-1">Dashboard</h2>
             <p className="text-muted mb-0 small">Estadísticas de Encuestas de Desempeño Docente</p>
+            <Badge bg="light" text="success" className="border border-success-subtle fw-semibold mt-2">
+              <span className="status-dot status-dot-success" />
+              Datos en vivo
+            </Badge>
             {periodosEncuesta.length > 0 && (
               <p className="text-muted mb-0 small mt-2">
                 <strong>Periodo:</strong> {periodosEncuesta.join(" | ")}
@@ -165,6 +179,8 @@ export default function EstadisticasDepartamentoPage() {
                 <Form.Label className="small text-muted fw-bold mb-1">Año</Form.Label>
                 <Form.Select size="sm" value={ciclo} onChange={(e) => setCiclo(Number(e.target.value))} style={{width: '145px'}}>
                     <option value={2029}>2029 (V2 - IA)</option>
+                    <option value={2028}>2028 (V1)</option>
+                    <option value={2027}>2027 (V1)</option>
                     <option value={2026}>2026 (V1)</option>
                     <option value={2025}>2025</option>
                     <option value={2024}>2024</option>
@@ -177,7 +193,7 @@ export default function EstadisticasDepartamentoPage() {
       <Row className="g-3 mb-4">
         {data.indicadores.map((item, idx) => (
           <Col key={idx} md={3}>
-            <Card className="shadow-sm border h-100 text-center py-2">
+            <Card className="shadow-sm border h-100 text-center py-2 hover-lift">
               <Card.Body>
                 <small className="text-muted fw-bold text-uppercase">{item.titulo}</small>
                 <div className={`display-6 fw-bold mt-1 ${getTextColor(idx === 3 ? 'warning' : idx === 2 ? 'success' : 'primary')}`}>
@@ -195,14 +211,21 @@ export default function EstadisticasDepartamentoPage() {
           <Card className="shadow-sm border h-100">
             <Card.Header className="bg-white fw-bold text-primary">Participación por Variable</Card.Header>
             <Card.Body>
-              {data.dimensiones.length === 0 ? <p className="text-muted text-center py-5">Sin datos para este nivel.</p> : 
+              {data.dimensiones.length === 0 ? (
+                <EmptyState
+                  icon="bi-graph-up"
+                  title="Sin datos para este nivel"
+                  message="No hay dimensiones con respuestas para el nivel seleccionado."
+                  className="my-2"
+                />
+              ) : 
                data.dimensiones.map((d) => (
                 <div key={d.nombre} className="mb-3">
                   <div className="d-flex justify-content-between small mb-1">
                     <span className="fw-bold">{d.nombre}</span>
                     <span>{d.valor}%</span>
                   </div>
-                  <ProgressBar now={d.valor} variant="primary" style={{height: "8px"}} />
+                  <ProgressBar now={d.valor} variant="primary" className="progress-animated" style={{height: "8px"}} />
                 </div>
               ))}
             </Card.Body>
@@ -221,17 +244,25 @@ export default function EstadisticasDepartamentoPage() {
       {/* Top Asignaturas */}
       <h5 className="text-primary fw-bold mb-3 border-bottom pb-2">Asignaturas con Mayor Participación</h5>
       <Row className="g-3 mb-4">
-        {data.top_asignaturas.length === 0 ? <Col><p className="text-muted">No hay asignaturas en este nivel.</p></Col> :
+        {data.top_asignaturas.length === 0 ? (
+          <Col>
+            <EmptyState
+              icon="bi-mortarboard"
+              title="Sin asignaturas destacadas"
+              message="No hay asignaturas con participación registrada en este nivel."
+            />
+          </Col>
+        ) :
          data.top_asignaturas.map((a, i) => (
           <Col key={i} md={3}>
-            <div className="p-3 border rounded bg-light h-100 shadow-sm">
+            <div className="p-3 border rounded bg-light h-100 shadow-sm hover-lift">
               <div className="fw-bold text-truncate" title={a.nombre}>{a.nombre}</div>
               <small className="text-muted d-block mb-2">Inscriptos (Est.): {a.alumnos}</small>
               <div className="d-flex justify-content-between small fw-bold">
                 <span>Participación</span>
                 <span className="text-success">{a.avance}%</span>
               </div>
-              <ProgressBar now={a.avance} variant="success" style={{height: "5px"}} />
+              <ProgressBar now={a.avance} variant="success" className="progress-animated" style={{height: "5px"}} />
             </div>
           </Col>
         ))}
@@ -243,7 +274,12 @@ export default function EstadisticasDepartamentoPage() {
           <Card className="shadow-sm border h-100">
             <Card.Header className="bg-white d-flex justify-content-between align-items-center">
                  <h5 className="text-primary fw-bold mb-0">Alertas y Observaciones</h5>
-                 {data.alertas.length > 0 && <Badge bg="danger" pill>{data.alertas.length}</Badge>}
+                 {data.alertas.length > 0 && (
+                   <Badge bg="danger" pill>
+                     <span className="status-dot status-dot-light" />
+                     {data.alertas.length}
+                   </Badge>
+                 )}
             </Card.Header>
             <Table hover responsive className="mb-0 align-middle text-center small">
                  <thead className="table-light">

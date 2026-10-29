@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session, joinedload, selectinload
-from sqlalchemy import select
+from sqlalchemy import Integer, and_, cast, func, select
 from fastapi import HTTPException
 from typing import List
 
@@ -13,6 +13,7 @@ from src.detalle_respuesta.models import DetalleRespuesta
 from src.pregunta_opcion.models import PreguntaOpcion
 from src.preguntas.models import Pregunta
 from src.carreras.models import Carrera
+from src.encuestas_base.models import EncuestaBase
 from src.informes_sinteticos_base.models import InformeSinteticoBase
 # ¡Importante! El "molde" del docente (Anexo I)
 from src.informes_curriculares_base.models import InformeCurricularBase 
@@ -52,15 +53,49 @@ def _get_query_con_joins():
         )
     )
 
+def _filtro_ciclo_lectivo_valido():
+    """
+    El esquema real guarda el ciclo lectivo como texto, no como FK a una tabla
+    de ciclos. Para que un informe aparezca en los listados debe tener un año
+    numérico y ese año debe estar cubierto por algún período de encuestas_base.
+    """
+    anio = cast(InformeSinteticoCarrera.ciclo_lectivo, Integer)
+    periodo_vigente = (
+        select(EncuestaBase.id)
+        .where(
+            EncuestaBase.anio_inicio.is_not(None),
+            EncuestaBase.anio_fin.is_not(None),
+            EncuestaBase.anio_inicio <= anio,
+            EncuestaBase.anio_fin >= anio,
+        )
+        .exists()
+    )
+
+    return and_(
+        InformeSinteticoCarrera.ciclo_lectivo.is_not(None),
+        func.trim(InformeSinteticoCarrera.ciclo_lectivo) != "",
+        anio > 0,
+        periodo_vigente,
+    )
+
+
 def listar_informes_sinteticos_carrera(db: Session) -> List[InformeSinteticoCarrera]:
-    query = _get_query_con_joins()
+    query = (
+        _get_query_con_joins()
+        .where(_filtro_ciclo_lectivo_valido())
+        .order_by(InformeSinteticoCarrera.id.asc())
+    )
     # .unique() es clave para evitar duplicados por los joins
     return db.scalars(query).unique().all()
 
 
 def listar_informes_respondidos_departamento(db: Session, persona_id: int) -> List[InformeSinteticoCarrera]:
+    # "Enviado" se define por la existencia de una Respuesta de esa persona.
+    # No se filtra por estado ni por ciclo: hay envíos históricos que pueden
+    # tener un estado o un ciclo inconsistentes y no deben desaparecer.
     query = _get_query_con_joins().join(Respuesta, InformeSinteticoCarrera.respuesta) \
-            .filter(Respuesta.id_persona == persona_id)
+            .filter(Respuesta.id_persona == persona_id) \
+            .order_by(InformeSinteticoCarrera.id.asc())
             
     return db.scalars(query).unique().all()
 

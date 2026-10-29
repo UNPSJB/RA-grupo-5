@@ -3,6 +3,7 @@ import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveCo
 import { useEffect, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { useReportes } from "../hook/useReportes";
+import EmptyState from "../componentes/EmptyState";
 
 // --- TIPOS ---
 type Opcion = { opcion_texto: string; porcentaje: number };
@@ -20,6 +21,14 @@ const WEIGHTS: Record<string, number> = {
   'más de 50%': 75, 'entre 0 y 50%': 25,
   '1': 0, '2': 33, '3': 67, '4': 100,
   'una': 50, 'más de una': 50,
+  // Escala cualitativa de 4 niveles (Opinión Global, preguntas de IA, etc.)
+  'muy bueno, muy satisfactorio': 100,
+  'bueno, satisfactorio': 75,
+  'regular, poco satisfactorio': 40,
+  'malo, no satisfactorio': 0,
+  'excelente': 100, 'muy bueno': 100, 'bueno': 75,
+  'regular': 40, 'malo': 0,
+  'siempre': 100, 'nunca': 0,
 };
 
 
@@ -120,9 +129,8 @@ export default function EstadisticasDocentePage() {
   const [calculatedComparativeScores, setCalculatedComparativeScores] = useState<Record<string, number> | null>(null);
   const [loadingComparative, setLoadingComparative] = useState(false);
   const [rankingSource, setRankingSource] = useState<'general' | string>('general');
+  const [reportYear, setReportYear] = useState<number>(new Date().getFullYear());
   const [comparisonYear, setComparisonYear] = useState<number>(new Date().getFullYear() - 1);
-
-  const inscriptos = 10;
 
   // --- EFECTO DE CARGA INICIAL ---
   useEffect(() => {
@@ -130,6 +138,15 @@ export default function EstadisticasDocentePage() {
       try {
         const data = await fetchReporteById(idReporte);
         setReporteCompleto(data);
+
+        // El año del reporte surge de la encuesta asociada, no de la fecha actual:
+        // así la comparativa y los rótulos son correctos al abrir ciclos históricos.
+        const encuesta = data?.encuesta_asignatura;
+        const yearFromData = Number(encuesta?.ciclo_lectivo)
+          || (encuesta?.fecha_inicio ? new Date(encuesta.fecha_inicio).getFullYear() : NaN)
+          || new Date().getFullYear();
+        setReportYear(yearFromData);
+        setComparisonYear(yearFromData - 1);
 
         const resumen = await fetchResumenByReporteId(idReporte);
         const parsed = transformarResumenEnVariables(resumen);
@@ -150,8 +167,8 @@ export default function EstadisticasDocentePage() {
   // --- EFECTO DE CARGA DE COMPARATIVA ---
   useEffect(() => {
     const cargarComparativa = async () => {
-      const currentYear = new Date().getFullYear();
-      if (comparisonYear >= currentYear) {
+      const currentYear = reportYear;
+      if (comparisonYear === currentYear) {
         setCalculatedComparativeScores(null);
         return;
       }
@@ -167,7 +184,7 @@ export default function EstadisticasDocentePage() {
       setLoadingComparative(false);
     };
     cargarComparativa();
-  }, [idReporte, comparisonYear, fetchResumenComparativo]);
+  }, [idReporte, comparisonYear, reportYear, fetchResumenComparativo]);
 
   // --- CÁLCULOS DERIVADOS ---
   const { preguntasParaRanking, rankingTitle } = useMemo(() => {
@@ -185,10 +202,34 @@ export default function EstadisticasDocentePage() {
 
   // --- RENDERIZACIÓN ---
   if (loading) return <div className="text-center my-5">Cargando estadísticas...</div>;
-  if (!reporteCompleto || variables.length === 0) return <div className="text-center my-5">No hay datos disponibles</div>;
+  if (!reporteCompleto || variables.length === 0) {
+    return (
+      <Container className="my-4">
+        <EmptyState
+          icon="bi-bar-chart-line"
+          title="Sin datos estadísticos"
+          message="No hay datos disponibles para este reporte. Cuando se registren respuestas vas a poder ver las estadísticas acá."
+        />
+      </Container>
+    );
+  }
 
-  const participantes = reporteCompleto?.encuesta_asignatura?.respuestas?.length || 0;
-  const participacion = inscriptos > 0 ? Math.round((participantes / inscriptos) * 100) : 0;
+  const participantesApi = Number(reporteCompleto?.alumnos_participantes);
+  const participantes = Number.isFinite(participantesApi)
+    ? participantesApi
+    : reporteCompleto?.encuesta_asignatura?.respuestas?.length || 0;
+
+  // El backend resuelve inscriptos incluso cuando el informe curricular todavía
+  // está pendiente. Si el valor no es válido, la participación queda en N/D.
+  const inscriptosApi = Number(reporteCompleto?.alumnos_inscriptos);
+  const inscriptos = Number.isFinite(inscriptosApi) && inscriptosApi > 0
+    ? inscriptosApi
+    : null;
+
+  // La participación nunca puede superar el 100%.
+  const participacion = inscriptos != null
+    ? Math.min(100, Math.round((participantes / inscriptos) * 100))
+    : null;
   const satisfaccionGeneral = variables.length
     ? Math.round(variables.reduce((acc, v) => acc + v.promedio, 0) / variables.length)
     : 0;
@@ -252,25 +293,27 @@ export default function EstadisticasDocentePage() {
                             </Col>
                         </Row>
                         <div className="mt-4">
-                          <ResponsiveContainer width="100%" height={250}>
+                          <ResponsiveContainer width="100%" height={300}>
                             <BarChart
                               data={[...rankingData].sort((a, b) => a.valor - b.valor)} // ← copia antes de ordenar
-                              margin={{ top: 5, right: 30, left: 20, bottom: 100 }}
+                              margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
                             >
                               <XAxis
                                 dataKey="texto"
                                 interval={0}
-                                angle={-30}
+                                angle={-35}
                                 textAnchor="end"
-                                height={110}
+                                height={90}
                                 style={{ fontSize: '0.7rem' }}
                                 tickFormatter={(value: unknown) => {
                                   const text = typeof value === 'string' ? value : '';
-                                  const trunc = text.length > 30 ? text.substring(0, 30) + '...' : text;
-                                  return rankingSource === 'general' ? trunc : trunc;
+                                  return text.length > 20 ? text.substring(0, 20) + '...' : text;
                                 }}
                               />
-                              <YAxis tickFormatter={(value: number) => `${value}%`} />
+                              <YAxis
+                                domain={[0, 100]}
+                                tickFormatter={(value: number) => `${value}%`}
+                              />
                               <Tooltip
                                 formatter={(value: unknown, _name: unknown, props: any) => {
                                   const v = typeof value === 'number' && isFinite(value) ? value : 0;
@@ -281,7 +324,14 @@ export default function EstadisticasDocentePage() {
                                 }}
                                 cursor={{ fill: 'rgba(13,110,253,0.08)' }} // opcional: mejora hover
                               />
-                              <Bar dataKey="valor" fill="#0d6efd" name="Score" />
+                              <Bar
+                                dataKey="valor"
+                                fill="#0d6efd"
+                                name="Score"
+                                isAnimationActive={true}
+                                animationDuration={900}
+                                animationEasing="ease-out"
+                              />
                             </BarChart>
                           </ResponsiveContainer>
                         </div>
@@ -298,9 +348,18 @@ export default function EstadisticasDocentePage() {
   // --- Renderización de la Comparativa Anual ---
 // --- Renderización de la Comparativa Anual (Actualizado para usar datos reales) ---
 const renderComparativaSection = () => {
-    const currentYear = new Date().getFullYear();
+    const currentYear = reportYear;
     const comparativeScores = calculatedComparativeScores;
     const isComparativeYear = comparisonYear !== currentYear;
+
+    // Años ofrecidos para comparar: los cercanos al ciclo del reporte,
+    // excluyendo el propio año (no tiene sentido compararlo consigo mismo).
+    const comparables = new Set<number>();
+    for (let offset = -3; offset <= 2; offset++) {
+        const y = currentYear + offset;
+        if (y !== currentYear) comparables.add(y);
+    }
+    const aniosComparables = Array.from(comparables).sort((a, b) => a - b);
 
     return (
         <Card className="shadow-sm">
@@ -309,11 +368,13 @@ const renderComparativaSection = () => {
                     <Card.Title className="m-0">Comparativa de Scores</Card.Title>
                     <Dropdown onSelect={(key) => setComparisonYear(Number(key))}>
                         <Dropdown.Toggle variant="primary" id="dropdown-year-scope">
-                            Comparando con: {comparisonYear === currentYear ? 'Actual (2025)' : `Año Anterior (${comparisonYear})`}
+                            Comparando con: {comparisonYear === currentYear ? `Actual (${currentYear})` : `Ciclo ${comparisonYear}`}
                         </Dropdown.Toggle>
                         <Dropdown.Menu>
                             <Dropdown.Item eventKey={currentYear}>Actual ({currentYear})</Dropdown.Item>
-                            <Dropdown.Item eventKey="2024">Año Anterior (2024)</Dropdown.Item>
+                            {aniosComparables.map((y) => (
+                                <Dropdown.Item key={y} eventKey={y}>Ciclo {y}</Dropdown.Item>
+                            ))}
                         </Dropdown.Menu>
                     </Dropdown>
                 </div>
@@ -330,15 +391,15 @@ const renderComparativaSection = () => {
                 {!(isComparativeYear && (!comparativeScores || Object.keys(comparativeScores).length === 0)) && (
                     <ListGroup variant="flush">
                         {variables.map((v) => {
-                            const score2025 = v.promedio;
+                            const scoreActual = v.promedio;
                             const variableKey = v.nombre;
                             
-                            // Obtener el score del año comparativo, o usar el score de 2025 si es el año actual
+                            // Obtener el score del año comparativo, o usar el del ciclo actual
                             const scoreComparative = isComparativeYear && comparativeScores && comparativeScores[variableKey] !== undefined
                                 ? comparativeScores[variableKey]
-                                : score2025;
+                                : scoreActual;
                             
-                            const delta = score2025 - scoreComparative;
+                            const delta = scoreActual - scoreComparative;
                             const isPositive = delta >= 0;
                             const variant = isPositive ? 'success' : 'danger';
                             
@@ -349,7 +410,7 @@ const renderComparativaSection = () => {
                                     </span>
                                     <div>
                                         <span className="me-3 text-muted" style={{fontSize: '0.9rem'}}>
-                                            Score {currentYear}: {score2025}% (vs {comparisonYear}: {scoreComparative}%)
+                                            Score {currentYear}: {scoreActual}% (vs {comparisonYear}: {scoreComparative}%)
                                         </span>
                                         {isComparativeYear && (
                                             <span className={`fw-bold text-${variant}`}>
@@ -371,6 +432,10 @@ const renderComparativaSection = () => {
     <Container className="my-4">
       <div className="text-center mb-4">
         <h2 className="mb-2">Estadísticas por Materia</h2>
+        <Badge bg="light" text="success" className="border border-success-subtle fw-semibold me-2">
+          <span className="status-dot status-dot-success" />
+          Datos en vivo
+        </Badge>
         {reporteCompleto.encuesta_asignatura?.encuesta_base?.anio_inicio != null && reporteCompleto.encuesta_asignatura?.encuesta_base?.anio_fin != null && (
           <Badge bg="light" text="dark" className="border fw-semibold">
             Periodo: {reporteCompleto.encuesta_asignatura.encuesta_base.anio_inicio} - {reporteCompleto.encuesta_asignatura.encuesta_base.anio_fin}
@@ -381,13 +446,13 @@ const renderComparativaSection = () => {
       {/* 1. Indicadores Clave (KPIs) - Altura reducida con py-2 */}
       <Row className="g-4 mb-4">
         {[
-          { titulo: "Alumnos Inscriptos", valor: inscriptos, bg: "primary" },
+          { titulo: "Alumnos Inscriptos", valor: inscriptos ?? "N/D", bg: "primary" },
           { titulo: "Alumnos participantes", valor: participantes, bg: "info" },
-          { titulo: "Participación", valor: `${participacion}%`, bg: "success" },
+          { titulo: "Participación", valor: participacion != null ? `${participacion}%` : "N/D", bg: "success" },
           { titulo: "Satisfacción general", valor: `${satisfaccionGeneral}%`, bg: "warning" },
         ].map((item, idx) => (
           <Col key={idx} xs={12} md={6} lg={3}>
-            <Card bg={item.bg as any} text="white" className="shadow-sm">
+            <Card bg={item.bg as any} text="white" className="shadow-sm hover-lift">
               <Card.Body className="text-center py-2"> 
                 <Card.Title className="fs-6">{item.titulo}</Card.Title>
                 <div className="display-6 fw-bold">{item.valor}</div>
@@ -413,8 +478,7 @@ const renderComparativaSection = () => {
                   <ProgressBar
                     now={v.promedio}
                     label={`${v.promedio}%`}
-                    style={{ backgroundColor: "#eee" }}
-                    variant="info"
+                    className="progress-animated"
                   />
                 </div>
               ))}
@@ -435,6 +499,9 @@ const renderComparativaSection = () => {
                     innerRadius={50}
                     outerRadius={65}
                     paddingAngle={2}
+                    isAnimationActive={true}
+                    animationDuration={900}
+                    animationEasing="ease-out"
                     // FIX: Agregando el valor del promedio como etiqueta simple
                     label={(props: any) => `${props.promedio}%`} 
                     labelLine={true} 
@@ -511,7 +578,7 @@ const renderComparativaSection = () => {
                         <strong>{p.texto}</strong>
                         <span className="text-muted">{p.valor}%</span>
                       </div>
-                      <ProgressBar now={p.valor} label={`${p.valor}%`} />
+                      <ProgressBar now={p.valor} label={`${p.valor}%`} className="progress-animated" />
                     </div>
                   ))}
                 </>

@@ -26,6 +26,7 @@ def listar_reportes(db: Session, persona_id: int) -> List[schemas.Reporte]:
         select(Reporte)
         .join(Reporte.encuesta_asignatura)
         .where(EncuestaAsignatura.id_asignatura.in_(subquery_asignaturas))
+        .order_by(Reporte.id.asc())
         .options(
             selectinload(Reporte.encuesta_asignatura).options(
                 selectinload(EncuestaAsignatura.asignatura),
@@ -47,6 +48,7 @@ def listar_reportes_disponibles(db: Session, persona_id: int) -> list[schemas.Re
         select(Reporte)
         .join(Reporte.encuesta_asignatura)
         .where(EncuestaAsignatura.id_asignatura.in_(subquery_asignaturas))
+        .order_by(Reporte.id.asc())
         .options(selectinload(Reporte.informes_asignaturas))
     ).all()
 
@@ -311,6 +313,20 @@ def generar_resumen_comparativo_real(db: Session, reporte_id: int, ciclo_lectivo
         .limit(1)
     )
     
+    # Fallback: si el año solicitado pertenece a otra versión de la encuesta base
+    # (por ejemplo 2029-2032 vs 2025-2028), comparamos igual contra la encuesta
+    # de la misma asignatura, priorizando siempre la versión más reciente.
+    if not encuesta_anterior:
+        encuesta_anterior = db.scalar(
+            select(EncuestaAsignatura)
+            .where(
+                EncuestaAsignatura.id_asignatura == asignatura_id,
+                func.strftime('%Y', EncuestaAsignatura.fecha_inicio) == str(ciclo_lectivo_comparar)
+            )
+            .order_by(EncuestaAsignatura.id.desc())
+            .limit(1)
+        )
+
     if not encuesta_anterior:
         return {} # Devolver diccionario vacío si no se encuentra (No hay datos para ese año)
 

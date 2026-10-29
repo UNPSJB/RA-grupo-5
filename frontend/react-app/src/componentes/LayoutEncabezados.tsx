@@ -21,8 +21,17 @@ interface Props {
   children?: React.ReactNode;
 }
 
+const DatoAdministrativo: React.FC<{
+  label: string;
+  value?: React.ReactNode;
+}> = ({ label, value }) => (
+  <div>
+    <strong>{label}:</strong> {value ?? "-"}
+  </div>
+);
 
-const EncabezadoCurricular: React.FC<Props> = ({ asignatura, anio, docente, carrera, ciclo_lectivo, anio_inicio, anio_fin, sede, cant_alumnos_insc, cant_comisiones_practicas, cant_comisiones_teoricas, children }) => {
+
+const EncabezadoCurricular: React.FC<Props> = ({ asignatura, docente, carrera, ciclo_lectivo, anio_inicio, anio_fin, sede, cant_alumnos_insc, cant_comisiones_practicas, cant_comisiones_teoricas, children }) => {
   return (
     <div style={{ padding: '2rem', textAlign: "left" }}>
         <Card className="border rounded shadow-sm mb-4">
@@ -32,46 +41,51 @@ const EncabezadoCurricular: React.FC<Props> = ({ asignatura, anio, docente, carr
         
 
         <Card.Body className="p-4 bg-light">
-            <Row className="mb-2">
-              <Col sm={6}>
-                    <strong>Asignatura:</strong> {asignatura}
-                </Col>
-              <Col sm={6}>
-                    <strong>Carrera:</strong> {carrera.nombre}
-                </Col>
+          <Row className="g-3">
+            <Col sm={6}>
+              <DatoAdministrativo label="Asignatura" value={asignatura} />
+            </Col>
+            <Col sm={6}>
+              <DatoAdministrativo label="Carrera" value={carrera.nombre} />
+            </Col>
+            <Col sm={6}>
+              <DatoAdministrativo label="Ciclo Lectivo" value={ciclo_lectivo} />
+            </Col>
+            <Col sm={6}>
+              <DatoAdministrativo
+                label="Periodo"
+                value={
+                  anio_inicio != null && anio_fin != null
+                    ? `${anio_inicio} - ${anio_fin}`
+                    : undefined
+                }
+              />
+            </Col>
+            <Col sm={6}>
+              <DatoAdministrativo label="Docente Responsable" value={docente} />
+            </Col>
+            <Col sm={6}>
+              <DatoAdministrativo label="Sede" value={sede} />
+            </Col>
+            <Col sm={6}>
+              <DatoAdministrativo
+                label="Alumnos Inscriptos"
+                value={cant_alumnos_insc}
+              />
+            </Col>
+            <Col sm={6}>
+              <DatoAdministrativo
+                label="Comisiones Teóricas"
+                value={cant_comisiones_teoricas}
+              />
+            </Col>
+            <Col sm={6}>
+              <DatoAdministrativo
+                label="Comisiones Prácticas"
+                value={cant_comisiones_practicas}
+              />
+            </Col>
           </Row>
-
-          <Row className="mb-2">
-              <Col sm={6}>
-                <strong>Ciclo Lectivo:</strong> {ciclo_lectivo}
-                {anio_inicio != null && anio_fin != null && (
-                  <div className="small text-muted mt-1">
-                    <strong>Periodo:</strong> {anio_inicio} - {anio_fin}
-                  </div>
-                )}
-              </Col>
-              <Col sm={6}>
-                    <strong>Sede:</strong> {sede}
-                </Col>
-            </Row>
-
-            <Row className="mb-2">
-              <Col sm={6}>
-                <strong>Docente Responsable:</strong> {docente}
-              </Col>
-              <Col sm={6}>
-                <strong>Alumnos Inscriptos:</strong> {cant_alumnos_insc}
-              </Col>
-            </Row>
-
-            <Row>
-              <Col sm={6}>
-                    <strong>Comisiones Teóricas:</strong> {cant_comisiones_teoricas}
-                </Col>
-              <Col sm={6}>
-                    <strong>Comisiones Prácticas:</strong> {cant_comisiones_practicas}
-                </Col>
-            </Row>
         </Card.Body>
     </Card>
 
@@ -83,7 +97,6 @@ const EncabezadoCurricular: React.FC<Props> = ({ asignatura, anio, docente, carr
 
 const EncabezadoReporte: React.FC<Props> = ({
   asignatura,
-  anio,
   docente,
   carrera,
   ciclo_lectivo,
@@ -105,38 +118,33 @@ const EncabezadoReporte: React.FC<Props> = ({
         </Card.Header>
 
         <Card.Body className="p-4 bg-white rounded-bottom-3">
-
-          <Row className="mb-2">
+          <Row className="g-3">
             <Col sm={6}>
-              <strong>Asignatura:</strong> {asignatura}
+              <DatoAdministrativo label="Asignatura" value={asignatura} />
             </Col>
             <Col sm={6}>
-              <strong>Carrera:</strong> {carrera.nombre}
-            </Col>
-          </Row>
-
-          <Row className="mb-2">
-            <Col sm={6}>
-              <strong>Ciclo Lectivo:</strong> {ciclo_lectivo}
+              <DatoAdministrativo label="Carrera" value={carrera.nombre} />
             </Col>
             <Col sm={6}>
-              <strong>Sede:</strong> {sede}
-            </Col>
-          </Row>
-
-          <Row className="mb-2">
-            <Col sm={6}>
-              <strong>Docente Responsable:</strong> {docente}
+              <DatoAdministrativo label="Ciclo Lectivo" value={ciclo_lectivo} />
             </Col>
             <Col sm={6}>
-              {anio_inicio != null && anio_fin != null && (
-                <>
-                  <strong>Periodo:</strong> {anio_inicio} - {anio_fin}
-                </>
-              )}
+              <DatoAdministrativo
+                label="Periodo"
+                value={
+                  anio_inicio != null && anio_fin != null
+                    ? `${anio_inicio} - ${anio_fin}`
+                    : undefined
+                }
+              />
+            </Col>
+            <Col sm={6}>
+              <DatoAdministrativo label="Docente Responsable" value={docente} />
+            </Col>
+            <Col sm={6}>
+              <DatoAdministrativo label="Sede" value={sede} />
             </Col>
           </Row>
-
         </Card.Body>
       </Card>
 
@@ -152,8 +160,7 @@ const EncabezadoSintetico: React.FC<Props> = ({
   cursado,
   comision_asesora,
   integrantes,
-  periodosEncuesta,
-  children
+  periodosEncuesta
 }) => {
   return (
     <Card className="mb-4 border rounded shadow-sm">

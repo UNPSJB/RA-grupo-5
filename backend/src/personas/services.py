@@ -21,7 +21,7 @@ def crear_persona(db: Session, persona: schemas.PersonaCreate) -> Persona:
 
 
 def listar_personas(db: Session) -> List[Persona]:
-    return db.scalars(select(Persona)).all()
+    return db.scalars(select(Persona).order_by(Persona.id.asc())).all()
 
 
 def leer_persona(db: Session, persona_id: int) -> Persona:

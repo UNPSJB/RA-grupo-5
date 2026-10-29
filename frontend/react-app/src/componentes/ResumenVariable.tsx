@@ -1,4 +1,5 @@
 import { Card, ListGroup } from "react-bootstrap";
+import EmptyState from "./EmptyState";
 
 type Opcion = { opcion_texto: string; porcentaje: number };
 export type ResumenVariableData = { opciones: Opcion[] };
@@ -38,7 +39,12 @@ export default function ResumenVariable({
               Resumen de la Variable:
             </h6>
           </Card.Title>
-          <p className="text-muted mb-0">No hay datos disponibles.</p>
+          <EmptyState
+            icon="bi-pie-chart"
+            title="Sin datos de la variable"
+            message="No hay datos disponibles para esta variable."
+            className="my-2"
+          />
         </Card.Body>
       </Card>
     );
